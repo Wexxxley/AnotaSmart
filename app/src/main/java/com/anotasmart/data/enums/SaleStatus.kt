@@ -1,7 +1,7 @@
 package com.anotasmart.data.enums
 
 enum class SaleStatus {
-    ORÇAMENTO,
+    ORCAMENTO,
     PENDENTE,
     ATRASADA,
     FINALIZADA,

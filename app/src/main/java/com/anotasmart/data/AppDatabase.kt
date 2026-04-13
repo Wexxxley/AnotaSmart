@@ -5,8 +5,20 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.anotasmart.data.entities.*
 
-@Database(entities = [], version = 1, exportSchema = false)
+@Database(
+    entities = [
+        Category::class,
+        Product::class,
+        Client::class,
+        Sale::class,
+        SaleItem::class,
+        Installment::class
+    ],
+    version = 1,
+    exportSchema = false
+)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     
