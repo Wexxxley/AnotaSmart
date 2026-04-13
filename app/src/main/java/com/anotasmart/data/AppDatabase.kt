@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.anotasmart.data.entities.*
+import com.anotasmart.data.dao.*
 
 @Database(
     entities = [
@@ -21,6 +22,13 @@ import com.anotasmart.data.entities.*
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
+
+    abstract fun categoryDao(): CategoryDao
+    abstract fun clientDao(): ClientDao
+    abstract fun productDao(): ProductDao
+    abstract fun saleDao(): SaleDao
+    abstract fun saleItemDao(): SaleItemDao
+    abstract fun installmentDao(): InstallmentDao
     
     companion object {
         private const val DATABASE_NAME = "anotasmart_db"
