@@ -13,14 +13,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AttachMoney
-import androidx.compose.material.icons.filled.Inventory
-import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -45,6 +39,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.anotasmart.ui.navigation.Screen
+import com.anotasmart.ui.navigation.bottomNavItems
+import com.anotasmart.ui.screens.*
 import com.anotasmart.ui.theme.AnotaSmartTheme
 
 class MainActivity : ComponentActivity() {
@@ -53,14 +56,15 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AnotaSmartTheme {
-                ScreenStructure()
+                val navController = rememberNavController()
+                ScreenStructure(navController)
             }
         }
     }
 }
 
 @Composable
-fun ScreenStructure() {
+fun ScreenStructure(navController: NavHostController) {
     var quantidadeItens by remember { mutableIntStateOf(0) }
 
     Scaffold(
@@ -73,7 +77,7 @@ fun ScreenStructure() {
                 if (quantidadeItens > 0) {
                     ResumoCarrinho(quantidadeItens = quantidadeItens)
                 }
-                BarraNavegacaoPrincipal()
+                BarraNavegacaoPrincipal(navController)
             }
         }
     ) { innerPadding ->
@@ -83,7 +87,16 @@ fun ScreenStructure() {
                 .padding(innerPadding)
                 .background(Color.White)
         ) {
-
+            NavHost(
+                navController = navController,
+                startDestination = Screen.Venda.route
+            ) {
+                composable(Screen.Venda.route) { VendaScreen() }
+                composable(Screen.Produtos.route) { ProdutosScreen() }
+                composable(Screen.Pedidos.route) { PedidosScreen() }
+                composable(Screen.Clientes.route) { ClientesScreen() }
+                composable(Screen.Despesas.route) { DespesasScreen() }
+            }
         }
     }
 }
@@ -160,56 +173,35 @@ fun ResumoCarrinho(quantidadeItens: Int) {
 }
 
 @Composable
-fun BarraNavegacaoPrincipal() {
+fun BarraNavegacaoPrincipal(navController: NavController) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
     NavigationBar {
-        NavigationBarItem(
-            selected = true,
-            onClick = { },
-            icon = { Icon(Icons.Default.ShoppingBag, contentDescription = "Venda") },
-            label = { Text("Venda") },
-            alwaysShowLabel = false
-        )
-        NavigationBarItem(
-            selected = false,
-            onClick = { },
-            icon = { Icon(Icons.Default.Inventory, contentDescription = "Produtos") },
-            label = { Text("Produtos") },
-            alwaysShowLabel = false
-        )
-        NavigationBarItem(
-            selected = false,
-            onClick = { },
-            icon = { Icon(Icons.Default.ListAlt, contentDescription = "Pedidos") },
-            label = { Text("Pedidos") },
-            alwaysShowLabel = false
-        )
-        NavigationBarItem(
-            selected = false,
-            onClick = { },
-            icon = { Icon(Icons.Default.People, contentDescription = "Clientes") },
-            label = { Text("Clientes") },
-            alwaysShowLabel = false
-        )
-        NavigationBarItem(
-            selected = false,
-            onClick = { },
-            icon = { Icon(Icons.Default.AttachMoney, contentDescription = "Despesas") },
-            label = { Text("Despesas") },
-            alwaysShowLabel = false
-        )
-        NavigationBarItem(
-            selected = false,
-            onClick = { },
-            icon = { Icon(Icons.Default.MoreHoriz, contentDescription = "Mais") },
-            label = { Text("Mais") },
-            alwaysShowLabel = false
-        )
+        bottomNavItems.forEach { screen ->
+            NavigationBarItem(
+                selected = currentRoute == screen.route,
+                onClick = {
+                    navController.navigate(screen.route) {
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                icon = { Icon(screen.icon, contentDescription = screen.title) },
+                label = { Text(screen.title) },
+                alwaysShowLabel = false
+            )
+        }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun Preview(){
-    BarraSuperiorAnotaSmart(1)
-    ResumoCarrinho(1)
+    AnotaSmartTheme {
+        BarraSuperiorAnotaSmart(0)
+    }
 }
