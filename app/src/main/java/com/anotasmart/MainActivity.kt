@@ -1,17 +1,21 @@
 package com.anotasmart
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
@@ -49,6 +53,19 @@ import com.anotasmart.ui.navigation.Screen
 import com.anotasmart.ui.navigation.bottomNavItems
 import com.anotasmart.ui.screens.*
 import com.anotasmart.ui.theme.AnotaSmartTheme
+import androidx.compose.material.icons.filled.Brightness4
+import androidx.compose.material.icons.filled.Brightness7
+import androidx.compose.material.icons.filled.Contrast
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.draw.clip
+import com.anotasmart.ui.navigation.drawerNavItems
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,36 +83,71 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun ScreenStructure(navController: NavHostController) {
     var quantidadeItens by remember { mutableIntStateOf(0) }
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            BarraSuperiorAnotaSmart(quantidadeItens = quantidadeItens)
-        },
-        bottomBar = {
-            Column {
-                if (quantidadeItens > 0) {
-                    ResumoCarrinho(quantidadeItens = quantidadeItens)
-                }
-                BarraNavegacaoPrincipal(navController)
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                DrawerContent(
+                    userName = "Wesley",
+                    companyName = "AnotaSmart",
+                    currentRoute = currentRoute,
+                    onItemClick = { screen ->
+                        navController.navigate(screen.route) {
+                            popUpTo(navController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                        scope.launch { drawerState.close() }
+                    }
+                )
             }
         }
-    ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .background(Color.White)
-        ) {
-            NavHost(
-                navController = navController,
-                startDestination = Screen.Venda.route
+    ) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = {
+                BarraSuperior(
+                    quantidadeItens = quantidadeItens,
+                    onMenuClick = { scope.launch { drawerState.open() } }
+                )
+            },
+            bottomBar = {
+                Column {
+                    if (quantidadeItens > 0) {
+                        ResumoCarrinho(quantidadeItens = quantidadeItens)
+                    }
+                    BarraNavegacaoPrincipal(navController)
+                }
+            }
+        ) { innerPadding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .background(Color.White)
             ) {
-                composable(Screen.Venda.route) { VendaScreen() }
-                composable(Screen.Produtos.route) { ProdutosScreen() }
-                composable(Screen.Pedidos.route) { PedidosScreen() }
-                composable(Screen.Clientes.route) { ClientesScreen() }
-                composable(Screen.Despesas.route) { DespesasScreen() }
+                NavHost(
+                    navController = navController,
+                    startDestination = Screen.Venda.route
+                ) {
+                    composable(Screen.Venda.route) { VendaScreen() }
+                    composable(Screen.Produtos.route) { ProdutosScreen() }
+                    composable(Screen.Pedidos.route) { PedidosScreen() }
+                    composable(Screen.Clientes.route) { ClientesScreen() }
+                    composable(Screen.Despesas.route) { DespesasScreen() }
+                    composable(Screen.Categorias.route) { CategoriasScreen() }
+                    composable(Screen.Relatorios.route) { RelatoriosScreen() }
+                    composable(Screen.Documentacao.route) { DocumentacaoScreen() }
+                    composable(Screen.ChavePix.route) { ChavePixScreen() }
+                    composable(Screen.Sobre.route) { SobreScreen() }
+                }
             }
         }
     }
@@ -103,7 +155,7 @@ fun ScreenStructure(navController: NavHostController) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BarraSuperiorAnotaSmart(quantidadeItens: Int) {
+fun BarraSuperior(quantidadeItens: Int, onMenuClick: () -> Unit) {
     CenterAlignedTopAppBar(
         title = {
             IconButton(onClick = { }) {
@@ -114,7 +166,7 @@ fun BarraSuperiorAnotaSmart(quantidadeItens: Int) {
             }
         },
         navigationIcon = {
-            IconButton(onClick = { }) {
+            IconButton(onClick = onMenuClick) {
                 Icon(
                     imageVector = Icons.Default.Menu,
                     contentDescription = "Navigation drawer"
@@ -141,6 +193,113 @@ fun BarraSuperiorAnotaSmart(quantidadeItens: Int) {
         }
     )
 }
+
+@Composable
+fun DrawerContent(
+    userName: String,
+    companyName: String,
+    currentRoute: String?,
+    onItemClick: (Screen) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
+                Text(
+                    text = userName,
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Text(
+                    text = companyName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+        drawerNavItems.forEach { screen ->
+            NavigationDrawerItem(
+                label = { Text(screen.title) },
+                icon = { Icon(screen.icon, contentDescription = null) },
+                selected = currentRoute == screen.route,
+                onClick = { onItemClick(screen) },
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
+        }
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+        
+        Text(
+            text = "Aparência",
+            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.padding(start = 16.dp, bottom = 8.dp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        ThemeSwitcher()
+    }
+}
+
+@Composable
+fun ThemeSwitcher() {
+    var selectedTheme by remember { mutableIntStateOf(0) } // 0: Padrao, 1: Claro, 2: Escuro
+    
+    val themes = listOf(
+        Triple("Padrão", Icons.Default.Contrast, 0),
+        Triple("Claro", Icons.Default.Brightness7, 1),
+        Triple("Escuro", Icons.Default.Brightness4, 2)
+    )
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        themes.forEach { (label, icon, index) ->
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
+                    .clip(MaterialTheme.shapes.medium)
+                    .background(if (selectedTheme == index) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent)
+                    .padding(8.dp)
+                    .clickable { selectedTheme = index }) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = label,
+                    tint = if (selectedTheme == index) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (selectedTheme == index) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+    }
+}
+
 
 @Composable
 fun ResumoCarrinho(quantidadeItens: Int) {
@@ -202,6 +361,6 @@ fun BarraNavegacaoPrincipal(navController: NavController) {
 @Composable
 fun Preview(){
     AnotaSmartTheme {
-        BarraSuperiorAnotaSmart(0)
+        BarraSuperior(0, onMenuClick = {})
     }
 }
