@@ -91,7 +91,7 @@ fun ScreenStructure(navController: NavHostController) {
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet {
+            ModalDrawerSheet (modifier = Modifier.width(300.dp)){
                 DrawerContent(
                     userName = "Wesley",
                     companyName = "AnotaSmart",

@@ -5,7 +5,7 @@ enum class ItemType {
 }
 
 enum class UnitType {
-    UNIDADE, KG, LITRO, METRO
+    UN, KG, L, M
 }
 
 enum class CategoryType {

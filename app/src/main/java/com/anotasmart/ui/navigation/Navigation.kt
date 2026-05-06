@@ -11,6 +11,9 @@ import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Inventory2
+import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.MoneyOff
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -19,11 +22,11 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     object Produtos : Screen("produtos", "Produtos", Icons.Default.Inventory)
     object Pedidos : Screen("pedidos", "Pedidos", Icons.Default.ListAlt)
     object Clientes : Screen("clientes", "Clientes", Icons.Default.People)
-    object Despesas : Screen("despesas", "Despesas", Icons.Default.AttachMoney)
+    object Despesas : Screen("despesas", "Despesas", Icons.Default.MoneyOff)
     object Categorias : Screen("categorias", "Categorias", Icons.Default.Category)
     object Relatorios : Screen("relatorios", "Relatórios", Icons.Default.Assessment)
     object Documentacao : Screen("documentacao", "Documentação", Icons.Default.Description)
-    object ChavePix : Screen("chave_pix", "Chave Pix", Icons.Default.QrCode)
+    object ChavePix : Screen("chave_pix", "Chave Pix", Icons.Default.Key)
     object Sobre : Screen("sobre", "Sobre", Icons.Default.Info)
 }
 
