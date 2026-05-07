@@ -2,6 +2,7 @@ package com.anotasmart.ui.viewModels
 
 import androidx.lifecycle.ViewModel
 import com.anotasmart.data.mocks.MockDataSource
+import com.anotasmart.model.CartItem
 import com.anotasmart.model.entity.Category
 import com.anotasmart.model.entity.Product
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,13 +56,27 @@ class VendaViewModel : ViewModel() {
         _mostrarDialogItemAvulso.value = false
     }
 
-    fun adicionarAoCarrinho(produto: Product, quantidade: Double) {
-        // lógica
+    fun adicionarAoCarrinho(produto: Product, quantidade: Double, onConfirmar: (CartItem) -> Unit) {
+        val item = CartItem(
+            product = produto,
+            nome = produto.nome,
+            precoVenda = produto.precoVenda,
+            precoCusto = produto.precoCusto,
+            quantidade = quantidade,
+            unidadeMedida = produto.unidadeMedida
+        )
+        onConfirmar(item)
         limparProdutoSelecionado()
     }
 
-    fun adicionarItemAvulsoAoCarrinho(precoCusto: Double?, precoVenda: Double, quantidade: Double) {
-        // lógica para adicionar item avulso
+    fun adicionarItemAvulsoAoCarrinho(precoCusto: Double?, precoVenda: Double, quantidade: Double, onConfirmar: (CartItem) -> Unit) {
+        val item = CartItem(
+            nome = "Item Avulso",
+            precoVenda = precoVenda,
+            precoCusto = precoCusto,
+            quantidade = quantidade
+        )
+        onConfirmar(item)
         fecharDialogItemAvulso()
     }
 }

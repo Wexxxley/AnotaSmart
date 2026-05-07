@@ -62,7 +62,9 @@ import com.anotasmart.ui.screens.relatorios.RelatoriosScreen
 import com.anotasmart.ui.screens.documentacao.DocumentacaoScreen
 import com.anotasmart.ui.screens.chavepix.ChavePixScreen
 import com.anotasmart.ui.screens.sobre.SobreScreen
+import com.anotasmart.ui.screens.carrinho.CarrinhoScreen
 import com.anotasmart.ui.theme.AnotaSmartTheme
+import com.anotasmart.ui.viewModels.CartViewModel
 import androidx.compose.material.icons.filled.Brightness4
 import androidx.compose.material.icons.filled.Brightness7
 import androidx.compose.material.icons.filled.Contrast
@@ -72,8 +74,10 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.draw.clip
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -83,15 +87,19 @@ class MainActivity : ComponentActivity() {
         setContent {
             AnotaSmartTheme {
                 val navController = rememberNavController()
-                ScreenStructure(navController)
+                val cartViewModel: CartViewModel = viewModel()
+                ScreenStructure(navController, cartViewModel)
             }
         }
     }
 }
 
 @Composable
-fun ScreenStructure(navController: NavHostController) {
-    var quantidadeItens by remember { mutableIntStateOf(0) }
+fun ScreenStructure(navController: NavHostController, cartViewModel: CartViewModel) {
+    val items by cartViewModel.items.collectAsState()
+    val totalValor by cartViewModel.totalValor.collectAsState()
+    val quantidadeItens = items.sumOf { it.quantidade }.toInt()
+
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -106,12 +114,14 @@ fun ScreenStructure(navController: NavHostController) {
                     companyName = "AnotaSmart",
                     currentRoute = currentRoute,
                     onItemClick = { screen ->
-                        navController.navigate(screen.route) {
-                            popUpTo(navController.graph.startDestinationId) {
-                                saveState = true
+                        if (currentRoute != screen.route) {
+                            navController.navigate(screen.route) {
+                                popUpTo(navController.graph.startDestinationId) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
                         }
                         scope.launch { drawerState.close() }
                     }
@@ -124,13 +134,32 @@ fun ScreenStructure(navController: NavHostController) {
             topBar = {
                 BarraSuperior(
                     quantidadeItens = quantidadeItens,
-                    onMenuClick = { scope.launch { drawerState.open() } }
+                    onMenuClick = { scope.launch { drawerState.open() } },
+                    onCartClick = { 
+                        if (currentRoute != Screen.Carrinho.route) {
+                            navController.navigate(Screen.Carrinho.route) {
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    }
                 )
             },
             bottomBar = {
                 Column {
-                    if (quantidadeItens > 0) {
-                        ResumoCarrinho(quantidadeItens = quantidadeItens)
+                    if (quantidadeItens > 0 && currentRoute != Screen.Carrinho.route) {
+                        ResumoCarrinho(
+                            quantidadeItens = quantidadeItens,
+                            totalValor = totalValor,
+                            onVerCarrinhoClick = { 
+                                if (currentRoute != Screen.Carrinho.route) {
+                                    navController.navigate(Screen.Carrinho.route) {
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
+                            }
+                        )
                     }
                     BarraNavegacaoPrincipal(navController)
                 }
@@ -146,7 +175,7 @@ fun ScreenStructure(navController: NavHostController) {
                     navController = navController,
                     startDestination = Screen.Venda.route
                 ) {
-                    composable(Screen.Venda.route) { VendaScreen() }
+                    composable(Screen.Venda.route) { VendaScreen(cartViewModel = cartViewModel) }
                     composable(Screen.Produtos.route) { ProdutosScreen() }
                     composable(Screen.Pedidos.route) { PedidosScreen() }
                     composable(Screen.Clientes.route) { ClientesScreen() }
@@ -156,6 +185,13 @@ fun ScreenStructure(navController: NavHostController) {
                     composable(Screen.Documentacao.route) { DocumentacaoScreen() }
                     composable(Screen.ChavePix.route) { ChavePixScreen() }
                     composable(Screen.Sobre.route) { SobreScreen() }
+                    composable(Screen.Carrinho.route) { 
+                        CarrinhoScreen(
+                            viewModel = cartViewModel,
+                            onBackClick = { navController.popBackStack() },
+                            onFinalizarVenda = { /* Logica de finalizar */ }
+                        )
+                    }
                 }
             }
         }
@@ -164,7 +200,7 @@ fun ScreenStructure(navController: NavHostController) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BarraSuperior(quantidadeItens: Int, onMenuClick: () -> Unit) {
+fun BarraSuperior(quantidadeItens: Int, onMenuClick: () -> Unit, onCartClick: () -> Unit) {
     CenterAlignedTopAppBar(
         title = {
             IconButton(onClick = { }) {
@@ -183,7 +219,7 @@ fun BarraSuperior(quantidadeItens: Int, onMenuClick: () -> Unit) {
             }
         },
         actions = {
-            IconButton(onClick = { }) {
+            IconButton(onClick = onCartClick) {
                 BadgedBox(
                     badge = {
                         if (quantidadeItens > 0) {
@@ -311,7 +347,7 @@ fun ThemeSwitcher() {
 
 
 @Composable
-fun ResumoCarrinho(quantidadeItens: Int) {
+fun ResumoCarrinho(quantidadeItens: Int, totalValor: Double, onVerCarrinhoClick: () -> Unit) {
     Surface(
         tonalElevation = 8.dp,
         modifier = Modifier.fillMaxWidth()
@@ -325,7 +361,7 @@ fun ResumoCarrinho(quantidadeItens: Int) {
         ) {
             Column {
                 Text(
-                    text = "TOTAL: R$ 51,00",
+                    text = "TOTAL: R$ ${String.format("%.2f", totalValor)}",
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
@@ -333,7 +369,7 @@ fun ResumoCarrinho(quantidadeItens: Int) {
                     style = MaterialTheme.typography.bodySmall
                 )
             }
-            Button(onClick = { }) {
+            Button(onClick = onVerCarrinhoClick) {
                 Text("VER CARRINHO")
             }
         }
@@ -350,12 +386,14 @@ fun BarraNavegacaoPrincipal(navController: NavController) {
             NavigationBarItem(
                 selected = currentRoute == screen.route,
                 onClick = {
-                    navController.navigate(screen.route) {
-                        popUpTo(navController.graph.startDestinationId) {
-                            saveState = true
+                    if (currentRoute != screen.route) {
+                        navController.navigate(screen.route) {
+                            popUpTo(navController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
                         }
-                        launchSingleTop = true
-                        restoreState = true
                     }
                 },
                 icon = { Icon(screen.icon, contentDescription = screen.title) },

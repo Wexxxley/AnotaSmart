@@ -1,7 +1,7 @@
 package com.anotasmart.ui.screens.vendas
 
 import com.anotasmart.ui.screens.vendas.components.DialogAdicionarCarrinho
-import com.anotasmart.ui.screens.vendas.components.DialogAdicionarCarrinhoItemAvulso
+import com.anotasmart.ui.screens.vendas.components.DialogItemAvulso
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,10 +17,12 @@ import com.anotasmart.ui.screens.vendas.components.BotaoVendaAvulsa
 import com.anotasmart.ui.screens.vendas.components.GradeProdutos
 import com.anotasmart.ui.screens.vendas.components.ListaCategorias
 import com.anotasmart.ui.viewModels.VendaViewModel
+import com.anotasmart.ui.viewModels.CartViewModel
 
 @Composable
 fun VendaScreen(
-    viewModel: VendaViewModel = viewModel()
+    viewModel: VendaViewModel = viewModel(),
+    cartViewModel: CartViewModel
 ) {
     val produtos by viewModel.produtos.collectAsState()
     val categorias by viewModel.categorias.collectAsState()
@@ -58,7 +60,7 @@ fun VendaScreen(
             )
         }
 
-        // Renderização condicional do Bottom Sheet de adicionar produto no carrinho
+        // Renderização condicional
         produtoSelecionado?.let { produto ->
             DialogAdicionarCarrinho(
                 produto = produto,
@@ -66,16 +68,21 @@ fun VendaScreen(
                     viewModel.limparProdutoSelecionado()
                 },
                 onConfirmar = { quantidade ->
-                    viewModel.adicionarAoCarrinho(produto, quantidade)
+                    viewModel.adicionarAoCarrinho(produto, quantidade) { item ->
+                        cartViewModel.adicionarItem(item)
+                    }
                 }
             )
         }
 
+        // Renderização condicional
         if (mostrarDialogItemAvulso) {
-            DialogAdicionarCarrinhoItemAvulso(
+            DialogItemAvulso(
                 onDismissRequest = { viewModel.fecharDialogItemAvulso() },
                 onConfirmar = { precoCusto, precoVenda, quantidade ->
-                    viewModel.adicionarItemAvulsoAoCarrinho(precoCusto, precoVenda, quantidade)
+                    viewModel.adicionarItemAvulsoAoCarrinho(precoCusto, precoVenda, quantidade) { item ->
+                        cartViewModel.adicionarItem(item)
+                    }
                 }
             )
         }

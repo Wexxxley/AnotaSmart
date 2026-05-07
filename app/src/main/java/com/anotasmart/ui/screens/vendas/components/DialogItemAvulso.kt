@@ -33,7 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun DialogAdicionarCarrinhoItemAvulso(
+fun DialogItemAvulso(
     onDismissRequest: () -> Unit,
     onConfirmar: (precoCusto: Double?, precoVenda: Double, quantidade: Double) -> Unit
 ) {
