@@ -1,4 +1,4 @@
-package com.anotasmart.ui.screens
+package com.anotasmart.data.mocks
 
 import com.anotasmart.R
 import com.anotasmart.model.CategoryType

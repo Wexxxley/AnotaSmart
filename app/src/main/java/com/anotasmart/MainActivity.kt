@@ -51,7 +51,17 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.anotasmart.ui.navigation.Screen
 import com.anotasmart.ui.navigation.bottomNavItems
-import com.anotasmart.ui.screens.*
+import com.anotasmart.ui.navigation.drawerNavItems
+import com.anotasmart.ui.screens.vendas.VendaScreen
+import com.anotasmart.ui.screens.produtos.ProdutosScreen
+import com.anotasmart.ui.screens.pedidos.PedidosScreen
+import com.anotasmart.ui.screens.clientes.ClientesScreen
+import com.anotasmart.ui.screens.despesas.DespesasScreen
+import com.anotasmart.ui.screens.categorias.CategoriasScreen
+import com.anotasmart.ui.screens.relatorios.RelatoriosScreen
+import com.anotasmart.ui.screens.documentacao.DocumentacaoScreen
+import com.anotasmart.ui.screens.chavepix.ChavePixScreen
+import com.anotasmart.ui.screens.sobre.SobreScreen
 import com.anotasmart.ui.theme.AnotaSmartTheme
 import androidx.compose.material.icons.filled.Brightness4
 import androidx.compose.material.icons.filled.Brightness7
@@ -64,7 +74,6 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.draw.clip
-import com.anotasmart.ui.navigation.drawerNavItems
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -354,13 +363,5 @@ fun BarraNavegacaoPrincipal(navController: NavController) {
                 alwaysShowLabel = false
             )
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun Preview(){
-    AnotaSmartTheme {
-        BarraSuperior(0, onMenuClick = {})
     }
 }

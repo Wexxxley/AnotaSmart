@@ -1,4 +1,4 @@
-package com.anotasmart.ui.screens
+package com.anotasmart.ui.screens.relatorios
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize

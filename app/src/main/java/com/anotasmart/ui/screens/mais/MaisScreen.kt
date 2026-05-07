@@ -1,4 +1,4 @@
-package com.anotasmart.ui.screens
+package com.anotasmart.ui.screens.mais
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,8 +8,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 @Composable
-fun ChavePixScreen() {
+fun MaisScreen() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "Tela de Chave Pix")
+        Text(text = "Tela de Mais")
     }
 }
