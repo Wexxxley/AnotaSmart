@@ -53,7 +53,7 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.navigation.compose)
     implementation(libs.androidx.material3)
-    implementation(libs.compose.material3)
+    implementation(libs.androidx.compose.ui.text.google.fonts)
     ksp(libs.androidx.room.compiler)
 
     testImplementation(libs.junit)

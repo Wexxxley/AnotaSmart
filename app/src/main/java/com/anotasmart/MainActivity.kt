@@ -5,6 +5,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -63,7 +64,7 @@ import com.anotasmart.ui.screens.documentacao.DocumentacaoScreen
 import com.anotasmart.ui.screens.chavepix.ChavePixScreen
 import com.anotasmart.ui.screens.sobre.SobreScreen
 import com.anotasmart.ui.screens.carrinho.CarrinhoScreen
-import com.anotasmart.ui.theme.AnotaSmartTheme
+import com.anotasmart.ui.theme.AppTheme
 import com.anotasmart.ui.viewModels.CartViewModel
 import androidx.compose.material.icons.filled.Brightness4
 import androidx.compose.material.icons.filled.Brightness7
@@ -85,17 +86,40 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            AnotaSmartTheme {
-                val navController = rememberNavController()
-                val cartViewModel: CartViewModel = viewModel()
-                ScreenStructure(navController, cartViewModel)
+            var selectedTheme by remember { mutableIntStateOf(0) } // 0: Padrão, 1: Claro, 2: Escuro
+            
+            val isDarkTheme = when (selectedTheme) {
+                1 -> false
+                2 -> true
+                else -> isSystemInDarkTheme()
+            }
+
+            AppTheme(darkTheme = isDarkTheme) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    val navController = rememberNavController()
+                    val cartViewModel: CartViewModel = viewModel()
+                    ScreenStructure(
+                        navController = navController,
+                        cartViewModel = cartViewModel,
+                        selectedTheme = selectedTheme,
+                        onThemeChange = { selectedTheme = it }
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun ScreenStructure(navController: NavHostController, cartViewModel: CartViewModel) {
+fun ScreenStructure(
+    navController: NavHostController,
+    cartViewModel: CartViewModel,
+    selectedTheme: Int,
+    onThemeChange: (Int) -> Unit
+) {
     val items by cartViewModel.items.collectAsState()
     val totalValor by cartViewModel.totalValor.collectAsState()
     val quantidadeItens = items.sumOf { it.quantidade }.toInt()
@@ -113,6 +137,8 @@ fun ScreenStructure(navController: NavHostController, cartViewModel: CartViewMod
                     userName = "Wesley",
                     companyName = "AnotaSmart",
                     currentRoute = currentRoute,
+                    selectedTheme = selectedTheme,
+                    onThemeChange = onThemeChange,
                     onItemClick = { screen ->
                         if (currentRoute != screen.route) {
                             navController.navigate(screen.route) {
@@ -169,7 +195,7 @@ fun ScreenStructure(navController: NavHostController, cartViewModel: CartViewMod
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .background(Color.White)
+                    .background(MaterialTheme.colorScheme.background)
             ) {
                 NavHost(
                     navController = navController,
@@ -244,6 +270,8 @@ fun DrawerContent(
     userName: String,
     companyName: String,
     currentRoute: String?,
+    selectedTheme: Int,
+    onThemeChange: (Int) -> Unit,
     onItemClick: (Screen) -> Unit
 ) {
     Column(
@@ -306,14 +334,12 @@ fun DrawerContent(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        ThemeSwitcher()
+        ThemeSwitcher(selectedTheme = selectedTheme, onThemeChange = onThemeChange)
     }
 }
 
 @Composable
-fun ThemeSwitcher() {
-    var selectedTheme by remember { mutableIntStateOf(0) } // 0: Padrao, 1: Claro, 2: Escuro
-    
+fun ThemeSwitcher(selectedTheme: Int, onThemeChange: (Int) -> Unit) {
     val themes = listOf(
         Triple("Padrão", Icons.Default.Contrast, 0),
         Triple("Claro", Icons.Default.Brightness7, 1),
@@ -329,7 +355,7 @@ fun ThemeSwitcher() {
                     .clip(MaterialTheme.shapes.medium)
                     .background(if (selectedTheme == index) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent)
                     .padding(8.dp)
-                    .clickable { selectedTheme = index }) {
+                    .clickable { onThemeChange(index) }) {
                 Icon(
                     imageVector = icon,
                     contentDescription = label,
