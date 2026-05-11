@@ -2,7 +2,6 @@ package com.anotasmart.ui.screens.vendas.components
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -25,11 +24,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.anotasmart.model.entity.Product
 
 @SuppressLint("DefaultLocale")
@@ -53,20 +52,17 @@ fun ItemProduto(produto: Product, onClick: () -> Unit) {
                 contentAlignment = Alignment.Center
             ) {
                 if (!produto.imagePath.isNullOrEmpty()) {
-                    val imageResourceId = produto.imagePath.toIntOrNull()
-                    if (imageResourceId != null) {
-                        Image(
-                            painter = painterResource(id = imageResourceId),
-                            contentDescription = "Imagem do produto ${produto.nome}",
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(100.dp)
-                                .clip(RoundedCornerShape(4.dp)),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
+                    val imageModel: Any = produto.imagePath.toIntOrNull() ?: produto.imagePath
+                    AsyncImage(
+                        model = imageModel,
+                        contentDescription = "Imagem do produto ${produto.nome}",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(100.dp)
+                            .clip(RoundedCornerShape(4.dp)),
+                        contentScale = ContentScale.Crop
+                    )
                 } else {
-                    // Exibe o ícone genérico caso o produto não possua imagem
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()

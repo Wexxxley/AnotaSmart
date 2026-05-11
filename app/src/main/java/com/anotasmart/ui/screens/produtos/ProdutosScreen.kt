@@ -13,6 +13,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.anotasmart.ui.components.BarraBusca
 import com.anotasmart.ui.components.ListaCategorias
 import com.anotasmart.ui.screens.produtos.components.DialogEntradaEstoque
+import com.anotasmart.ui.screens.produtos.components.DialogNovoProduto
+import com.anotasmart.ui.screens.produtos.components.DialogNovoServico
 import com.anotasmart.ui.screens.produtos.components.GradeItemsProduto
 import com.anotasmart.ui.viewModels.ProdutosViewModel
 
@@ -56,6 +58,7 @@ fun ProdutosScreen(
             )
         }
 
+        // FAB e Menu de Opções posicionados manualmente para evitar Scaffold aninhado
         Column(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -106,27 +109,21 @@ fun ProdutosScreen(
         }
 
         if (mostrarModalNovoProduto) {
-            AlertDialog(
+            DialogNovoProduto(
+                categorias = categorias,
                 onDismissRequest = { viewModel.fecharModalNovoProduto() },
-                title = { Text("Novo Produto") },
-                text = { Text("Aqui virá o formulário de novo produto.") },
-                confirmButton = {
-                    Button(onClick = { viewModel.fecharModalNovoProduto() }) {
-                        Text("Salvar")
-                    }
+                onConfirmar = { nome, categoryId, precoVenda, precoCusto, unidade, imagePath ->
+                    viewModel.salvarNovoProduto(nome, categoryId, precoVenda, precoCusto, unidade, imagePath)
                 }
             )
         }
 
         if (mostrarModalNovoServico) {
-            AlertDialog(
+            DialogNovoServico(
+                categorias = categorias,
                 onDismissRequest = { viewModel.fecharModalNovoServico() },
-                title = { Text("Novo Serviço") },
-                text = { Text("Aqui virá o formulário de novo serviço.") },
-                confirmButton = {
-                    Button(onClick = { viewModel.fecharModalNovoServico() }) {
-                        Text("Salvar")
-                    }
+                onConfirmar = { nome, categoryId, precoVenda, imagePath ->
+                    viewModel.salvarNovoServico(nome, categoryId, precoVenda, imagePath)
                 }
             )
         }

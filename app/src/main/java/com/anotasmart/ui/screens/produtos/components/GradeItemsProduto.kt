@@ -25,7 +25,7 @@ fun GradeItemsProduto(
         modifier = Modifier.fillMaxSize()
     ) {
         items(produtos) { produto ->
-            ItemProduto(
+            ItemProdutoProdutos(
                 produto = produto,
                 onClick = { onProdutoClick(produto) },
                 onAddEstoqueClick = { onAddEstoqueClick(produto) }

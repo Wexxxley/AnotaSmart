@@ -48,35 +48,6 @@ class ProdutosViewModel : ViewModel() {
     private fun carregarDadosMock() {
         _categorias.value = MockDataSource.getMockCategories()
         val mockProducts = MockDataSource.getMockProducts().toMutableList()
-        
-        // Adicionando alguns serviços mock
-        mockProducts.add(
-            Product(
-                id = "s1",
-                categoryId = "1",
-                nome = "Corte de Cabelo",
-                precoCusto = 0.0,
-                precoVenda = 35.0,
-                unidadeMedida = com.anotasmart.model.UnitType.UN,
-                tipoItem = ItemType.SERVICO,
-                quantidadeEstoque = 0.0,
-                imagePath = null
-            )
-        )
-        mockProducts.add(
-            Product(
-                id = "s2",
-                categoryId = "1",
-                nome = "Barba",
-                precoCusto = 0.0,
-                precoVenda = 20.0,
-                unidadeMedida = com.anotasmart.model.UnitType.UN,
-                tipoItem = ItemType.SERVICO,
-                quantidadeEstoque = 0.0,
-                imagePath = null
-            )
-        )
-        
         _produtos.value = mockProducts
     }
 
@@ -118,6 +89,54 @@ class ProdutosViewModel : ViewModel() {
 
     fun fecharModalNovoServico() {
         _mostrarModalNovoServico.value = false
+    }
+
+    fun salvarNovoProduto(
+        nome: String,
+        categoryId: String?,
+        precoVenda: Double,
+        precoCusto: Double,
+        unidadeMedida: com.anotasmart.model.UnitType,
+        imagePath: String?
+    ) {
+        val novoProduto = Product(
+            id = java.util.UUID.randomUUID().toString(),
+            categoryId = categoryId,
+            nome = nome,
+            precoCusto = precoCusto,
+            precoVenda = precoVenda,
+            unidadeMedida = unidadeMedida,
+            tipoItem = ItemType.PRODUTO,
+            quantidadeEstoque = 0.0,
+            imagePath = imagePath
+        )
+        val listaAtual = _produtos.value.toMutableList()
+        listaAtual.add(0, novoProduto)
+        _produtos.value = listaAtual
+        fecharModalNovoProduto()
+    }
+
+    fun salvarNovoServico(
+        nome: String,
+        categoryId: String?,
+        precoVenda: Double,
+        imagePath: String?
+    ) {
+        val novoServico = Product(
+            id = java.util.UUID.randomUUID().toString(),
+            categoryId = categoryId,
+            nome = nome,
+            precoCusto = 0.0,
+            precoVenda = precoVenda,
+            unidadeMedida = com.anotasmart.model.UnitType.UN,
+            tipoItem = ItemType.SERVICO,
+            quantidadeEstoque = 0.0,
+            imagePath = imagePath
+        )
+        val listaAtual = _produtos.value.toMutableList()
+        listaAtual.add(0, novoServico)
+        _produtos.value = listaAtual
+        fecharModalNovoServico()
     }
 
     fun confirmarEntradaEstoque(produtoId: String, quantidade: Double, novoPrecoCusto: Double) {

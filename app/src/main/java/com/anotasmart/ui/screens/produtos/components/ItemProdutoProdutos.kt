@@ -2,7 +2,6 @@ package com.anotasmart.ui.screens.produtos.components
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,17 +16,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.anotasmart.model.ItemType
 import com.anotasmart.model.entity.Product
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun ItemProduto(
+fun ItemProdutoProdutos(
     produto: Product,
     onClick: () -> Unit,
     onAddEstoqueClick: () -> Unit
@@ -53,18 +52,17 @@ fun ItemProduto(
                     contentAlignment = Alignment.Center
                 ) {
                     if (!produto.imagePath.isNullOrEmpty()) {
-                        val imageResourceId = produto.imagePath.toIntOrNull()
-                        if (imageResourceId != null) {
-                            Image(
-                                painter = painterResource(id = imageResourceId),
-                                contentDescription = "Imagem do produto ${produto.nome}",
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(100.dp)
-                                    .clip(RoundedCornerShape(4.dp)),
-                                contentScale = ContentScale.Crop
-                            )
-                        }
+                        // Verifica se é um resource ID (inteiro) ou um caminho/URI
+                        val imageModel: Any = produto.imagePath.toIntOrNull() ?: produto.imagePath
+                        AsyncImage(
+                            model = imageModel,
+                            contentDescription = "Imagem do produto ${produto.nome}",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(100.dp)
+                                .clip(RoundedCornerShape(4.dp)),
+                            contentScale = ContentScale.Crop
+                        )
                     } else {
                         Box(
                             modifier = Modifier
@@ -113,6 +111,7 @@ fun ItemProduto(
             }
         }
 
+        // Botão flutuante no card para estoque (apenas se for PRODUTO)
         if (produto.tipoItem == ItemType.PRODUTO) {
             SmallFloatingActionButton(
                 onClick = onAddEstoqueClick,

@@ -154,6 +154,28 @@ object MockDataSource {
                 tipoItem = ItemType.PRODUTO,
                 quantidadeEstoque = 12.0,
                 imagePath = null
+            ),
+            Product(
+                id = "s1",
+                categoryId = "1",
+                nome = "Corte de Cabelo",
+                precoCusto = 0.0,
+                precoVenda = 35.0,
+                unidadeMedida = com.anotasmart.model.UnitType.UN,
+                tipoItem = ItemType.SERVICO,
+                quantidadeEstoque = 0.0,
+                imagePath = null
+            ),
+            Product(
+                id = "s2",
+                categoryId = "1",
+                nome = "Barba",
+                precoCusto = 0.0,
+                precoVenda = 20.0,
+                unidadeMedida = com.anotasmart.model.UnitType.UN,
+                tipoItem = ItemType.SERVICO,
+                quantidadeEstoque = 0.0,
+                imagePath = null
             )
         )
     }
