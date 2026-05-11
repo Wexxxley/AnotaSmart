@@ -102,7 +102,7 @@ fun ItemProdutoProdutos(
                 )
 
                 Text(
-                    text = "${produto.quantidadeEstoque} ${produto.unidadeMedida.name}",
+                    text = if (produto.tipoItem == ItemType.PRODUTO) "${produto.quantidadeEstoque} ${produto.unidadeMedida.name}" else " ",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,

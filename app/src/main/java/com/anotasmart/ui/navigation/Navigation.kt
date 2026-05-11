@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.MoneyOff
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
@@ -26,7 +27,7 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     object Despesas : Screen("despesas", "Despesas", Icons.Default.MoneyOff)
     object Categorias : Screen("categorias", "Categorias", Icons.Default.Category)
     object Relatorios : Screen("relatorios", "Relatórios", Icons.Default.Assessment)
-    object Documentacao : Screen("documentacao", "Documentação", Icons.Default.Description)
+    object Tutoriais : Screen("tutoriais", "Tutoriais", Icons.Default.VideoLibrary)
     object ChavePix : Screen("chave_pix", "Chave Pix", Icons.Default.Key)
     object Sobre : Screen("sobre", "Sobre", Icons.Default.Info)
     object Carrinho : Screen("carrinho", "Carrinho", Icons.Default.ShoppingCart)
@@ -43,7 +44,7 @@ val bottomNavItems = listOf(
 val drawerNavItems = listOf(
     Screen.Categorias,
     Screen.Relatorios,
-    Screen.Documentacao,
     Screen.ChavePix,
+    Screen.Tutoriais,
     Screen.Sobre
 )

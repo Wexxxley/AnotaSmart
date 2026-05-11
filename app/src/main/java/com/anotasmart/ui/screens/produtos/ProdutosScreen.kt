@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.anotasmart.ui.components.BarraBusca
 import com.anotasmart.ui.components.ListaCategorias
+import com.anotasmart.ui.screens.produtos.components.DialogEditarItem
 import com.anotasmart.ui.screens.produtos.components.DialogEntradaEstoque
 import com.anotasmart.ui.screens.produtos.components.DialogNovoProduto
 import com.anotasmart.ui.screens.produtos.components.DialogNovoServico
@@ -129,14 +130,12 @@ fun ProdutosScreen(
         }
 
         produtoParaEditar?.let { produto ->
-            AlertDialog(
+            DialogEditarItem(
+                produto = produto,
+                categorias = categorias,
                 onDismissRequest = { viewModel.fecharModalEdicao() },
-                title = { Text("Editar: ${produto.nome}") },
-                text = { Text("Aqui virá o formulário de edição.") },
-                confirmButton = {
-                    Button(onClick = { viewModel.fecharModalEdicao() }) {
-                        Text("Salvar")
-                    }
+                onConfirmar = { id, nome, categoryId, precoVenda, precoCusto, unidade, imagePath, tipoItem, estoque ->
+                    viewModel.salvarEdicao(id, nome, categoryId, precoVenda, precoCusto, unidade, imagePath, tipoItem, estoque)
                 }
             )
         }

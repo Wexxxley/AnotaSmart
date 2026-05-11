@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.anotasmart.model.ItemType
 import com.anotasmart.model.entity.Product
 
 @SuppressLint("DefaultLocale")
@@ -101,7 +102,7 @@ fun ItemProduto(produto: Product, onClick: () -> Unit) {
             )
 
             Text(
-                text = "${produto.quantidadeEstoque} ${produto.unidadeMedida.name}",
+                text = if (produto.tipoItem == ItemType.PRODUTO) "${produto.quantidadeEstoque} ${produto.unidadeMedida.name}" else " ",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,

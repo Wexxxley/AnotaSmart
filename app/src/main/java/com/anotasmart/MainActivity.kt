@@ -210,7 +210,7 @@ fun ScreenStructure(
                     composable(Screen.Despesas.route) { DespesasScreen() }
                     composable(Screen.Categorias.route) { CategoriasScreen() }
                     composable(Screen.Relatorios.route) { RelatoriosScreen() }
-                    composable(Screen.Documentacao.route) { DocumentacaoScreen() }
+                    composable(Screen.Tutoriais.route) { DocumentacaoScreen() }
                     composable(Screen.ChavePix.route) { ChavePixScreen() }
                     composable(Screen.Sobre.route) { SobreScreen() }
                     composable(Screen.Carrinho.route) { 

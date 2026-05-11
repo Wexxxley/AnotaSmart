@@ -139,6 +139,36 @@ class ProdutosViewModel : ViewModel() {
         fecharModalNovoServico()
     }
 
+    fun salvarEdicao(
+        id: String,
+        nome: String,
+        categoryId: String?,
+        precoVenda: Double,
+        precoCusto: Double,
+        unidadeMedida: com.anotasmart.model.UnitType,
+        imagePath: String?,
+        tipoItem: ItemType,
+        quantidadeEstoque: Double
+    ) {
+        val produtosAtuais = _produtos.value.toMutableList()
+        val index = produtosAtuais.indexOfFirst { it.id == id }
+        if (index != -1) {
+            produtosAtuais[index] = Product(
+                id = id,
+                categoryId = categoryId,
+                nome = nome,
+                precoCusto = precoCusto,
+                precoVenda = precoVenda,
+                unidadeMedida = unidadeMedida,
+                tipoItem = tipoItem,
+                quantidadeEstoque = quantidadeEstoque,
+                imagePath = imagePath
+            )
+            _produtos.value = produtosAtuais
+        }
+        fecharModalEdicao()
+    }
+
     fun confirmarEntradaEstoque(produtoId: String, quantidade: Double, novoPrecoCusto: Double) {
         // Logica para atualizar estoque (no momento apenas simulada)
         val produtosAtuais = _produtos.value.toMutableList()
