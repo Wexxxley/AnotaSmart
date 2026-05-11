@@ -14,8 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.anotasmart.ui.components.BarraBusca
 import com.anotasmart.ui.screens.vendas.components.BotaoVendaAvulsa
-import com.anotasmart.ui.screens.vendas.components.GradeProdutos
-import com.anotasmart.ui.screens.vendas.components.ListaCategorias
+import com.anotasmart.ui.components.ListaCategorias
+import com.anotasmart.ui.screens.vendas.components.GradeItems
 import com.anotasmart.ui.viewModels.VendaViewModel
 import com.anotasmart.ui.viewModels.CartViewModel
 
@@ -52,7 +52,7 @@ fun VendaScreen(
                 onCategoriaClick = viewModel::onCategoriaSelecionada
             )
 
-            GradeProdutos(
+            GradeItems(
                 produtos = produtos,
                 onProdutoClick = { produtoClicado ->
                     viewModel.selecionarProdutoParaCarrinho(produtoClicado)

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Brightness2
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -67,6 +68,7 @@ import com.anotasmart.ui.screens.carrinho.CarrinhoScreen
 import com.anotasmart.ui.theme.AppTheme
 import com.anotasmart.ui.viewModels.CartViewModel
 import androidx.compose.material.icons.filled.Brightness4
+import androidx.compose.material.icons.filled.Brightness5
 import androidx.compose.material.icons.filled.Brightness7
 import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material3.DrawerValue
@@ -342,8 +344,8 @@ fun DrawerContent(
 fun ThemeSwitcher(selectedTheme: Int, onThemeChange: (Int) -> Unit) {
     val themes = listOf(
         Triple("Padrão", Icons.Default.Contrast, 0),
-        Triple("Claro", Icons.Default.Brightness7, 1),
-        Triple("Escuro", Icons.Default.Brightness4, 2)
+        Triple("Claro", Icons.Default.Brightness5, 1),
+        Triple("Escuro", Icons.Default.Brightness2, 2)
     )
 
     Row(
@@ -353,9 +355,9 @@ fun ThemeSwitcher(selectedTheme: Int, onThemeChange: (Int) -> Unit) {
         themes.forEach { (label, icon, index) ->
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
                     .clip(MaterialTheme.shapes.medium)
+                    .clickable { onThemeChange(index) }
                     .background(if (selectedTheme == index) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent)
-                    .padding(8.dp)
-                    .clickable { onThemeChange(index) }) {
+                    .padding(8.dp) ){
                 Icon(
                     imageVector = icon,
                     contentDescription = label,

@@ -1,4 +1,4 @@
-package com.anotasmart.ui.screens.vendas.components
+package com.anotasmart.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

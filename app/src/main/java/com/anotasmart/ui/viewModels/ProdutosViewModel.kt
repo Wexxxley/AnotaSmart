@@ -1,0 +1,137 @@
+package com.anotasmart.ui.viewModels
+
+import androidx.lifecycle.ViewModel
+import com.anotasmart.data.mocks.MockDataSource
+import com.anotasmart.model.ItemType
+import com.anotasmart.model.entity.Category
+import com.anotasmart.model.entity.Product
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+
+class ProdutosViewModel : ViewModel() {
+    private val _produtos = MutableStateFlow<List<Product>>(emptyList())
+    private val _categorias = MutableStateFlow<List<Category>>(emptyList())
+    val categorias: StateFlow<List<Category>> = _categorias.asStateFlow()
+
+    private val _categoriaSelecionada = MutableStateFlow("1") // "1" é "TODOS" no mock
+    val categoriaSelecionada: StateFlow<String> = _categoriaSelecionada.asStateFlow()
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    private val _produtoParaEditar = MutableStateFlow<Product?>(null)
+    val produtoParaEditar: StateFlow<Product?> = _produtoParaEditar.asStateFlow()
+
+    private val _produtoParaEstoque = MutableStateFlow<Product?>(null)
+    val produtoParaEstoque: StateFlow<Product?> = _produtoParaEstoque.asStateFlow()
+
+    private val _mostrarModalNovoProduto = MutableStateFlow(false)
+    val mostrarModalNovoProduto: StateFlow<Boolean> = _mostrarModalNovoProduto.asStateFlow()
+
+    private val _mostrarModalNovoServico = MutableStateFlow(false)
+    val mostrarModalNovoServico: StateFlow<Boolean> = _mostrarModalNovoServico.asStateFlow()
+
+    val produtosFiltrados = combine(_produtos, _categoriaSelecionada, _searchQuery) { produtos, categoriaId, query ->
+        produtos.filter { produto ->
+            val matchesCategory = if (categoriaId == "1") true else produto.categoryId == categoriaId
+            val matchesSearch = produto.nome.contains(query, ignoreCase = true)
+            matchesCategory && matchesSearch
+        }
+    }
+
+    init {
+        carregarDadosMock()
+    }
+
+    private fun carregarDadosMock() {
+        _categorias.value = MockDataSource.getMockCategories()
+        val mockProducts = MockDataSource.getMockProducts().toMutableList()
+        
+        // Adicionando alguns serviços mock
+        mockProducts.add(
+            Product(
+                id = "s1",
+                categoryId = "1",
+                nome = "Corte de Cabelo",
+                precoCusto = 0.0,
+                precoVenda = 35.0,
+                unidadeMedida = com.anotasmart.model.UnitType.UN,
+                tipoItem = ItemType.SERVICO,
+                quantidadeEstoque = 0.0,
+                imagePath = null
+            )
+        )
+        mockProducts.add(
+            Product(
+                id = "s2",
+                categoryId = "1",
+                nome = "Barba",
+                precoCusto = 0.0,
+                precoVenda = 20.0,
+                unidadeMedida = com.anotasmart.model.UnitType.UN,
+                tipoItem = ItemType.SERVICO,
+                quantidadeEstoque = 0.0,
+                imagePath = null
+            )
+        )
+        
+        _produtos.value = mockProducts
+    }
+
+    fun onSearchQueryChanged(query: String) {
+        _searchQuery.value = query
+    }
+
+    fun onCategoriaSelecionada(id: String) {
+        _categoriaSelecionada.value = id
+    }
+
+    fun selecionarProdutoParaEdicao(produto: Product) {
+        _produtoParaEditar.value = produto
+    }
+
+    fun fecharModalEdicao() {
+        _produtoParaEditar.value = null
+    }
+
+    fun selecionarProdutoParaEstoque(produto: Product) {
+        _produtoParaEstoque.value = produto
+    }
+
+    fun fecharModalEstoque() {
+        _produtoParaEstoque.value = null
+    }
+
+    fun abrirModalNovoProduto() {
+        _mostrarModalNovoProduto.value = true
+    }
+
+    fun fecharModalNovoProduto() {
+        _mostrarModalNovoProduto.value = false
+    }
+
+    fun abrirModalNovoServico() {
+        _mostrarModalNovoServico.value = true
+    }
+
+    fun fecharModalNovoServico() {
+        _mostrarModalNovoServico.value = false
+    }
+
+    fun confirmarEntradaEstoque(produtoId: String, quantidade: Double, novoPrecoCusto: Double) {
+        // Logica para atualizar estoque (no momento apenas simulada)
+        val produtosAtuais = _produtos.value.toMutableList()
+        val index = produtosAtuais.indexOfFirst { it.id == produtoId }
+        if (index != -1) {
+            val p = produtosAtuais[index]
+            produtosAtuais[index] = p.copy(
+                quantidadeEstoque = p.quantidadeEstoque + quantidade,
+                precoCusto = novoPrecoCusto
+            )
+            _produtos.value = produtosAtuais
+        }
+        fecharModalEstoque()
+    }
+}

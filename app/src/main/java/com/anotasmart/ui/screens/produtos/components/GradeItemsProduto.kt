@@ -1,4 +1,4 @@
-package com.anotasmart.ui.screens.vendas.components
+package com.anotasmart.ui.screens.produtos.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,9 +12,10 @@ import androidx.compose.ui.unit.dp
 import com.anotasmart.model.entity.Product
 
 @Composable
-fun GradeProdutos(
+fun GradeItemsProduto(
     produtos: List<Product>,
-    onProdutoClick: (Product) -> Unit
+    onProdutoClick: (Product) -> Unit,
+    onAddEstoqueClick: (Product) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
@@ -26,7 +27,8 @@ fun GradeProdutos(
         items(produtos) { produto ->
             ItemProduto(
                 produto = produto,
-                onClick = { onProdutoClick(produto) }
+                onClick = { onProdutoClick(produto) },
+                onAddEstoqueClick = { onAddEstoqueClick(produto) }
             )
         }
     }
