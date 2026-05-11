@@ -1,12 +1,12 @@
 package com.anotasmart.ui.screens.clientes
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -15,15 +15,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.anotasmart.R
+import coil.compose.AsyncImage
 import com.anotasmart.model.entity.Client
 import com.anotasmart.ui.components.BarraBusca
+import com.anotasmart.ui.screens.clientes.components.DialogNovoCliente
 import com.anotasmart.ui.viewModels.ClientesViewModel
 
 @Composable
@@ -33,26 +32,51 @@ fun ClientesScreen(
 ) {
     val searchQuery by viewModel.searchQuery.collectAsState()
     val clientes by viewModel.clientesFiltrados.collectAsState(initial = emptyList())
+    val mostrarModalNovoCliente by viewModel.mostrarModalNovoCliente.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        BarraBusca(
-            query = searchQuery,
-            onQueryChange = { viewModel.onSearchQueryChanged(it) }
-        )
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            BarraBusca(
+                query = searchQuery,
+                onQueryChange = { viewModel.onSearchQueryChanged(it) }
+            )
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(bottom = 16.dp)
-        ) {
-            items(clientes) { cliente ->
-                ItemCliente(
-                    cliente = cliente,
-                    onClick = { onClientClick(cliente) }
-                )
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(bottom = 80.dp) // Espaço para o FAB
+            ) {
+                items(clientes) { cliente ->
+                    ItemCliente(
+                        cliente = cliente,
+                        onClick = { onClientClick(cliente) }
+                    )
+                }
             }
+        }
+
+        // FAB para adicionar cliente
+        FloatingActionButton(
+            onClick = { viewModel.abrirModalNovoCliente() },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp),
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
+        ) {
+            Icon(imageVector = Icons.Default.Add, contentDescription = "Adicionar Cliente")
+        }
+
+        // Modal para novo cliente
+        if (mostrarModalNovoCliente) {
+            DialogNovoCliente(
+                onDismissRequest = { viewModel.fecharModalNovoCliente() },
+                onConfirmar = { nome, telefone, endereco, imagePath ->
+                    viewModel.salvarNovoCliente(nome, telefone, endereco, imagePath)
+                }
+            )
         }
     }
 }
@@ -67,7 +91,7 @@ fun ItemCliente(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(
             modifier = Modifier
@@ -83,31 +107,20 @@ fun ItemCliente(
                     .padding(2.dp),
                 contentAlignment = Alignment.Center
             ) {
-                if (cliente.imagePath != null) {
-                    // Aqui você usaria uma lib de carregamento de imagem como Coil
-                    // Como estamos usando mocks e IDs de recursos, simulamos
-                    val resId = cliente.imagePath.toIntOrNull()
-                    if (resId != null) {
-                        Image(
-                            painter = painterResource(id = resId),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize().clip(CircleShape)
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = null,
-                            modifier = Modifier.size(40.dp),
-                            tint = Color.Gray
-                        )
-                    }
+                if (!cliente.imagePath.isNullOrEmpty()) {
+                    val imageModel: Any = cliente.imagePath.toIntOrNull() ?: cliente.imagePath
+                    AsyncImage(
+                        model = imageModel,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize().clip(CircleShape)
+                    )
                 } else {
                     Icon(
                         imageVector = Icons.Default.Person,
                         contentDescription = null,
                         modifier = Modifier.size(40.dp),
-                        tint = Color.Gray
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

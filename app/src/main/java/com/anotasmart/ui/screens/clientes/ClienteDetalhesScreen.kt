@@ -1,6 +1,5 @@
 package com.anotasmart.ui.screens.clientes
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,10 +20,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.anotasmart.model.entity.Client
 import com.anotasmart.ui.viewModels.ClientesViewModel
 
@@ -128,20 +127,21 @@ fun CardClienteSuperior(cliente: Client) {
                         .background(MaterialTheme.colorScheme.surface),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (cliente.imagePath != null) {
-                        val resId = cliente.imagePath.toIntOrNull()
-                        if (resId != null) {
-                            Image(
-                                painter = painterResource(id = resId),
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        } else {
-                            Icon(Icons.Default.Person, null, modifier = Modifier.size(40.dp), tint = Color.Gray)
-                        }
+                    if (!cliente.imagePath.isNullOrEmpty()) {
+                        val imageModel: Any = cliente.imagePath.toIntOrNull() ?: cliente.imagePath
+                        AsyncImage(
+                            model = imageModel,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
                     } else {
-                        Icon(Icons.Default.Person, null, modifier = Modifier.size(40.dp), tint = Color.Gray)
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = null,
+                            modifier = Modifier.size(40.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.width(16.dp))

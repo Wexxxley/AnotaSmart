@@ -1,13 +1,8 @@
 package com.anotasmart.ui.screens.carrinho
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -15,14 +10,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.anotasmart.model.CartItem
 import com.anotasmart.ui.viewModels.CartViewModel
 
@@ -42,25 +31,67 @@ fun CarrinhoScreen(
     val items by viewModel.items.collectAsState()
     val totalValor by viewModel.totalValor.collectAsState()
 
-    Scaffold(
-        topBar = {
-            Row(
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .fillMaxSize()
+                    .weight(1f),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                IconButton(onClick = onBackClick) {
-                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Voltar")
+                // Botão Voltar manual (Igual ClienteDetalhesScreen)
+                item {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onBackClick() }
+                            .padding(vertical = 8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Voltar",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Carrinho",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
-                Text(
-                    text = "Carrinho",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(start = 8.dp)
-                )
+
+                if (items.isEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Seu carrinho está vazio",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                } else {
+                    items(items) { item ->
+                        CartItemCard(
+                            item = item,
+                            onIncrement = { viewModel.alterarQuantidade(item.id, item.quantidade + 1) },
+                            onDecrement = { viewModel.alterarQuantidade(item.id, item.quantidade - 1) },
+                            onDelete = { viewModel.removerItem(item.id) }
+                        )
+                    }
+                }
             }
-        },
-        bottomBar = {
+
+            // Barra Inferior de Total e Ação
             if (items.isNotEmpty()) {
                 Column(
                     modifier = Modifier
@@ -88,35 +119,6 @@ fun CarrinhoScreen(
                     ) {
                         Text("FINALIZAR VENDA")
                     }
-                }
-            }
-        }
-    ) { innerPadding ->
-        if (items.isEmpty()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(text = "Seu carrinho está vazio", style = MaterialTheme.typography.bodyLarge)
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(items) { item ->
-                    CartItemCard(
-                        item = item,
-                        onIncrement = { viewModel.alterarQuantidade(item.id, item.quantidade + 1) },
-                        onDecrement = { viewModel.alterarQuantidade(item.id, item.quantidade - 1) },
-                        onDelete = { viewModel.removerItem(item.id) }
-                    )
                 }
             }
         }

@@ -187,21 +187,21 @@ object MockDataSource {
                 nome = "Wesley Oliveira",
                 telefone = "(11) 98765-4321",
                 endereco = "Rua das Flores, 123",
-                imagePath = null
+                imagePath = R.drawable.c1.toString()
             ),
             com.anotasmart.model.entity.Client(
                 id = "2",
                 nome = "Maria Silva",
                 telefone = "(11) 91234-5678",
                 endereco = "Av. Paulista, 1000",
-                imagePath = null
+                imagePath = R.drawable.c2.toString()
             ),
             com.anotasmart.model.entity.Client(
                 id = "3",
                 nome = "João Pereira",
                 telefone = "(11) 99887-7665",
                 endereco = "Rua Bahia, 45",
-                imagePath = null
+                imagePath = R.drawable.c3.toString()
             ),
             com.anotasmart.model.entity.Client(
                 id = "4",

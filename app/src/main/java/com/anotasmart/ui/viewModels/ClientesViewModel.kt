@@ -15,6 +15,9 @@ class ClientesViewModel : ViewModel() {
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
+    private val _mostrarModalNovoCliente = MutableStateFlow(false)
+    val mostrarModalNovoCliente: StateFlow<Boolean> = _mostrarModalNovoCliente.asStateFlow()
+
     val clientesFiltrados = combine(_clientes, _searchQuery) { clientes, query ->
         if (query.isEmpty()) {
             clientes
@@ -33,6 +36,33 @@ class ClientesViewModel : ViewModel() {
 
     fun onSearchQueryChanged(query: String) {
         _searchQuery.value = query
+    }
+
+    fun abrirModalNovoCliente() {
+        _mostrarModalNovoCliente.value = true
+    }
+
+    fun fecharModalNovoCliente() {
+        _mostrarModalNovoCliente.value = false
+    }
+
+    fun salvarNovoCliente(
+        nome: String,
+        telefone: String,
+        endereco: String?,
+        imagePath: String?
+    ) {
+        val novoCliente = Client(
+            id = java.util.UUID.randomUUID().toString(),
+            nome = nome,
+            telefone = telefone,
+            endereco = endereco,
+            imagePath = imagePath
+        )
+        val listaAtual = _clientes.value.toMutableList()
+        listaAtual.add(0, novoCliente)
+        _clientes.value = listaAtual
+        fecharModalNovoCliente()
     }
 
     fun getClientById(clientId: String): Client? {
