@@ -179,4 +179,37 @@ object MockDataSource {
             )
         )
     }
+
+    fun getMockClients(): List<com.anotasmart.model.entity.Client> {
+        return listOf(
+            com.anotasmart.model.entity.Client(
+                id = "1",
+                nome = "Wesley Oliveira",
+                telefone = "(11) 98765-4321",
+                endereco = "Rua das Flores, 123",
+                imagePath = null
+            ),
+            com.anotasmart.model.entity.Client(
+                id = "2",
+                nome = "Maria Silva",
+                telefone = "(11) 91234-5678",
+                endereco = "Av. Paulista, 1000",
+                imagePath = null
+            ),
+            com.anotasmart.model.entity.Client(
+                id = "3",
+                nome = "João Pereira",
+                telefone = "(11) 99887-7665",
+                endereco = "Rua Bahia, 45",
+                imagePath = null
+            ),
+            com.anotasmart.model.entity.Client(
+                id = "4",
+                nome = "Ana Costa",
+                telefone = "(11) 97766-5544",
+                endereco = null,
+                imagePath = null
+            )
+        )
+    }
 }

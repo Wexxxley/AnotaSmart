@@ -58,6 +58,7 @@ import com.anotasmart.ui.screens.vendas.VendaScreen
 import com.anotasmart.ui.screens.produtos.ProdutosScreen
 import com.anotasmart.ui.screens.pedidos.PedidosScreen
 import com.anotasmart.ui.screens.clientes.ClientesScreen
+import com.anotasmart.ui.screens.clientes.ClienteDetalhesScreen
 import com.anotasmart.ui.screens.despesas.DespesasScreen
 import com.anotasmart.ui.screens.categorias.CategoriasScreen
 import com.anotasmart.ui.screens.relatorios.RelatoriosScreen
@@ -67,6 +68,7 @@ import com.anotasmart.ui.screens.sobre.SobreScreen
 import com.anotasmart.ui.screens.carrinho.CarrinhoScreen
 import com.anotasmart.ui.theme.AppTheme
 import com.anotasmart.ui.viewModels.CartViewModel
+import com.anotasmart.ui.viewModels.ClientesViewModel
 import androidx.compose.material.icons.filled.Brightness4
 import androidx.compose.material.icons.filled.Brightness5
 import androidx.compose.material.icons.filled.Brightness7
@@ -122,6 +124,7 @@ fun ScreenStructure(
     selectedTheme: Int,
     onThemeChange: (Int) -> Unit
 ) {
+    val clientesViewModel: ClientesViewModel = viewModel()
     val items by cartViewModel.items.collectAsState()
     val totalValor by cartViewModel.totalValor.collectAsState()
     val quantidadeItens = items.sumOf { it.quantidade }.toInt()
@@ -175,7 +178,7 @@ fun ScreenStructure(
             },
             bottomBar = {
                 Column {
-                    if (quantidadeItens > 0 && currentRoute != Screen.Carrinho.route) {
+                    if (quantidadeItens > 0 && currentRoute != Screen.Carrinho.route && currentRoute != Screen.ClienteDetalhes.route) {
                         ResumoCarrinho(
                             quantidadeItens = quantidadeItens,
                             totalValor = totalValor,
@@ -189,7 +192,9 @@ fun ScreenStructure(
                             }
                         )
                     }
-                    BarraNavegacaoPrincipal(navController)
+                    if (currentRoute != Screen.Carrinho.route && currentRoute != Screen.ClienteDetalhes.route) {
+                        BarraNavegacaoPrincipal(navController)
+                    }
                 }
             }
         ) { innerPadding ->
@@ -206,7 +211,14 @@ fun ScreenStructure(
                     composable(Screen.Venda.route) { VendaScreen(cartViewModel = cartViewModel) }
                     composable(Screen.Produtos.route) { ProdutosScreen() }
                     composable(Screen.Pedidos.route) { PedidosScreen() }
-                    composable(Screen.Clientes.route) { ClientesScreen() }
+                    composable(Screen.Clientes.route) { 
+                        ClientesScreen(
+                            viewModel = clientesViewModel,
+                            onClientClick = { cliente ->
+                                navController.navigate(Screen.ClienteDetalhes.createRoute(cliente.id))
+                            }
+                        ) 
+                    }
                     composable(Screen.Despesas.route) { DespesasScreen() }
                     composable(Screen.Categorias.route) { CategoriasScreen() }
                     composable(Screen.Relatorios.route) { RelatoriosScreen() }
@@ -218,6 +230,14 @@ fun ScreenStructure(
                             viewModel = cartViewModel,
                             onBackClick = { navController.popBackStack() },
                             onFinalizarVenda = { /* Logica de finalizar */ }
+                        )
+                    }
+                    composable(Screen.ClienteDetalhes.route) { backStackEntry ->
+                        val clientId = backStackEntry.arguments?.getString("clientId")
+                        ClienteDetalhesScreen(
+                            clientId = clientId,
+                            viewModel = clientesViewModel,
+                            onBackClick = { navController.popBackStack() }
                         )
                     }
                 }
