@@ -69,6 +69,8 @@ import com.anotasmart.ui.screens.carrinho.CarrinhoScreen
 import com.anotasmart.ui.theme.AppTheme
 import com.anotasmart.ui.viewModels.CartViewModel
 import com.anotasmart.ui.viewModels.ClientesViewModel
+import com.anotasmart.ui.viewModels.UserViewModel
+import com.anotasmart.data.preferences.UserPreferencesRepository
 import androidx.compose.material.icons.filled.Brightness4
 import androidx.compose.material.icons.filled.Brightness5
 import androidx.compose.material.icons.filled.Brightness7
@@ -82,17 +84,33 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
+
+class UserViewModelFactory(private val repository: UserPreferencesRepository) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(UserViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return UserViewModel(repository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            var selectedTheme by remember { mutableIntStateOf(0) } // 0: Padrão, 1: Claro, 2: Escuro
+            val context = LocalContext.current
+            val userPrefsRepository = remember { UserPreferencesRepository(context) }
+            val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userPrefsRepository))
+            val userPrefs by userViewModel.userPreferences.collectAsState()
             
-            val isDarkTheme = when (selectedTheme) {
+            val isDarkTheme = when (userPrefs.selectedTheme) {
                 1 -> false
                 2 -> true
                 else -> isSystemInDarkTheme()
@@ -108,8 +126,7 @@ class MainActivity : ComponentActivity() {
                     ScreenStructure(
                         navController = navController,
                         cartViewModel = cartViewModel,
-                        selectedTheme = selectedTheme,
-                        onThemeChange = { selectedTheme = it }
+                        userViewModel = userViewModel
                     )
                 }
             }
@@ -121,9 +138,9 @@ class MainActivity : ComponentActivity() {
 fun ScreenStructure(
     navController: NavHostController,
     cartViewModel: CartViewModel,
-    selectedTheme: Int,
-    onThemeChange: (Int) -> Unit
+    userViewModel: UserViewModel
 ) {
+    val userPrefs by userViewModel.userPreferences.collectAsState()
     val clientesViewModel: ClientesViewModel = viewModel()
     val items by cartViewModel.items.collectAsState()
     val totalValor by cartViewModel.totalValor.collectAsState()
@@ -139,11 +156,11 @@ fun ScreenStructure(
         drawerContent = {
             ModalDrawerSheet (modifier = Modifier.width(300.dp)){
                 DrawerContent(
-                    userName = "Wesley",
-                    companyName = "AnotaSmart",
+                    userName = userPrefs.userName,
+                    companyName = userPrefs.companyName,
                     currentRoute = currentRoute,
-                    selectedTheme = selectedTheme,
-                    onThemeChange = onThemeChange,
+                    selectedTheme = userPrefs.selectedTheme,
+                    onThemeChange = { userViewModel.updateTheme(it) },
                     onItemClick = { screen ->
                         if (currentRoute != screen.route) {
                             navController.navigate(screen.route) {
