@@ -7,31 +7,25 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddAPhoto
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.anotasmart.model.ItemType
 import com.anotasmart.model.UnitType
 import com.anotasmart.model.entity.Category
 import com.anotasmart.model.entity.Product
+import com.anotasmart.ui.components.CampoMoeda
+import com.anotasmart.ui.components.FullScreenDialog
 import com.anotasmart.ui.components.GradeCategorias
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun DialogEditarItem(
     produto: Product,
@@ -63,180 +57,93 @@ fun DialogEditarItem(
 
     val isConfirmEnabled = nome.isNotBlank() && precoVendaText.isNotBlank()
 
-    Dialog(
+    FullScreenDialog(
+        title = if (produto.tipoItem == ItemType.PRODUTO) "Editar Produto" else "Editar Serviço",
         onDismissRequest = onDismissRequest,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        confirmButtonText = "Salvar Alterações",
+        isConfirmEnabled = isConfirmEnabled,
+        onConfirmClick = {
+            onConfirmar(
+                produto.id,
+                nome,
+                categoryId,
+                precoVendaText.toDoubleOrNull() ?: 0.0,
+                precoCustoText.toDoubleOrNull() ?: 0.0,
+                unidadeMedida,
+                selectedImageUri?.toString(),
+                produto.tipoItem,
+                produto.quantidadeEstoque
+            )
+        }
     ) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                CenterAlignedTopAppBar(
-                    title = {
-                        Text(
-                            text = if (produto.tipoItem == ItemType.PRODUTO) "Editar Produto" else "Editar Serviço",
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onDismissRequest) {
-                            Icon(Icons.Default.Close, contentDescription = "Fechar")
-                        }
-                    },
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    )
+        // Imagem
+        ImageSelector(
+            uri = selectedImageUri,
+            label = if (selectedImageUri != null) "Alterar Imagem" else "Adicionar Imagem",
+            onClick = {
+                imagePickerLauncher.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                 )
+            }
+        )
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .padding(16.dp)
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    // Imagem
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(180.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .clickable {
-                                imagePickerLauncher.launch(
-                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                )
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (selectedImageUri != null) {
-                            AsyncImage(
-                                model = selectedImageUri,
-                                contentDescription = "Imagem selecionada",
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
-                            )
-                        } else {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(
-                                    Icons.Default.AddAPhoto,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(48.dp),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Text(
-                                    "Alterar Imagem",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
+        // Nome
+        OutlinedTextField(
+            value = nome,
+            onValueChange = { nome = it },
+            label = { Text(if (produto.tipoItem == ItemType.PRODUTO) "Nome do Produto" else "Nome do Serviço") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
-                    // Nome
-                    OutlinedTextField(
-                        value = nome,
-                        onValueChange = { nome = it },
-                        label = { Text(if (produto.tipoItem == ItemType.PRODUTO) "Nome do Produto" else "Nome do Serviço") },
-                        modifier = Modifier.fillMaxWidth()
+        // Categorias
+        Text("Categoria", style = MaterialTheme.typography.labelLarge)
+        GradeCategorias(
+            categorias = categorias,
+            selectedCategoryId = categoryId,
+            onCategorySelected = { categoryId = it }
+        )
+
+        if (produto.tipoItem == ItemType.PRODUTO) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                CampoMoeda(
+                    value = precoVendaText,
+                    onValueChange = { precoVendaText = it },
+                    label = "Preço Venda",
+                    modifier = Modifier.weight(1f)
+                )
+                CampoMoeda(
+                    value = precoCustoText,
+                    onValueChange = { precoCustoText = it },
+                    label = "Preço Custo",
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Text("Unidade de Medida", style = MaterialTheme.typography.labelLarge)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                UnitType.values().forEach { unit ->
+                    val isSelected = unidadeMedida == unit
+                    FilterChip(
+                        selected = isSelected,
+                        onClick = { unidadeMedida = unit },
+                        label = { Text(unit.name) }
                     )
-
-                    // Categorias
-                    Text("Categoria", style = MaterialTheme.typography.labelLarge)
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        categorias.filter { it.id != "1" }.forEach { categoria ->
-                            val isSelected = categoryId == categoria.id
-                            FilterChip(
-                                selected = isSelected,
-                                onClick = { categoryId = if (isSelected) null else categoria.id },
-                                label = { Text(categoria.nome) }
-                            )
-                        }
-                    }
-
-                    if (produto.tipoItem == ItemType.PRODUTO) {
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            OutlinedTextField(
-                                value = precoVendaText,
-                                onValueChange = { if (it.all { c -> c.isDigit() || c == '.' }) precoVendaText = it },
-                                label = { Text("Preço Venda") },
-                                modifier = Modifier.weight(1f),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                                prefix = { Text("R$ ") }
-                            )
-                            OutlinedTextField(
-                                value = precoCustoText,
-                                onValueChange = { if (it.all { c -> c.isDigit() || c == '.' }) precoCustoText = it },
-                                label = { Text("Preço Custo") },
-                                modifier = Modifier.weight(1f),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                                prefix = { Text("R$ ") }
-                            )
-                        }
-
-                        Text("Unidade de Medida", style = MaterialTheme.typography.labelLarge)
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            UnitType.values().forEach { unit ->
-                                val isSelected = unidadeMedida == unit
-                                FilterChip(
-                                    selected = isSelected,
-                                    onClick = { unidadeMedida = unit },
-                                    label = { Text(unit.name) }
-                                )
-                            }
-                        }
-                    } else {
-                        OutlinedTextField(
-                            value = precoVendaText,
-                            onValueChange = { if (it.all { c -> c.isDigit() || c == '.' }) precoVendaText = it },
-                            label = { Text("Preço Venda") },
-                            modifier = Modifier.fillMaxWidth(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                            prefix = { Text("R$ ") }
-                        )
-                    }
-                }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Button(
-                        onClick = {
-                            onConfirmar(
-                                produto.id,
-                                nome,
-                                categoryId,
-                                precoVendaText.toDoubleOrNull() ?: 0.0,
-                                precoCustoText.toDoubleOrNull() ?: 0.0,
-                                unidadeMedida,
-                                selectedImageUri?.toString(),
-                                produto.tipoItem,
-                                produto.quantidadeEstoque
-                            )
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = isConfirmEnabled
-                    ) {
-                        Text("Salvar Alterações")
-                    }
                 }
             }
+        } else {
+            CampoMoeda(
+                value = precoVendaText,
+                onValueChange = { precoVendaText = it },
+                label = "Preço Venda",
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DialogNovoProduto(
     categorias: List<Category>,
@@ -264,166 +171,78 @@ fun DialogNovoProduto(
 
     val isConfirmEnabled = nome.isNotBlank() && precoVendaText.isNotBlank()
 
-    Dialog(
+    FullScreenDialog(
+        title = "Novo Produto",
         onDismissRequest = onDismissRequest,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        confirmButtonText = "Confirmar",
+        isConfirmEnabled = isConfirmEnabled,
+        onConfirmClick = {
+            onConfirmar(
+                nome,
+                categoryId,
+                precoVendaText.toDoubleOrNull() ?: 0.0,
+                precoCustoText.toDoubleOrNull() ?: 0.0,
+                unidadeMedida,
+                selectedImageUri?.toString()
+            )
+        }
     ) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                // Cabeçalho
-                CenterAlignedTopAppBar(
-                    title = { Text("Novo Produto", style = MaterialTheme.typography.titleLarge) },
-                    navigationIcon = {
-                        IconButton(onClick = onDismissRequest) {
-                            Icon(Icons.Default.Close, contentDescription = "Fechar")
-                        }
-                    },
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    )
+        ImageSelector(
+            uri = selectedImageUri,
+            label = "Adicionar Imagem",
+            onClick = {
+                imagePickerLauncher.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                 )
+            }
+        )
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .padding(16.dp)
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    // Imagem
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(180.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .clickable {
-                                imagePickerLauncher.launch(
-                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                )
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (selectedImageUri != null) {
-                            AsyncImage(
-                                model = selectedImageUri,
-                                contentDescription = "Imagem selecionada",
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
-                            )
-                        } else {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(
-                                    Icons.Default.AddAPhoto,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(48.dp),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Text(
-                                    "Adicionar Imagem",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
+        OutlinedTextField(
+            value = nome,
+            onValueChange = { nome = it },
+            label = { Text("Nome do Produto") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
-                    // Nome
-                    OutlinedTextField(
-                        value = nome,
-                        onValueChange = { nome = it },
-                        label = { Text("Nome do Produto") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
+        Text("Categoria", style = MaterialTheme.typography.labelLarge)
+        GradeCategorias(
+            categorias = categorias,
+            selectedCategoryId = categoryId,
+            onCategorySelected = { categoryId = it }
+        )
 
-                    // Categorias (Tags)
-                    Text("Categoria", style = MaterialTheme.typography.labelLarge)
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        categorias.filter { it.id != "1" }.forEach { categoria ->
-                            val isSelected = categoryId == categoria.id
-                            FilterChip(
-                                selected = isSelected,
-                                onClick = { categoryId = if (isSelected) null else categoria.id },
-                                label = { Text(categoria.nome) }
-                            )
-                        }
-                    }
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            CampoMoeda(
+                value = precoVendaText,
+                onValueChange = { precoVendaText = it },
+                label = "Preço Venda",
+                modifier = Modifier.weight(1f)
+            )
+            CampoMoeda(
+                value = precoCustoText,
+                onValueChange = { precoCustoText = it },
+                label = "Preço Custo",
+                modifier = Modifier.weight(1f)
+            )
+        }
 
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        // Preço de Venda
-                        OutlinedTextField(
-                            value = precoVendaText,
-                            onValueChange = { if (it.all { c -> c.isDigit() || c == '.' }) precoVendaText = it },
-                            label = { Text("Preço Venda") },
-                            modifier = Modifier.weight(1f),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                            prefix = { Text("R$ ") }
-                        )
-                        // Preço de Custo
-                        OutlinedTextField(
-                            value = precoCustoText,
-                            onValueChange = { if (it.all { c -> c.isDigit() || c == '.' }) precoCustoText = it },
-                            label = { Text("Preço Custo") },
-                            modifier = Modifier.weight(1f),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                            prefix = { Text("R$ ") }
-                        )
-                    }
-
-                    // Unidade de Medida
-                    Text("Unidade de Medida", style = MaterialTheme.typography.labelLarge)
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        UnitType.values().forEach { unit ->
-                            val isSelected = unidadeMedida == unit
-                            FilterChip(
-                                selected = isSelected,
-                                onClick = { unidadeMedida = unit },
-                                label = { Text(unit.name) }
-                            )
-                        }
-                    }
-                }
-
-                // Ação
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Button(
-                        onClick = {
-                            onConfirmar(
-                                nome,
-                                categoryId,
-                                precoVendaText.toDoubleOrNull() ?: 0.0,
-                                precoCustoText.toDoubleOrNull() ?: 0.0,
-                                unidadeMedida,
-                                selectedImageUri?.toString()
-                            )
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = isConfirmEnabled
-                    ) {
-                        Text("Confirmar")
-                    }
-                }
+        Text("Unidade de Medida", style = MaterialTheme.typography.labelLarge)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            UnitType.values().forEach { unit ->
+                val isSelected = unidadeMedida == unit
+                FilterChip(
+                    selected = isSelected,
+                    onClick = { unidadeMedida = unit },
+                    label = { Text(unit.name) }
+                )
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun DialogNovoServico(
     categorias: List<Category>,
@@ -447,131 +266,88 @@ fun DialogNovoServico(
 
     val isConfirmEnabled = nome.isNotBlank() && precoVendaText.isNotBlank()
 
-    Dialog(
+    FullScreenDialog(
+        title = "Novo Serviço",
         onDismissRequest = onDismissRequest,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        confirmButtonText = "Confirmar",
+        isConfirmEnabled = isConfirmEnabled,
+        onConfirmClick = {
+            onConfirmar(
+                nome,
+                categoryId,
+                precoVendaText.toDoubleOrNull() ?: 0.0,
+                selectedImageUri?.toString()
+            )
+        }
     ) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                // Cabeçalho
-                CenterAlignedTopAppBar(
-                    title = { Text("Novo Serviço", style = MaterialTheme.typography.titleLarge) },
-                    navigationIcon = {
-                        IconButton(onClick = onDismissRequest) {
-                            Icon(Icons.Default.Close, contentDescription = "Fechar")
-                        }
-                    },
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    )
+        ImageSelector(
+            uri = selectedImageUri,
+            label = "Adicionar Imagem",
+            onClick = {
+                imagePickerLauncher.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                 )
+            }
+        )
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .padding(16.dp)
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    // Imagem
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(180.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .clickable {
-                                imagePickerLauncher.launch(
-                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                )
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (selectedImageUri != null) {
-                            AsyncImage(
-                                model = selectedImageUri,
-                                contentDescription = "Imagem selecionada",
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
-                            )
-                        } else {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(
-                                    Icons.Default.AddAPhoto,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(48.dp),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Text(
-                                    "Adicionar Imagem",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
+        OutlinedTextField(
+            value = nome,
+            onValueChange = { nome = it },
+            label = { Text("Nome do Serviço") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
-                    // Nome
-                    OutlinedTextField(
-                        value = nome,
-                        onValueChange = { nome = it },
-                        label = { Text("Nome do Serviço") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
+        Text("Categoria", style = MaterialTheme.typography.labelLarge)
+        GradeCategorias(
+            categorias = categorias,
+            selectedCategoryId = categoryId,
+            onCategorySelected = { categoryId = it }
+        )
 
-                    // Categorias (Tags)
-                    Text("Categoria", style = MaterialTheme.typography.labelLarge)
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        categorias.filter { it.id != "1" }.forEach { categoria ->
-                            val isSelected = categoryId == categoria.id
-                            FilterChip(
-                                selected = isSelected,
-                                onClick = { categoryId = if (isSelected) null else categoria.id },
-                                label = { Text(categoria.nome) }
-                            )
-                        }
-                    }
+        CampoMoeda(
+            value = precoVendaText,
+            onValueChange = { precoVendaText = it },
+            label = "Preço Venda",
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
 
-                    // Preço de Venda
-                    OutlinedTextField(
-                        value = precoVendaText,
-                        onValueChange = { if (it.all { c -> c.isDigit() || c == '.' }) precoVendaText = it },
-                        label = { Text("Preço Venda") },
-                        modifier = Modifier.fillMaxWidth(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        prefix = { Text("R$ ") }
-                    )
-                }
-
-                // Ação
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Button(
-                        onClick = {
-                            onConfirmar(
-                                nome,
-                                categoryId,
-                                precoVendaText.toDoubleOrNull() ?: 0.0,
-                                selectedImageUri?.toString()
-                            )
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = isConfirmEnabled
-                    ) {
-                        Text("Confirmar")
-                    }
-                }
+@Composable
+private fun ImageSelector(
+    uri: Uri?,
+    label: String,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(180.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        if (uri != null) {
+            AsyncImage(
+                model = uri,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(
+                    Icons.Default.AddAPhoto,
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    label,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }

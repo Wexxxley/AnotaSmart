@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.anotasmart.model.entity.Product
+import com.anotasmart.ui.components.ItemCard
 
 @Composable
 fun GradeItems(
@@ -24,7 +25,7 @@ fun GradeItems(
         modifier = Modifier.fillMaxSize()
     ) {
         items(produtos) { produto ->
-            ItemProduto(
+            ItemCard(
                 produto = produto,
                 onClick = { onProdutoClick(produto) }
             )

@@ -1,4 +1,4 @@
-package com.anotasmart.ui.screens.produtos.components
+package com.anotasmart.ui.components
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
@@ -26,10 +26,10 @@ import com.anotasmart.model.entity.Product
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun ItemProdutoProdutos(
+fun ItemCard(
     produto: Product,
     onClick: () -> Unit,
-    onAddEstoqueClick: () -> Unit
+    onAddEstoqueClick: (() -> Unit)? = null
 ) {
     Box {
         Card(
@@ -52,7 +52,6 @@ fun ItemProdutoProdutos(
                     contentAlignment = Alignment.Center
                 ) {
                     if (!produto.imagePath.isNullOrEmpty()) {
-                        // Verifica se é um resource ID (inteiro) ou um caminho/URI
                         val imageModel: Any = produto.imagePath.toIntOrNull() ?: produto.imagePath
                         AsyncImage(
                             model = imageModel,
@@ -64,20 +63,12 @@ fun ItemProdutoProdutos(
                             contentScale = ContentScale.Crop
                         )
                     } else {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(100.dp)
-                                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Inventory2,
-                                contentDescription = "Ícone de produto sem imagem",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(32.dp)
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.Inventory2,
+                            contentDescription = "Sem imagem",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(32.dp)
+                        )
                     }
                 }
 
@@ -111,8 +102,7 @@ fun ItemProdutoProdutos(
             }
         }
 
-        // Botão flutuante no card para estoque (apenas se for PRODUTO)
-        if (produto.tipoItem == ItemType.PRODUTO) {
+        if (produto.tipoItem == ItemType.PRODUTO && onAddEstoqueClick != null) {
             SmallFloatingActionButton(
                 onClick = onAddEstoqueClick,
                 modifier = Modifier
