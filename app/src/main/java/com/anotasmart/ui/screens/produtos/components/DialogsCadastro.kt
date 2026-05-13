@@ -146,11 +146,12 @@ fun DialogEditarItem(
 
                     // Categorias
                     Text("Categoria", style = MaterialTheme.typography.labelLarge)
-                    LazyRow(
+                    FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        items(categorias.filter { it.id != "1" }) { categoria ->
+                        categorias.filter { it.id != "1" }.forEach { categoria ->
                             val isSelected = categoryId == categoria.id
                             FilterChip(
                                 selected = isSelected,
@@ -342,11 +343,12 @@ fun DialogNovoProduto(
 
                     // Categorias (Tags)
                     Text("Categoria", style = MaterialTheme.typography.labelLarge)
-                    LazyRow(
+                    FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        items(categorias.filter { it.id != "1" }) { categoria ->
+                        categorias.filter { it.id != "1" }.forEach { categoria ->
                             val isSelected = categoryId == categoria.id
                             FilterChip(
                                 selected = isSelected,
@@ -524,11 +526,12 @@ fun DialogNovoServico(
 
                     // Categorias (Tags)
                     Text("Categoria", style = MaterialTheme.typography.labelLarge)
-                    LazyRow(
+                    FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        items(categorias.filter { it.id != "1" }) { categoria ->
+                        categorias.filter { it.id != "1" }.forEach { categoria ->
                             val isSelected = categoryId == categoria.id
                             FilterChip(
                                 selected = isSelected,

@@ -98,11 +98,12 @@ fun DialogNovaDespesa(
                     )
 
                     Text("Categoria", style = MaterialTheme.typography.labelLarge)
-                    LazyRow(
+                    FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        items(categorias) { categoria ->
+                        categorias.forEach { categoria ->
                             val isSelected = categoryId == categoria.id
                             FilterChip(
                                 selected = isSelected,

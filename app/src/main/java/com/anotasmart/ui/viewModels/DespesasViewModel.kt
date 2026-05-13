@@ -54,13 +54,15 @@ class DespesasViewModel : ViewModel() {
     fun getGroupedExpenses(): Map<String, List<Expense>> {
         val calendar = Calendar.getInstance()
         val locale = Locale.forLanguageTag("pt-BR")
-        return _expenses.value.groupBy { expense ->
-            calendar.timeInMillis = expense.date
-            val month = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, locale)
-            val year = calendar.get(Calendar.YEAR)
-            val monthName = month?.replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() } ?: "Desconhecido"
-            "$monthName $year"
-        }
+        return _expenses.value
+            .sortedByDescending { it.date }
+            .groupBy { expense ->
+                calendar.timeInMillis = expense.date
+                val month = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, locale)
+                val year = calendar.get(Calendar.YEAR)
+                val monthName = month?.replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() } ?: "Desconhecido"
+                "$monthName $year"
+            }
     }
 
     fun getMonthSubtotal(monthYear: String): Double {
