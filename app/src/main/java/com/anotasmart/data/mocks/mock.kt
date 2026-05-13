@@ -17,7 +17,12 @@ object MockDataSource {
             Category(id = "3", nome = "ALIMENTOS", tipo = CategoryType.ITENS),
             Category(id = "4", nome = "LIMPEZA", tipo = CategoryType.ITENS),
             Category(id = "5", nome = "HIGIENE", tipo = CategoryType.ITENS),
-            Category(id = "6", nome = "ROUPAS", tipo = CategoryType.ITENS)
+            Category(id = "6", nome = "ROUPAS", tipo = CategoryType.ITENS),
+            Category(id = "100", nome = "ALUGUEL", tipo = CategoryType.DESPESAS),
+            Category(id = "101", nome = "ENERGIA", tipo = CategoryType.DESPESAS),
+            Category(id = "102", nome = "MERCADORIA", tipo = CategoryType.DESPESAS),
+            Category(id = "103", nome = "SALÁRIOS", tipo = CategoryType.DESPESAS),
+            Category(id = "104", nome = "OUTROS", tipo = CategoryType.DESPESAS)
         )
     }
 
@@ -209,6 +214,25 @@ object MockDataSource {
                 telefone = "(11) 97766-5544",
                 endereco = null,
                 imagePath = null
+            )
+        )
+    }
+
+    fun getMockExpenses(): List<com.anotasmart.model.entity.Expense> {
+        return listOf(
+            com.anotasmart.model.entity.Expense(
+                id = UUID.randomUUID().toString(),
+                categoryId = "100", // Aluguel
+                description = "Aluguel Maio",
+                amount = 1200.0,
+                date = System.currentTimeMillis()
+            ),
+            com.anotasmart.model.entity.Expense(
+                id = UUID.randomUUID().toString(),
+                categoryId = "101", // Energia
+                description = "Conta de Luz",
+                amount = 250.0,
+                date = System.currentTimeMillis()
             )
         )
     }

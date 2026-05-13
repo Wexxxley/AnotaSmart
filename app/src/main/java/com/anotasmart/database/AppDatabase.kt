@@ -6,6 +6,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
 import android.content.Context
+import com.anotasmart.database.dao.ExpenseDao
 import com.anotasmart.model.*
 import com.anotasmart.model.entity.*
 
@@ -48,13 +49,16 @@ class EnumsConverters {
         Client::class,
         Sale::class,
         SaleItem::class,
-        Installment::class
+        Installment::class,
+        Expense::class
     ],
     version = 1,
     exportSchema = false
 )
 @TypeConverters(EnumsConverters::class)
 abstract class AppDatabase : RoomDatabase() {
+    abstract fun expenseDao(): ExpenseDao
+
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
