@@ -1,5 +1,6 @@
 package com.anotasmart.utils
 
+import android.net.Uri
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
@@ -65,5 +66,22 @@ object PhoneUtils {
             10 -> "(${clean.substring(0, 2)}) ${clean.substring(2, 6)}-${clean.substring(6)}"
             else -> phone
         }
+    }
+
+    /**
+     * Remove todos os caracteres não numéricos.
+     */
+    fun cleanPhoneNumber(phone: String): String {
+        return phone.filter { it.isDigit() }
+    }
+
+    /**
+     * Gera o link do WhatsApp para o número fornecido.
+     * Adiciona o DDI +55 (Brasil) caso não exista.
+     */
+    fun getWhatsAppLink(phone: String, message: String = ""): String {
+        val cleanPhone = cleanPhoneNumber(phone)
+        val phoneWithDDI = if (cleanPhone.length <= 11) "55$cleanPhone" else cleanPhone
+        return "https://api.whatsapp.com/send?phone=$phoneWithDDI&text=${Uri.encode(message)}"
     }
 }

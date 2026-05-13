@@ -3,9 +3,6 @@ package com.anotasmart.ui.components
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 
-/**
- * Um diálogo de confirmação em duas etapas para ações destrutivas (como exclusão).
- */
 @Composable
 fun DoubleDeleteConfirmationDialog(
     showDialog: Boolean,
@@ -47,7 +44,7 @@ fun DoubleDeleteConfirmationDialog(
                 Button(
                     onClick = {
                         onConfirm()
-                        onDismissRequest() // Fecha após confirmar
+                        onDismissRequest()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
