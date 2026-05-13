@@ -18,11 +18,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.anotasmart.model.CategoryType
 import com.anotasmart.model.ItemType
 import com.anotasmart.model.UnitType
 import com.anotasmart.model.entity.Category
 import com.anotasmart.model.entity.Product
 import com.anotasmart.ui.components.CampoMoeda
+import com.anotasmart.ui.components.DialogNovaCategoria
 import com.anotasmart.ui.components.FullScreenDialog
 import com.anotasmart.ui.components.GradeCategorias
 
@@ -41,7 +43,8 @@ fun DialogEditarItem(
         imagePath: String?,
         tipoItem: ItemType,
         quantidadeEstoque: Double
-    ) -> Unit
+    ) -> Unit,
+    onNovaCategoria: (String, CategoryType) -> Unit
 ) {
     var nome by remember { mutableStateOf(produto.nome) }
     var categoryId by remember { mutableStateOf<String?>(produto.categoryId) }
@@ -49,6 +52,7 @@ fun DialogEditarItem(
     var precoCustoText by remember { mutableStateOf(produto.precoCusto.toString()) }
     var unidadeMedida by remember { mutableStateOf(produto.unidadeMedida) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(produto.imagePath?.let { Uri.parse(it) }) }
+    var showNovaCategoriaDialog by remember { mutableStateOf(false) }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -56,6 +60,17 @@ fun DialogEditarItem(
     )
 
     val isConfirmEnabled = nome.isNotBlank() && precoVendaText.isNotBlank()
+
+    if (showNovaCategoriaDialog) {
+        DialogNovaCategoria(
+            tipoInicial = CategoryType.ITENS,
+            onDismissRequest = { showNovaCategoriaDialog = false },
+            onConfirmar = { nomeCat, tipo ->
+                onNovaCategoria(nomeCat, tipo)
+                showNovaCategoriaDialog = false
+            }
+        )
+    }
 
     FullScreenDialog(
         title = if (produto.tipoItem == ItemType.PRODUTO) "Editar Produto" else "Editar Serviço",
@@ -100,7 +115,8 @@ fun DialogEditarItem(
         GradeCategorias(
             categorias = categorias,
             selectedCategoryId = categoryId,
-            onCategorySelected = { categoryId = it }
+            onCategorySelected = { categoryId = it },
+            onAddCategoryClick = { showNovaCategoriaDialog = true }
         )
 
         if (produto.tipoItem == ItemType.PRODUTO) {
@@ -155,7 +171,8 @@ fun DialogNovoProduto(
         precoCusto: Double,
         unidadeMedida: UnitType,
         imagePath: String?
-    ) -> Unit
+    ) -> Unit,
+    onNovaCategoria: (String, CategoryType) -> Unit
 ) {
     var nome by remember { mutableStateOf("") }
     var categoryId by remember { mutableStateOf<String?>(null) }
@@ -163,6 +180,7 @@ fun DialogNovoProduto(
     var precoCustoText by remember { mutableStateOf("") }
     var unidadeMedida by remember { mutableStateOf(UnitType.UN) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var showNovaCategoriaDialog by remember { mutableStateOf(false) }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -170,6 +188,17 @@ fun DialogNovoProduto(
     )
 
     val isConfirmEnabled = nome.isNotBlank() && precoVendaText.isNotBlank()
+
+    if (showNovaCategoriaDialog) {
+        DialogNovaCategoria(
+            tipoInicial = CategoryType.ITENS,
+            onDismissRequest = { showNovaCategoriaDialog = false },
+            onConfirmar = { nomeCat, tipo ->
+                onNovaCategoria(nomeCat, tipo)
+                showNovaCategoriaDialog = false
+            }
+        )
+    }
 
     FullScreenDialog(
         title = "Novo Produto",
@@ -208,7 +237,8 @@ fun DialogNovoProduto(
         GradeCategorias(
             categorias = categorias,
             selectedCategoryId = categoryId,
-            onCategorySelected = { categoryId = it }
+            onCategorySelected = { categoryId = it },
+            onAddCategoryClick = { showNovaCategoriaDialog = true }
         )
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -252,12 +282,14 @@ fun DialogNovoServico(
         categoryId: String?,
         precoVenda: Double,
         imagePath: String?
-    ) -> Unit
+    ) -> Unit,
+    onNovaCategoria: (String, CategoryType) -> Unit
 ) {
     var nome by remember { mutableStateOf("") }
     var categoryId by remember { mutableStateOf<String?>(null) }
     var precoVendaText by remember { mutableStateOf("") }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var showNovaCategoriaDialog by remember { mutableStateOf(false) }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -265,6 +297,17 @@ fun DialogNovoServico(
     )
 
     val isConfirmEnabled = nome.isNotBlank() && precoVendaText.isNotBlank()
+
+    if (showNovaCategoriaDialog) {
+        DialogNovaCategoria(
+            tipoInicial = CategoryType.ITENS,
+            onDismissRequest = { showNovaCategoriaDialog = false },
+            onConfirmar = { nomeCat, tipo ->
+                onNovaCategoria(nomeCat, tipo)
+                showNovaCategoriaDialog = false
+            }
+        )
+    }
 
     FullScreenDialog(
         title = "Novo Serviço",
@@ -301,7 +344,8 @@ fun DialogNovoServico(
         GradeCategorias(
             categorias = categorias,
             selectedCategoryId = categoryId,
-            onCategorySelected = { categoryId = it }
+            onCategorySelected = { categoryId = it },
+            onAddCategoryClick = { showNovaCategoriaDialog = true }
         )
 
         CampoMoeda(

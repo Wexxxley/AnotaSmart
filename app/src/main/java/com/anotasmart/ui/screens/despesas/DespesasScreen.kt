@@ -63,7 +63,7 @@ fun DespesasScreen(
                     items(monthExpenses) { expense ->
                         ExpenseCard(
                             expense = expense,
-                            categoryName = categories.find { it.id == expense.categoryId }?.nome ?: "S/ Cat"
+                            categoryName = categories.find { it.id == expense.categoryId }?.nome ?: "Sem categoria"
                         )
                     }
                 }
@@ -88,6 +88,9 @@ fun DespesasScreen(
                 onDismissRequest = { viewModel.closeAddModal() },
                 onConfirmar = { desc, valor, catId, data ->
                     viewModel.saveExpense(desc, valor, catId, data)
+                },
+                onNovaCategoria = { nome, tipo ->
+                    categoriasViewModel.salvarNovaCategoria(nome, tipo)
                 }
             )
         }
@@ -169,7 +172,11 @@ fun ExpenseCard(expense: Expense, categoryName: String) {
                 ) {
                     SuggestionChip(
                         onClick = { },
-                        label = { Text(categoryName, style = MaterialTheme.typography.labelSmall) },
+                        label = { Text(
+                            categoryName,
+                            style = MaterialTheme.typography.labelSmall
+                            ,
+                        ) },
                         modifier = Modifier.height(20.dp)
                     )
                     Text(

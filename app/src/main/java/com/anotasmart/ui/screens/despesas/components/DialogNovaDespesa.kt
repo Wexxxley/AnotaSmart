@@ -7,8 +7,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.anotasmart.model.CategoryType
 import com.anotasmart.model.entity.Category
 import com.anotasmart.ui.components.CampoMoeda
+import com.anotasmart.ui.components.DialogNovaCategoria
 import com.anotasmart.ui.components.FullScreenDialog
 import com.anotasmart.ui.components.GradeCategorias
 import java.text.SimpleDateFormat
@@ -19,13 +21,15 @@ import java.util.*
 fun DialogNovaDespesa(
     categorias: List<Category>,
     onDismissRequest: () -> Unit,
-    onConfirmar: (descricao: String, valor: Double, categoryId: String, data: Long) -> Unit
+    onConfirmar: (descricao: String, valor: Double, categoryId: String, data: Long) -> Unit,
+    onNovaCategoria: (String, CategoryType) -> Unit
 ) {
     var descricao by remember { mutableStateOf("") }
     var valorText by remember { mutableStateOf("") }
     var categoryId by remember { mutableStateOf<String?>(null) }
     var dataSelecionada by remember { mutableStateOf(System.currentTimeMillis()) }
     var showDatePicker by remember { mutableStateOf(false) }
+    var showNovaCategoriaDialog by remember { mutableStateOf(false) }
 
     val datePickerState = rememberDatePickerState(initialSelectedDateMillis = dataSelecionada)
     val dateFormatter = remember { SimpleDateFormat("dd/MM/yyyy", Locale.forLanguageTag("pt-BR")) }
@@ -47,6 +51,17 @@ fun DialogNovaDespesa(
         ) {
             DatePicker(state = datePickerState)
         }
+    }
+
+    if (showNovaCategoriaDialog) {
+        DialogNovaCategoria(
+            tipoInicial = CategoryType.DESPESAS,
+            onDismissRequest = { showNovaCategoriaDialog = false },
+            onConfirmar = { nomeCat, tipo ->
+                onNovaCategoria(nomeCat, tipo)
+                showNovaCategoriaDialog = false
+            }
+        )
     }
 
     FullScreenDialog(
@@ -81,7 +96,8 @@ fun DialogNovaDespesa(
         GradeCategorias(
             categorias = categorias,
             selectedCategoryId = categoryId,
-            onCategorySelected = { categoryId = it }
+            onCategorySelected = { categoryId = it },
+            onAddCategoryClick = { showNovaCategoriaDialog = true }
         )
 
         OutlinedTextField(

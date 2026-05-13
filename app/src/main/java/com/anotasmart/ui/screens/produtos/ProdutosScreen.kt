@@ -125,6 +125,9 @@ fun ProdutosScreen(
                 onDismissRequest = { viewModel.fecharModalNovoProduto() },
                 onConfirmar = { nome, categoryId, precoVenda, precoCusto, unidade, imagePath ->
                     viewModel.salvarNovoProduto(nome, categoryId, precoVenda, precoCusto, unidade, imagePath)
+                },
+                onNovaCategoria = { nome, tipo ->
+                    categoriasViewModel.salvarNovaCategoria(nome, tipo)
                 }
             )
         }
@@ -135,6 +138,9 @@ fun ProdutosScreen(
                 onDismissRequest = { viewModel.fecharModalNovoServico() },
                 onConfirmar = { nome, categoryId, precoVenda, imagePath ->
                     viewModel.salvarNovoServico(nome, categoryId, precoVenda, imagePath)
+                },
+                onNovaCategoria = { nome, tipo ->
+                    categoriasViewModel.salvarNovaCategoria(nome, tipo)
                 }
             )
         }
@@ -146,6 +152,9 @@ fun ProdutosScreen(
                 onDismissRequest = { viewModel.fecharModalEdicao() },
                 onConfirmar = { id, nome, categoryId, precoVenda, precoCusto, unidade, imagePath, tipoItem, estoque ->
                     viewModel.salvarEdicao(id, nome, categoryId, precoVenda, precoCusto, unidade, imagePath, tipoItem, estoque)
+                },
+                onNovaCategoria = { nome, tipo ->
+                    categoriasViewModel.salvarNovaCategoria(nome, tipo)
                 }
             )
         }

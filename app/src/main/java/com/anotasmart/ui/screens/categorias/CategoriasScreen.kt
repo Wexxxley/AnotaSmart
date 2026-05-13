@@ -19,13 +19,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.anotasmart.AnotaSmartApplication
 import com.anotasmart.model.CategoryType
-import com.anotasmart.ui.components.GradeCategorias
+import com.anotasmart.ui.components.DialogNovaCategoria
 import com.anotasmart.ui.viewModels.CategoriasViewModel
 import com.anotasmart.ui.viewModels.CategoriasViewModelFactory
 
@@ -93,7 +93,13 @@ fun CategoriasScreen() {
                 categoriasFiltradas.forEach { categoria ->
                     SuggestionChip(
                         onClick = { },
-                        label = { Text(categoria.nome) },
+                        label = { 
+                            Text(
+                                text = categoria.nome,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            ) 
+                        },
                         shape = RoundedCornerShape(8.dp)
                     )
                 }
@@ -149,58 +155,4 @@ fun TipoItemSelector(
             Text(text = title, color = contentColor, fontWeight = FontWeight.Bold, fontSize = 14.sp)
         }
     }
-}
-
-@Composable
-fun DialogNovaCategoria(
-    tipoInicial: CategoryType,
-    onDismissRequest: () -> Unit,
-    onConfirmar: (nome: String, tipo: CategoryType) -> Unit
-) {
-    var nome by remember { mutableStateOf("") }
-    var tipo by remember { mutableStateOf(tipoInicial) }
-
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        title = { Text("Nova Categoria") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                OutlinedTextField(
-                    value = nome,
-                    onValueChange = { nome = it },
-                    label = { Text("Nome da Categoria") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                
-                Column {
-                    Text("Tipo", style = MaterialTheme.typography.labelLarge)
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        FilterChip(
-                            selected = tipo == CategoryType.ITENS,
-                            onClick = { tipo = CategoryType.ITENS },
-                            label = { Text("Produtos") }
-                        )
-                        FilterChip(
-                            selected = tipo == CategoryType.DESPESAS,
-                            onClick = { tipo = CategoryType.DESPESAS },
-                            label = { Text("Despesas") }
-                        )
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = { onConfirmar(nome, tipo) },
-                enabled = nome.isNotBlank()
-            ) {
-                Text("Salvar")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text("Cancelar")
-            }
-        }
-    )
 }
