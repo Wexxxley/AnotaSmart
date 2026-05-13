@@ -20,11 +20,19 @@ import com.anotasmart.ui.screens.produtos.components.GradeItemsProduto
 import com.anotasmart.ui.viewModels.CategoriasViewModel
 import com.anotasmart.ui.viewModels.ProdutosViewModel
 
+import androidx.compose.ui.platform.LocalContext
+import com.anotasmart.AnotaSmartApplication
+import com.anotasmart.ui.viewModels.CategoriasViewModelFactory
+
 @Composable
 fun ProdutosScreen(
-    viewModel: ProdutosViewModel = viewModel(),
-    categoriasViewModel: CategoriasViewModel = viewModel()
+    viewModel: ProdutosViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+    val database = (context.applicationContext as AnotaSmartApplication).database
+    val categoriasViewModel: CategoriasViewModel = viewModel(
+        factory = CategoriasViewModelFactory(database.categoryDao())
+    )
     val produtos by viewModel.produtosFiltrados.collectAsState(initial = emptyList())
     val categorias by categoriasViewModel.categoriasItens.collectAsState(initial = emptyList())
     val categoriaSelecionada by viewModel.categoriaSelecionada.collectAsState()

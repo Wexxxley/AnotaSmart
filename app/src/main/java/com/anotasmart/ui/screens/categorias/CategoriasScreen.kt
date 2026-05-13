@@ -17,20 +17,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.anotasmart.AnotaSmartApplication
 import com.anotasmart.model.CategoryType
 import com.anotasmart.ui.components.GradeCategorias
 import com.anotasmart.ui.viewModels.CategoriasViewModel
+import com.anotasmart.ui.viewModels.CategoriasViewModelFactory
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun CategoriasScreen(viewModel: CategoriasViewModel = viewModel()) {
+fun CategoriasScreen() {
+    val context = LocalContext.current
+    val database = (context.applicationContext as AnotaSmartApplication).database
+    val viewModel: CategoriasViewModel = viewModel(
+        factory = CategoriasViewModelFactory(database.categoryDao())
+    )
+
     val selectedType by viewModel.selectedType.collectAsState()
-    val categoriasFiltradas = viewModel.getCategoriasFiltradas()
+    val categorias by viewModel.categorias.collectAsState()
+    val categoriasFiltradas = categorias.filter { it.tipo == selectedType && it.id != "1" }
     val mostrarModalNovaCategoria by viewModel.mostrarModalNovaCategoria.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {

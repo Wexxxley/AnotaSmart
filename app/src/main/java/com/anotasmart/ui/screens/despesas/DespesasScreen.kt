@@ -22,11 +22,19 @@ import com.anotasmart.ui.viewModels.DespesasViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
+import androidx.compose.ui.platform.LocalContext
+import com.anotasmart.AnotaSmartApplication
+import com.anotasmart.ui.viewModels.CategoriasViewModelFactory
+
 @Composable
 fun DespesasScreen(
-    viewModel: DespesasViewModel = viewModel(),
-    categoriasViewModel: CategoriasViewModel = viewModel()
+    viewModel: DespesasViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+    val database = (context.applicationContext as AnotaSmartApplication).database
+    val categoriasViewModel: CategoriasViewModel = viewModel(
+        factory = CategoriasViewModelFactory(database.categoryDao())
+    )
     val expenses by viewModel.expenses.collectAsState()
     val categories by categoriasViewModel.categoriasDespesas.collectAsState(initial = emptyList())
     val showAddModal by viewModel.showAddModal.collectAsState()
