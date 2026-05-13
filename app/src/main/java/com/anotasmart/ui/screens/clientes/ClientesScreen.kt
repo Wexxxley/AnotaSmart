@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.anotasmart.AnotaSmartApplication
+import com.anotasmart.model.ImageDirectory
 import com.anotasmart.model.entity.Client
 import com.anotasmart.ui.components.BarraBusca
 import com.anotasmart.ui.screens.clientes.components.DialogNovoCliente
@@ -86,7 +87,7 @@ fun ClientesScreen(
                 onDismissRequest = { viewModel.fecharModalNovoCliente() },
                 onConfirmar = { nome, telefone, endereco, imageUriString ->
                     val internalImagePath = imageUriString?.let {
-                        ImageUtils.saveImageToInternalStorage(context, Uri.parse(it), "clients", "client")
+                        ImageUtils.saveImageToInternalStorage(context, Uri.parse(it), ImageDirectory.CLIENTS)
                     }
                     viewModel.salvarNovoCliente(nome, telefone, endereco, internalImagePath)
                 }

@@ -23,3 +23,10 @@ enum class InstallmentStatus {
 enum class PaymentMethod {
     DINHEIRO, PIX, DEBITO, CREDITO
 }
+
+enum class ImageDirectory(val folderName: String, val prefix: String) {
+    CLIENTS("clients", "client"),
+    PRODUCTS("products", "prod"),
+    SERVICES("services", "serv"),
+    PROFILE("profile", "user")
+}

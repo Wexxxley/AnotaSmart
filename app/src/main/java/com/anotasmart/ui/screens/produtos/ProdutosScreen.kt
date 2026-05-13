@@ -23,6 +23,7 @@ import com.anotasmart.ui.viewModels.ProdutosViewModel
 
 import androidx.compose.ui.platform.LocalContext
 import com.anotasmart.AnotaSmartApplication
+import com.anotasmart.model.ImageDirectory
 import com.anotasmart.ui.viewModels.CategoriasViewModelFactory
 import com.anotasmart.utils.ImageUtils
 
@@ -128,7 +129,7 @@ fun ProdutosScreen(
                 onConfirmar = { nome, categoryId, precoVenda, precoCusto, unidade, imageUriString ->
                     val internalPath = imageUriString?.let {
                         if (it.startsWith("content://")) {
-                            ImageUtils.saveImageToInternalStorage(context, Uri.parse(it), "products", "prod")
+                            ImageUtils.saveImageToInternalStorage(context, Uri.parse(it), ImageDirectory.PRODUCTS)
                         } else it
                     }
                     viewModel.salvarNovoProduto(nome, categoryId, precoVenda, precoCusto, unidade, internalPath)
@@ -146,7 +147,7 @@ fun ProdutosScreen(
                 onConfirmar = { nome, categoryId, precoVenda, imageUriString ->
                     val internalPath = imageUriString?.let {
                         if (it.startsWith("content://")) {
-                            ImageUtils.saveImageToInternalStorage(context, Uri.parse(it), "services", "serv")
+                            ImageUtils.saveImageToInternalStorage(context, Uri.parse(it), ImageDirectory.SERVICES)
                         } else it
                     }
                     viewModel.salvarNovoServico(nome, categoryId, precoVenda, internalPath)
@@ -165,9 +166,8 @@ fun ProdutosScreen(
                 onConfirmar = { id, nome, categoryId, precoVenda, precoCusto, unidade, imageUriString, tipoItem, estoque ->
                     val internalPath = imageUriString?.let {
                         if (it.startsWith("content://")) {
-                            val folder = if (tipoItem == com.anotasmart.model.ItemType.PRODUTO) "products" else "services"
-                            val prefix = if (tipoItem == com.anotasmart.model.ItemType.PRODUTO) "prod" else "serv"
-                            ImageUtils.saveImageToInternalStorage(context, Uri.parse(it), folder, prefix)
+                            val directory = if (tipoItem == com.anotasmart.model.ItemType.PRODUTO) ImageDirectory.PRODUCTS else ImageDirectory.SERVICES
+                            ImageUtils.saveImageToInternalStorage(context, Uri.parse(it), directory)
                         } else it
                     }
                     viewModel.salvarEdicao(id, nome, categoryId, precoVenda, precoCusto, unidade, internalPath, tipoItem, estoque)
