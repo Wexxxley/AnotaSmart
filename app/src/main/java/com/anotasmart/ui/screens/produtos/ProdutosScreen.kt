@@ -11,20 +11,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.anotasmart.ui.components.BarraBusca
-import com.anotasmart.ui.components.ListaCategorias
+import com.anotasmart.ui.components.ListaCategoriasProdutos
 import com.anotasmart.ui.screens.produtos.components.DialogEditarItem
 import com.anotasmart.ui.screens.produtos.components.DialogEntradaEstoque
 import com.anotasmart.ui.screens.produtos.components.DialogNovoProduto
 import com.anotasmart.ui.screens.produtos.components.DialogNovoServico
 import com.anotasmart.ui.screens.produtos.components.GradeItemsProduto
+import com.anotasmart.ui.viewModels.CategoriasViewModel
 import com.anotasmart.ui.viewModels.ProdutosViewModel
 
 @Composable
 fun ProdutosScreen(
-    viewModel: ProdutosViewModel = viewModel()
+    viewModel: ProdutosViewModel = viewModel(),
+    categoriasViewModel: CategoriasViewModel = viewModel()
 ) {
     val produtos by viewModel.produtosFiltrados.collectAsState(initial = emptyList())
-    val categorias by viewModel.categorias.collectAsState()
+    val categorias by categoriasViewModel.categoriasItens.collectAsState(initial = emptyList())
     val categoriaSelecionada by viewModel.categoriaSelecionada.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val produtoParaEditar by viewModel.produtoParaEditar.collectAsState()
@@ -46,7 +48,7 @@ fun ProdutosScreen(
                 onQueryChange = viewModel::onSearchQueryChanged
             )
 
-            ListaCategorias(
+            ListaCategoriasProdutos(
                 categorias = categorias,
                 categoriaSelecionadaId = categoriaSelecionada,
                 onCategoriaClick = viewModel::onCategoriaSelecionada

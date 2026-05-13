@@ -12,8 +12,6 @@ import kotlinx.coroutines.flow.asStateFlow
 class VendaViewModel : ViewModel() {
     private val _produtos = MutableStateFlow<List<Product>>(emptyList())
     val produtos: StateFlow<List<Product>> = _produtos.asStateFlow()
-    private val _categorias = MutableStateFlow<List<Category>>(emptyList())
-    val categorias: StateFlow<List<Category>> = _categorias.asStateFlow()
     private val _categoriaSelecionada = MutableStateFlow("1")
     val categoriaSelecionada: StateFlow<String> = _categoriaSelecionada.asStateFlow()
     private val _searchQuery = MutableStateFlow("")
@@ -28,7 +26,6 @@ class VendaViewModel : ViewModel() {
     }
 
     private fun carregarDadosMock() {
-        _categorias.value = MockDataSource.getMockCategories()
         _produtos.value = MockDataSource.getMockProducts()
     }
 

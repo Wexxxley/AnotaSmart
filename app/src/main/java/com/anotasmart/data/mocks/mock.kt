@@ -12,7 +12,6 @@ object MockDataSource {
 
     fun getMockCategories(): List<Category> {
         return listOf(
-            Category(id = "1", nome = "TODOS", tipo = CategoryType.ITENS),
             Category(id = "2", nome = "BEBIDAS", tipo = CategoryType.ITENS),
             Category(id = "3", nome = "ALIMENTOS", tipo = CategoryType.ITENS),
             Category(id = "4", nome = "LIMPEZA", tipo = CategoryType.ITENS),

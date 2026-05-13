@@ -14,9 +14,6 @@ class DespesasViewModel : ViewModel() {
     private val _expenses = MutableStateFlow<List<Expense>>(emptyList())
     val expenses: StateFlow<List<Expense>> = _expenses.asStateFlow()
 
-    private val _categories = MutableStateFlow<List<Category>>(emptyList())
-    val categories: StateFlow<List<Category>> = _categories.asStateFlow()
-
     private val _showAddModal = MutableStateFlow(false)
     val showAddModal: StateFlow<Boolean> = _showAddModal.asStateFlow()
 
@@ -25,7 +22,6 @@ class DespesasViewModel : ViewModel() {
     }
 
     private fun loadMockData() {
-        _categories.value = MockDataSource.getMockCategories().filter { it.tipo == CategoryType.DESPESAS }
         _expenses.value = MockDataSource.getMockExpenses()
     }
 

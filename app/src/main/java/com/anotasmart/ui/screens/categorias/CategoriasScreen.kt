@@ -1,15 +1,196 @@
 package com.anotasmart.ui.screens.categorias
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Inventory
+import androidx.compose.material.icons.filled.MoneyOff
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.anotasmart.model.CategoryType
+import com.anotasmart.ui.components.GradeCategorias
+import com.anotasmart.ui.viewModels.CategoriasViewModel
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun CategoriasScreen(viewModel: CategoriasViewModel = viewModel()) {
+    val selectedType by viewModel.selectedType.collectAsState()
+    val categoriasFiltradas = viewModel.getCategoriasFiltradas()
+    val mostrarModalNovaCategoria by viewModel.mostrarModalNovaCategoria.collectAsState()
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            // Seletor de Tipo
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .padding(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                TipoItemSelector(
+                    title = "Produtos",
+                    icon = Icons.Default.Inventory,
+                    isSelected = selectedType == CategoryType.ITENS,
+                    modifier = Modifier.weight(1f),
+                    onClick = { viewModel.selectType(CategoryType.ITENS) }
+                )
+                TipoItemSelector(
+                    title = "Despesas",
+                    icon = Icons.Default.MoneyOff,
+                    isSelected = selectedType == CategoryType.DESPESAS,
+                    modifier = Modifier.weight(1f),
+                    onClick = { viewModel.selectType(CategoryType.DESPESAS) }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Lista de Categorias em FlowRow
+            Text(
+                text = "Categorias de ${if (selectedType == CategoryType.ITENS) "Produtos" else "Despesas"}",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                categoriasFiltradas.forEach { categoria ->
+                    SuggestionChip(
+                        onClick = { },
+                        label = { Text(categoria.nome) },
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                }
+            }
+        }
+
+        // FAB
+        FloatingActionButton(
+            onClick = { viewModel.abrirModalNovaCategoria() },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp),
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "Nova Categoria")
+        }
+
+        if (mostrarModalNovaCategoria) {
+            DialogNovaCategoria(
+                tipoInicial = selectedType,
+                onDismissRequest = { viewModel.fecharModalNovaCategoria() },
+                onConfirmar = { nome, tipo ->
+                    viewModel.salvarNovaCategoria(nome, tipo)
+                }
+            )
+        }
+    }
+}
 
 @Composable
-fun CategoriasScreen() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "Tela de Categorias")
+fun TipoItemSelector(
+    title: String,
+    icon: ImageVector,
+    isSelected: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    val backgroundColor = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
+    val contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(backgroundColor)
+            .clickable { onClick() }
+            .padding(vertical = 12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(icon, contentDescription = null, tint = contentColor, modifier = Modifier.size(20.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = title, color = contentColor, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+        }
     }
+}
+
+@Composable
+fun DialogNovaCategoria(
+    tipoInicial: CategoryType,
+    onDismissRequest: () -> Unit,
+    onConfirmar: (nome: String, tipo: CategoryType) -> Unit
+) {
+    var nome by remember { mutableStateOf("") }
+    var tipo by remember { mutableStateOf(tipoInicial) }
+
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text("Nova Categoria") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                OutlinedTextField(
+                    value = nome,
+                    onValueChange = { nome = it },
+                    label = { Text("Nome da Categoria") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                Column {
+                    Text("Tipo", style = MaterialTheme.typography.labelLarge)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FilterChip(
+                            selected = tipo == CategoryType.ITENS,
+                            onClick = { tipo = CategoryType.ITENS },
+                            label = { Text("Produtos") }
+                        )
+                        FilterChip(
+                            selected = tipo == CategoryType.DESPESAS,
+                            onClick = { tipo = CategoryType.DESPESAS },
+                            label = { Text("Despesas") }
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onConfirmar(nome, tipo) },
+                enabled = nome.isNotBlank()
+            ) {
+                Text("Salvar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text("Cancelar")
+            }
+        }
+    )
 }

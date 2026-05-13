@@ -7,8 +7,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -31,8 +29,9 @@ import com.anotasmart.model.ItemType
 import com.anotasmart.model.UnitType
 import com.anotasmart.model.entity.Category
 import com.anotasmart.model.entity.Product
+import com.anotasmart.ui.components.GradeCategorias
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun DialogEditarItem(
     produto: Product,
@@ -424,7 +423,7 @@ fun DialogNovoProduto(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun DialogNovoServico(
     categorias: List<Category>,

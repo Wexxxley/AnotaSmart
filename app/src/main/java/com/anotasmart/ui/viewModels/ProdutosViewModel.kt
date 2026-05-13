@@ -12,8 +12,6 @@ import kotlinx.coroutines.flow.combine
 
 class ProdutosViewModel : ViewModel() {
     private val _produtos = MutableStateFlow<List<Product>>(emptyList())
-    private val _categorias = MutableStateFlow<List<Category>>(emptyList())
-    val categorias: StateFlow<List<Category>> = _categorias.asStateFlow()
 
     private val _categoriaSelecionada = MutableStateFlow("1") // "1" é "TODOS" no mock
     val categoriaSelecionada: StateFlow<String> = _categoriaSelecionada.asStateFlow()
@@ -46,7 +44,6 @@ class ProdutosViewModel : ViewModel() {
     }
 
     private fun carregarDadosMock() {
-        _categorias.value = MockDataSource.getMockCategories()
         val mockProducts = MockDataSource.getMockProducts().toMutableList()
         _produtos.value = mockProducts
     }

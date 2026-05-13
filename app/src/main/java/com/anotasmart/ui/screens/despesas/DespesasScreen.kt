@@ -1,7 +1,5 @@
 package com.anotasmart.ui.screens.despesas
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,20 +12,23 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.anotasmart.model.entity.Expense
 import com.anotasmart.ui.screens.despesas.components.DialogNovaDespesa
+import com.anotasmart.ui.viewModels.CategoriasViewModel
 import com.anotasmart.ui.viewModels.DespesasViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
-fun DespesasScreen(viewModel: DespesasViewModel = viewModel()) {
+fun DespesasScreen(
+    viewModel: DespesasViewModel = viewModel(),
+    categoriasViewModel: CategoriasViewModel = viewModel()
+) {
     val expenses by viewModel.expenses.collectAsState()
-    val categories by viewModel.categories.collectAsState()
+    val categories by categoriasViewModel.categoriasDespesas.collectAsState(initial = emptyList())
     val showAddModal by viewModel.showAddModal.collectAsState()
 
     val groupedExpenses = viewModel.getGroupedExpenses()

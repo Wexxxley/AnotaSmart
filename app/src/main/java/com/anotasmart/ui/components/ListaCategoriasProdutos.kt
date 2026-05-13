@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.anotasmart.model.entity.Category
 
 @Composable
-fun ListaCategorias(categorias: List<Category>, categoriaSelecionadaId: String, onCategoriaClick: (String) -> Unit) {
+fun ListaCategoriasProdutos(categorias: List<Category>, categoriaSelecionadaId: String, onCategoriaClick: (String) -> Unit) {
     Box(modifier = Modifier.fillMaxWidth()) {
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
