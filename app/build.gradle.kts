@@ -48,6 +48,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.coil.compose)
+    implementation(libs.zxing.core)
     implementation("androidx.compose.material:material-icons-extended")
 
     // Room

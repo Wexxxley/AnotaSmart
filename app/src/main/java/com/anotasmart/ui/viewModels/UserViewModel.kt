@@ -48,3 +48,13 @@ class UserViewModel(private val repository: UserPreferencesRepository) : ViewMod
         }
     }
 }
+
+class UserViewModelFactory(private val repository: UserPreferencesRepository) : androidx.lifecycle.ViewModelProvider.Factory {
+    override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(UserViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return UserViewModel(repository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}

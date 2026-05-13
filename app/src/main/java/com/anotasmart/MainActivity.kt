@@ -70,6 +70,7 @@ import com.anotasmart.ui.theme.AppTheme
 import com.anotasmart.ui.viewModels.CartViewModel
 import com.anotasmart.ui.viewModels.ClientesViewModel
 import com.anotasmart.ui.viewModels.UserViewModel
+import com.anotasmart.ui.viewModels.UserViewModelFactory
 import com.anotasmart.data.preferences.UserPreferencesRepository
 import androidx.compose.material.icons.filled.Brightness4
 import androidx.compose.material.icons.filled.Brightness5
@@ -89,16 +90,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
-
-class UserViewModelFactory(private val repository: UserPreferencesRepository) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(UserViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return UserViewModel(repository) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
-    }
-}
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
