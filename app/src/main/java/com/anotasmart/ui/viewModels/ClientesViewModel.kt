@@ -1,16 +1,24 @@
 package com.anotasmart.ui.viewModels
 
 import androidx.lifecycle.ViewModel
-import com.anotasmart.data.mocks.MockDataSource
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import com.anotasmart.database.dao.ClientDao
 import com.anotasmart.model.entity.Client
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.UUID
 
-class ClientesViewModel : ViewModel() {
-    private val _clientes = MutableStateFlow<List<Client>>(emptyList())
-    val clientes: StateFlow<List<Client>> = _clientes.asStateFlow()
+class ClientesViewModel(private val clientDao: ClientDao) : ViewModel() {
+    val clientes: StateFlow<List<Client>> = clientDao.getAll()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -18,20 +26,12 @@ class ClientesViewModel : ViewModel() {
     private val _mostrarModalNovoCliente = MutableStateFlow(false)
     val mostrarModalNovoCliente: StateFlow<Boolean> = _mostrarModalNovoCliente.asStateFlow()
 
-    val clientesFiltrados = combine(_clientes, _searchQuery) { clientes, query ->
+    val clientesFiltrados = combine(clientes, _searchQuery) { clientes, query ->
         if (query.isEmpty()) {
             clientes
         } else {
             clientes.filter { it.nome.contains(query, ignoreCase = true) || it.telefone.contains(query) }
         }
-    }
-
-    init {
-        carregarDadosMock()
-    }
-
-    private fun carregarDadosMock() {
-        _clientes.value = MockDataSource.getMockClients()
     }
 
     fun onSearchQueryChanged(query: String) {
@@ -52,20 +52,43 @@ class ClientesViewModel : ViewModel() {
         endereco: String?,
         imagePath: String?
     ) {
-        val novoCliente = Client(
-            id = java.util.UUID.randomUUID().toString(),
-            nome = nome,
-            telefone = telefone,
-            endereco = endereco,
-            imagePath = imagePath
-        )
-        val listaAtual = _clientes.value.toMutableList()
-        listaAtual.add(0, novoCliente)
-        _clientes.value = listaAtual
-        fecharModalNovoCliente()
+        viewModelScope.launch {
+            val novoCliente = Client(
+                id = UUID.randomUUID().toString(),
+                nome = nome,
+                telefone = telefone,
+                endereco = endereco,
+                imagePath = imagePath
+            )
+            withContext(Dispatchers.IO) {
+                clientDao.insert(novoCliente)
+            }
+            fecharModalNovoCliente()
+        }
     }
 
-    fun getClientById(clientId: String): Client? {
-        return _clientes.value.find { it.id == clientId }
+    suspend fun getClientById(clientId: String): Client? {
+        return withContext(Dispatchers.IO) {
+            clientDao.getById(clientId)
+        }
+    }
+
+    fun deletarCliente(client: Client, onSucesso: () -> Unit) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                clientDao.delete(client)
+            }
+            onSucesso()
+        }
+    }
+}
+
+class ClientesViewModelFactory(private val clientDao: ClientDao) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(ClientesViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return ClientesViewModel(clientDao) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

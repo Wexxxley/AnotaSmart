@@ -132,7 +132,6 @@ fun ScreenStructure(
     userViewModel: UserViewModel
 ) {
     val userPrefs by userViewModel.userPreferences.collectAsState()
-    val clientesViewModel: ClientesViewModel = viewModel()
     val items by cartViewModel.items.collectAsState()
     val totalValor by cartViewModel.totalValor.collectAsState()
     val quantidadeItens = items.sumOf { it.quantidade }.toInt()
@@ -221,7 +220,6 @@ fun ScreenStructure(
                     composable(Screen.Pedidos.route) { PedidosScreen() }
                     composable(Screen.Clientes.route) { 
                         ClientesScreen(
-                            viewModel = clientesViewModel,
                             onClientClick = { cliente ->
                                 navController.navigate(Screen.ClienteDetalhes.createRoute(cliente.id))
                             }
@@ -242,9 +240,14 @@ fun ScreenStructure(
                     }
                     composable(Screen.ClienteDetalhes.route) { backStackEntry ->
                         val clientId = backStackEntry.arguments?.getString("clientId")
+                        val context = LocalContext.current
+                        val db = (context.applicationContext as AnotaSmartApplication).database
+                        val clientViewModel: com.anotasmart.ui.viewModels.ClientesViewModel = viewModel(
+                            factory = com.anotasmart.ui.viewModels.ClientesViewModelFactory(db.clientDao())
+                        )
                         ClienteDetalhesScreen(
                             clientId = clientId,
-                            viewModel = clientesViewModel,
+                            viewModel = clientViewModel,
                             onBackClick = { navController.popBackStack() }
                         )
                     }

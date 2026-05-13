@@ -1,5 +1,6 @@
 package com.anotasmart.ui.screens.produtos
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -23,6 +24,7 @@ import com.anotasmart.ui.viewModels.ProdutosViewModel
 import androidx.compose.ui.platform.LocalContext
 import com.anotasmart.AnotaSmartApplication
 import com.anotasmart.ui.viewModels.CategoriasViewModelFactory
+import com.anotasmart.utils.ImageUtils
 
 @Composable
 fun ProdutosScreen(
@@ -123,8 +125,13 @@ fun ProdutosScreen(
             DialogNovoProduto(
                 categorias = categorias,
                 onDismissRequest = { viewModel.fecharModalNovoProduto() },
-                onConfirmar = { nome, categoryId, precoVenda, precoCusto, unidade, imagePath ->
-                    viewModel.salvarNovoProduto(nome, categoryId, precoVenda, precoCusto, unidade, imagePath)
+                onConfirmar = { nome, categoryId, precoVenda, precoCusto, unidade, imageUriString ->
+                    val internalPath = imageUriString?.let {
+                        if (it.startsWith("content://")) {
+                            ImageUtils.saveImageToInternalStorage(context, Uri.parse(it), "products", "prod")
+                        } else it
+                    }
+                    viewModel.salvarNovoProduto(nome, categoryId, precoVenda, precoCusto, unidade, internalPath)
                 },
                 onNovaCategoria = { nome, tipo ->
                     categoriasViewModel.salvarNovaCategoria(nome, tipo)
@@ -136,8 +143,13 @@ fun ProdutosScreen(
             DialogNovoServico(
                 categorias = categorias,
                 onDismissRequest = { viewModel.fecharModalNovoServico() },
-                onConfirmar = { nome, categoryId, precoVenda, imagePath ->
-                    viewModel.salvarNovoServico(nome, categoryId, precoVenda, imagePath)
+                onConfirmar = { nome, categoryId, precoVenda, imageUriString ->
+                    val internalPath = imageUriString?.let {
+                        if (it.startsWith("content://")) {
+                            ImageUtils.saveImageToInternalStorage(context, Uri.parse(it), "services", "serv")
+                        } else it
+                    }
+                    viewModel.salvarNovoServico(nome, categoryId, precoVenda, internalPath)
                 },
                 onNovaCategoria = { nome, tipo ->
                     categoriasViewModel.salvarNovaCategoria(nome, tipo)
@@ -150,8 +162,15 @@ fun ProdutosScreen(
                 produto = produto,
                 categorias = categorias,
                 onDismissRequest = { viewModel.fecharModalEdicao() },
-                onConfirmar = { id, nome, categoryId, precoVenda, precoCusto, unidade, imagePath, tipoItem, estoque ->
-                    viewModel.salvarEdicao(id, nome, categoryId, precoVenda, precoCusto, unidade, imagePath, tipoItem, estoque)
+                onConfirmar = { id, nome, categoryId, precoVenda, precoCusto, unidade, imageUriString, tipoItem, estoque ->
+                    val internalPath = imageUriString?.let {
+                        if (it.startsWith("content://")) {
+                            val folder = if (tipoItem == com.anotasmart.model.ItemType.PRODUTO) "products" else "services"
+                            val prefix = if (tipoItem == com.anotasmart.model.ItemType.PRODUTO) "prod" else "serv"
+                            ImageUtils.saveImageToInternalStorage(context, Uri.parse(it), folder, prefix)
+                        } else it
+                    }
+                    viewModel.salvarEdicao(id, nome, categoryId, precoVenda, precoCusto, unidade, internalPath, tipoItem, estoque)
                 },
                 onNovaCategoria = { nome, tipo ->
                     categoriasViewModel.salvarNovaCategoria(nome, tipo)

@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
@@ -24,7 +25,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import com.anotasmart.model.entity.Client
+import com.anotasmart.ui.components.DoubleDeleteConfirmationDialog
 import com.anotasmart.ui.viewModels.ClientesViewModel
 
 @Composable
@@ -33,42 +40,77 @@ fun ClienteDetalhesScreen(
     viewModel: ClientesViewModel,
     onBackClick: () -> Unit
 ) {
-    val cliente = clientId?.let { viewModel.getClientById(it) }
+    var cliente by remember { mutableStateOf<Client?>(null) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(clientId) {
+        clientId?.let {
+            cliente = viewModel.getClientById(it)
+        }
+    }
 
     if (cliente != null) {
+        val client = cliente!!
+
+        DoubleDeleteConfirmationDialog(
+            showDialog = showDeleteDialog,
+            onDismissRequest = { showDeleteDialog = false },
+            onConfirm = {
+                viewModel.deletarCliente(client) {
+                    onBackClick()
+                }
+            },
+            title = "Apagar Cliente",
+            message1 = "Você tem certeza que deseja apagar o cliente ${client.nome}?",
+            message2 = "Esta ação não pode ser desfeita. Todos os dados de ${client.nome} serão removidos permanentemente. Confirmar?"
+        )
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Botão Voltar manual (estilo Carrinho)
+            // Cabeçalho com Voltar e Apagar
             item {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onBackClick() }
-                        .padding(vertical = 8.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Voltar",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Detalhes do Cliente",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clickable { onBackClick() }
+                            .padding(vertical = 8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Voltar",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Detalhes do Cliente",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    IconButton(onClick = { showDeleteDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Apagar Cliente",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             }
 
             // Card Superior
             item {
-                CardClienteSuperior(cliente)
+                CardClienteSuperior(client)
             }
 
             // Seção de Histórico

@@ -60,6 +60,7 @@ class EnumsConverters {
 abstract class AppDatabase : RoomDatabase() {
     abstract fun expenseDao(): ExpenseDao
     abstract fun categoryDao(): CategoryDao
+    abstract fun clientDao(): com.anotasmart.database.dao.ClientDao
 
     companion object {
         @Volatile

@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
+import com.anotasmart.utils.PhoneVisualTransformation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,10 +45,14 @@ fun DialogNovoCliente(
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> selectedImageUri = uri }
+        onResult = { uri -> 
+            if (uri != null) {
+                selectedImageUri = uri
+            }
+        }
     )
 
-    val isConfirmEnabled = nome.isNotBlank() && telefone.isNotBlank()
+    val isConfirmEnabled = nome.isNotBlank() && telefone.length >= 10
 
     Dialog(
         onDismissRequest = onDismissRequest,
@@ -127,10 +132,12 @@ fun DialogNovoCliente(
                     // Telefone
                     OutlinedTextField(
                         value = telefone,
-                        onValueChange = { telefone = it },
+                        onValueChange = { if (it.length <= 11 && it.all { char -> char.isDigit() }) telefone = it },
                         label = { Text("Telefone") },
                         modifier = Modifier.fillMaxWidth(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                        visualTransformation = PhoneVisualTransformation(),
+                        placeholder = { Text("(00) 00000-0000") }
                     )
 
                     // Endereço

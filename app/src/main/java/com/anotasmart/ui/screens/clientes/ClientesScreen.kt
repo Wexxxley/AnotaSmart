@@ -1,5 +1,7 @@
 package com.anotasmart.ui.screens.clientes
 
+import android.net.Uri
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -9,47 +11,60 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.anotasmart.AnotaSmartApplication
 import com.anotasmart.model.entity.Client
 import com.anotasmart.ui.components.BarraBusca
 import com.anotasmart.ui.screens.clientes.components.DialogNovoCliente
 import com.anotasmart.ui.viewModels.ClientesViewModel
+import com.anotasmart.ui.viewModels.ClientesViewModelFactory
+import com.anotasmart.utils.ImageUtils
+import com.anotasmart.utils.PhoneUtils
 
 @Composable
 fun ClientesScreen(
-    viewModel: ClientesViewModel,
-    onClientClick: (Client) -> Unit
+    onClientClick: (Client) -> Unit = {}
 ) {
-    val searchQuery by viewModel.searchQuery.collectAsState()
+    val context = LocalContext.current
+    val database = (context.applicationContext as AnotaSmartApplication).database
+    val viewModel: ClientesViewModel = viewModel(
+        factory = ClientesViewModelFactory(database.clientDao())
+    )
+
     val clientes by viewModel.clientesFiltrados.collectAsState(initial = emptyList())
+    val searchQuery by viewModel.searchQuery.collectAsState()
     val mostrarModalNovoCliente by viewModel.mostrarModalNovoCliente.collectAsState()
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
             BarraBusca(
                 query = searchQuery,
-                onQueryChange = { viewModel.onSearchQueryChanged(it) }
+                onQueryChange = viewModel::onSearchQueryChanged
             )
 
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(bottom = 80.dp) // Espaço para o FAB
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(clientes) { cliente ->
-                    ItemCliente(
+                    ClientItem(
                         cliente = cliente,
                         onClick = { onClientClick(cliente) }
                     )
@@ -57,24 +72,23 @@ fun ClientesScreen(
             }
         }
 
-        // FAB para adicionar cliente
         FloatingActionButton(
             onClick = { viewModel.abrirModalNovoCliente() },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(16.dp),
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
+                .padding(16.dp)
         ) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = "Adicionar Cliente")
+            Icon(Icons.Default.Add, contentDescription = "Novo Cliente")
         }
 
-        // Modal para novo cliente
         if (mostrarModalNovoCliente) {
             DialogNovoCliente(
                 onDismissRequest = { viewModel.fecharModalNovoCliente() },
-                onConfirmar = { nome, telefone, endereco, imagePath ->
-                    viewModel.salvarNovoCliente(nome, telefone, endereco, imagePath)
+                onConfirmar = { nome, telefone, endereco, imageUriString ->
+                    val internalImagePath = imageUriString?.let {
+                        ImageUtils.saveImageToInternalStorage(context, Uri.parse(it), "clients", "client")
+                    }
+                    viewModel.salvarNovoCliente(nome, telefone, endereco, internalImagePath)
                 }
             )
         }
@@ -82,7 +96,7 @@ fun ClientesScreen(
 }
 
 @Composable
-fun ItemCliente(
+fun ClientItem(
     cliente: Client,
     onClick: () -> Unit
 ) {
@@ -91,36 +105,38 @@ fun ItemCliente(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Row(
             modifier = Modifier
-                .padding(12.dp)
+                .padding(16.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Imagem do Cliente
-            Box(
-                modifier = Modifier
-                    .size(50.dp)
-                    .clip(CircleShape)
-                    .padding(2.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                if (!cliente.imagePath.isNullOrEmpty()) {
-                    val imageModel: Any = cliente.imagePath.toIntOrNull() ?: cliente.imagePath
-                    AsyncImage(
-                        model = imageModel,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize().clip(CircleShape)
-                    )
-                } else {
+            if (cliente.imagePath != null) {
+                AsyncImage(
+                    model = cliente.imagePath,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(50.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(50.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center
+                ) {
                     Icon(
-                        imageVector = Icons.Default.Person,
+                        Icons.Default.Person,
                         contentDescription = null,
-                        modifier = Modifier.size(40.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        modifier = Modifier.size(30.dp),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
             }
@@ -135,7 +151,7 @@ fun ItemCliente(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = cliente.telefone,
+                    text = PhoneUtils.formatPhone(cliente.telefone),
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
