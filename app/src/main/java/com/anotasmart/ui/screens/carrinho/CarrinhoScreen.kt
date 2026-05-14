@@ -40,7 +40,7 @@ fun CarrinhoScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Botão Voltar manual (Igual ClienteDetalhesScreen)
+                // Botão Voltar manual
                 item {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

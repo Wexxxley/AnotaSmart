@@ -25,13 +25,15 @@ import java.util.*
 import androidx.compose.ui.platform.LocalContext
 import com.anotasmart.AnotaSmartApplication
 import com.anotasmart.ui.viewModels.CategoriasViewModelFactory
+import com.anotasmart.ui.viewModels.DespesasViewModelFactory
 
 @Composable
-fun DespesasScreen(
-    viewModel: DespesasViewModel = viewModel()
-) {
+fun DespesasScreen() {
     val context = LocalContext.current
     val database = (context.applicationContext as AnotaSmartApplication).database
+    val viewModel: DespesasViewModel = viewModel(
+        factory = DespesasViewModelFactory(database.expenseDao())
+    )
     val categoriasViewModel: CategoriasViewModel = viewModel(
         factory = CategoriasViewModelFactory(database.categoryDao())
     )
@@ -39,7 +41,7 @@ fun DespesasScreen(
     val categories by categoriasViewModel.categoriasDespesas.collectAsState(initial = emptyList())
     val showAddModal by viewModel.showAddModal.collectAsState()
 
-    val groupedExpenses = viewModel.getGroupedExpenses()
+    val groupedExpenses = remember(expenses) { viewModel.getGroupedExpenses(expenses) }
     val expandedStates = remember { mutableStateMapOf<String, Boolean>() }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -53,7 +55,7 @@ fun DespesasScreen(
                     val isExpanded = expandedStates[monthYear] ?: true
                     MonthHeader(
                         monthYear = monthYear,
-                        subtotal = viewModel.getMonthSubtotal(monthYear),
+                        subtotal = viewModel.getMonthSubtotal(monthYear, groupedExpenses),
                         isExpanded = isExpanded,
                         onToggle = { expandedStates[monthYear] = !isExpanded }
                     )

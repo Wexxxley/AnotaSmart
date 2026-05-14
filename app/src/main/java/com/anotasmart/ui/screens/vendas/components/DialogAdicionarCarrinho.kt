@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.anotasmart.model.ItemType
 import com.anotasmart.model.entity.Product
 
 @Composable
@@ -33,8 +34,19 @@ fun DialogAdicionarCarrinho(
     onDismissRequest: () -> Unit,
     onConfirmar: (Double) -> Unit
 ) {
-    // Estado local para armazenar a quantidade
-    var quantidadeSelecionada by remember { mutableDoubleStateOf(1.0) }
+    val isService = produto.tipoItem == ItemType.SERVICO
+    val estoqueDisponivel = produto.quantidadeEstoque
+
+    // Estado local para armazenar a quantidade, inicializado corretamente
+    var quantidadeSelecionada by remember(produto.id) {
+        val inicial = when {
+            isService -> 1.0
+            estoqueDisponivel >= 1.0 -> 1.0
+            estoqueDisponivel > 0.0 -> estoqueDisponivel
+            else -> 0.0
+        }
+        mutableDoubleStateOf(inicial)
+    }
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
@@ -51,12 +63,21 @@ fun DialogAdicionarCarrinho(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = "Estoque ${produto.quantidadeEstoque} ${produto.unidadeMedida.name}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
+                if (!isService) {
+                    Text(
+                        text = "Estoque ${produto.quantidadeEstoque} ${produto.unidadeMedida.name}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = if (estoqueDisponivel > 0) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                } else {
+                    Text(
+                        text = "Serviço",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                }
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -64,24 +85,35 @@ fun DialogAdicionarCarrinho(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     IconButton(
-                        onClick = { if (quantidadeSelecionada > 1.0) quantidadeSelecionada -= 1.0 },
-                        enabled = quantidadeSelecionada > 1.0
+                        onClick = { if (quantidadeSelecionada > 1.0) quantidadeSelecionada -= 1.0 else if (quantidadeSelecionada > 0 && !isService) quantidadeSelecionada = 0.0 },
+                        enabled = quantidadeSelecionada > 0
                     ) {
                         Icon(imageVector = Icons.Default.Remove, contentDescription = "Diminuir quantidade")
                     }
 
                     Text(
-                        text = quantidadeSelecionada.toString(),
+                        text = if (produto.unidadeMedida == com.anotasmart.model.UnitType.UN) 
+                                   quantidadeSelecionada.toInt().toString() 
+                               else String.format("%.2f", quantidadeSelecionada),
                         style = MaterialTheme.typography.headlineMedium,
                         modifier = Modifier.padding(horizontal = 24.dp)
                     )
 
                     IconButton(
-                        onClick = { if (quantidadeSelecionada < produto.quantidadeEstoque) quantidadeSelecionada += 1.0 },
-                        enabled = quantidadeSelecionada < produto.quantidadeEstoque
+                        onClick = { quantidadeSelecionada += 1.0 },
+                        enabled = isService || quantidadeSelecionada < estoqueDisponivel
                     ) {
                         Icon(imageVector = Icons.Default.Add, contentDescription = "Aumentar quantidade")
                     }
+                }
+                
+                if (!isService && estoqueDisponivel <= 0) {
+                    Text(
+                        text = "Produto sem estoque",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
                 }
             }
         },
@@ -92,7 +124,8 @@ fun DialogAdicionarCarrinho(
             ) {
                 Button(
                     onClick = { onConfirmar(quantidadeSelecionada) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = quantidadeSelecionada > 0 && (isService || quantidadeSelecionada <= estoqueDisponivel)
                 ) {
                     val valorTotal = produto.precoVenda * quantidadeSelecionada
                     Text(
