@@ -1,19 +1,26 @@
 package com.anotasmart.ui.viewModels
 
 import androidx.lifecycle.ViewModel
-import com.anotasmart.data.mocks.MockDataSource
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import com.anotasmart.database.dao.ProductDao
 import com.anotasmart.model.ItemType
-import com.anotasmart.model.entity.Category
 import com.anotasmart.model.entity.Product
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class ProdutosViewModel : ViewModel() {
-    private val _produtos = MutableStateFlow<List<Product>>(emptyList())
+class ProdutosViewModel(private val productDao: ProductDao) : ViewModel() {
+    val produtos: StateFlow<List<Product>> = productDao.getAll()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    private val _categoriaSelecionada = MutableStateFlow("1") // "1" é "TODOS" no mock
+    private val _categoriaSelecionada = MutableStateFlow("1") // "1" é "TODOS"
     val categoriaSelecionada: StateFlow<String> = _categoriaSelecionada.asStateFlow()
 
     private val _searchQuery = MutableStateFlow("")
@@ -31,21 +38,12 @@ class ProdutosViewModel : ViewModel() {
     private val _mostrarModalNovoServico = MutableStateFlow(false)
     val mostrarModalNovoServico: StateFlow<Boolean> = _mostrarModalNovoServico.asStateFlow()
 
-    val produtosFiltrados = combine(_produtos, _categoriaSelecionada, _searchQuery) { produtos, categoriaId, query ->
+    val produtosFiltrados = combine(produtos, _categoriaSelecionada, _searchQuery) { produtos, categoriaId, query ->
         produtos.filter { produto ->
             val matchesCategory = if (categoriaId == "1") true else produto.categoryId == categoriaId
             val matchesSearch = produto.nome.contains(query, ignoreCase = true)
             matchesCategory && matchesSearch
         }
-    }
-
-    init {
-        carregarDadosMock()
-    }
-
-    private fun carregarDadosMock() {
-        val mockProducts = MockDataSource.getMockProducts().toMutableList()
-        _produtos.value = mockProducts
     }
 
     fun onSearchQueryChanged(query: String) {
@@ -96,21 +94,23 @@ class ProdutosViewModel : ViewModel() {
         unidadeMedida: com.anotasmart.model.UnitType,
         imagePath: String?
     ) {
-        val novoProduto = Product(
-            id = java.util.UUID.randomUUID().toString(),
-            categoryId = categoryId,
-            nome = nome,
-            precoCusto = precoCusto,
-            precoVenda = precoVenda,
-            unidadeMedida = unidadeMedida,
-            tipoItem = ItemType.PRODUTO,
-            quantidadeEstoque = 0.0,
-            imagePath = imagePath
-        )
-        val listaAtual = _produtos.value.toMutableList()
-        listaAtual.add(0, novoProduto)
-        _produtos.value = listaAtual
-        fecharModalNovoProduto()
+        viewModelScope.launch {
+            val novoProduto = Product(
+                id = java.util.UUID.randomUUID().toString(),
+                categoryId = categoryId,
+                nome = nome,
+                precoCusto = precoCusto,
+                precoVenda = precoVenda,
+                unidadeMedida = unidadeMedida,
+                tipoItem = ItemType.PRODUTO,
+                quantidadeEstoque = 0.0,
+                imagePath = imagePath
+            )
+            withContext(Dispatchers.IO) {
+                productDao.insert(novoProduto)
+            }
+            fecharModalNovoProduto()
+        }
     }
 
     fun salvarNovoServico(
@@ -119,21 +119,23 @@ class ProdutosViewModel : ViewModel() {
         precoVenda: Double,
         imagePath: String?
     ) {
-        val novoServico = Product(
-            id = java.util.UUID.randomUUID().toString(),
-            categoryId = categoryId,
-            nome = nome,
-            precoCusto = 0.0,
-            precoVenda = precoVenda,
-            unidadeMedida = com.anotasmart.model.UnitType.UN,
-            tipoItem = ItemType.SERVICO,
-            quantidadeEstoque = 0.0,
-            imagePath = imagePath
-        )
-        val listaAtual = _produtos.value.toMutableList()
-        listaAtual.add(0, novoServico)
-        _produtos.value = listaAtual
-        fecharModalNovoServico()
+        viewModelScope.launch {
+            val novoServico = Product(
+                id = java.util.UUID.randomUUID().toString(),
+                categoryId = categoryId,
+                nome = nome,
+                precoCusto = 0.0,
+                precoVenda = precoVenda,
+                unidadeMedida = com.anotasmart.model.UnitType.UN,
+                tipoItem = ItemType.SERVICO,
+                quantidadeEstoque = 0.0,
+                imagePath = imagePath
+            )
+            withContext(Dispatchers.IO) {
+                productDao.insert(novoServico)
+            }
+            fecharModalNovoServico()
+        }
     }
 
     fun salvarEdicao(
@@ -147,10 +149,8 @@ class ProdutosViewModel : ViewModel() {
         tipoItem: ItemType,
         quantidadeEstoque: Double
     ) {
-        val produtosAtuais = _produtos.value.toMutableList()
-        val index = produtosAtuais.indexOfFirst { it.id == id }
-        if (index != -1) {
-            produtosAtuais[index] = Product(
+        viewModelScope.launch {
+            val produtoEditado = Product(
                 id = id,
                 categoryId = categoryId,
                 nome = nome,
@@ -161,23 +161,36 @@ class ProdutosViewModel : ViewModel() {
                 quantidadeEstoque = quantidadeEstoque,
                 imagePath = imagePath
             )
-            _produtos.value = produtosAtuais
+            withContext(Dispatchers.IO) {
+                productDao.update(produtoEditado)
+            }
+            fecharModalEdicao()
         }
-        fecharModalEdicao()
     }
 
     fun confirmarEntradaEstoque(produtoId: String, quantidade: Double, novoPrecoCusto: Double) {
-        // Logica para atualizar estoque (no momento apenas simulada)
-        val produtosAtuais = _produtos.value.toMutableList()
-        val index = produtosAtuais.indexOfFirst { it.id == produtoId }
-        if (index != -1) {
-            val p = produtosAtuais[index]
-            produtosAtuais[index] = p.copy(
-                quantidadeEstoque = p.quantidadeEstoque + quantidade,
-                precoCusto = novoPrecoCusto
-            )
-            _produtos.value = produtosAtuais
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val p = productDao.getById(produtoId)
+                if (p != null) {
+                    val pAtualizado = p.copy(
+                        quantidadeEstoque = p.quantidadeEstoque + quantidade,
+                        precoCusto = novoPrecoCusto
+                    )
+                    productDao.update(pAtualizado)
+                }
+            }
+            fecharModalEstoque()
         }
-        fecharModalEstoque()
+    }
+}
+
+class ProdutosViewModelFactory(private val productDao: ProductDao) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(ProdutosViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return ProdutosViewModel(productDao) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

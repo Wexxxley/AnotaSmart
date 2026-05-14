@@ -23,18 +23,21 @@ import com.anotasmart.ui.viewModels.VendaViewModel
 import androidx.compose.ui.platform.LocalContext
 import com.anotasmart.AnotaSmartApplication
 import com.anotasmart.ui.viewModels.CategoriasViewModelFactory
+import com.anotasmart.ui.viewModels.VendaViewModelFactory
 
 @Composable
 fun VendaScreen(
-    viewModel: VendaViewModel = viewModel(),
     cartViewModel: CartViewModel
 ) {
     val context = LocalContext.current
     val database = (context.applicationContext as AnotaSmartApplication).database
+    val viewModel: VendaViewModel = viewModel(
+        factory = VendaViewModelFactory(database.productDao())
+    )
     val categoriasViewModel: CategoriasViewModel = viewModel(
         factory = CategoriasViewModelFactory(database.categoryDao())
     )
-    val produtos by viewModel.produtos.collectAsState()
+    val produtos by viewModel.produtosFiltrados.collectAsState(initial = emptyList())
     val categorias by categoriasViewModel.categoriasItens.collectAsState(initial = emptyList())
     val categoriaSelecionada by viewModel.categoriaSelecionada.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()

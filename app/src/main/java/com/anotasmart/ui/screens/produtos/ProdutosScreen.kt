@@ -25,14 +25,16 @@ import androidx.compose.ui.platform.LocalContext
 import com.anotasmart.AnotaSmartApplication
 import com.anotasmart.model.ImageDirectory
 import com.anotasmart.ui.viewModels.CategoriasViewModelFactory
+import com.anotasmart.ui.viewModels.ProdutosViewModelFactory
 import com.anotasmart.utils.ImageUtils
 
 @Composable
-fun ProdutosScreen(
-    viewModel: ProdutosViewModel = viewModel()
-) {
+fun ProdutosScreen() {
     val context = LocalContext.current
     val database = (context.applicationContext as AnotaSmartApplication).database
+    val viewModel: ProdutosViewModel = viewModel(
+        factory = ProdutosViewModelFactory(database.productDao())
+    )
     val categoriasViewModel: CategoriasViewModel = viewModel(
         factory = CategoriasViewModelFactory(database.categoryDao())
     )
