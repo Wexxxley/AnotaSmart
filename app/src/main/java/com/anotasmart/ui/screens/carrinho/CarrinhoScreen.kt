@@ -1,13 +1,10 @@
 package com.anotasmart.ui.screens.carrinho
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
@@ -18,8 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.anotasmart.model.CartItem
+import com.anotasmart.ui.components.StandardScreen
 import com.anotasmart.ui.viewModels.CartViewModel
 
 @Composable
@@ -31,95 +28,69 @@ fun CarrinhoScreen(
     val items by viewModel.items.collectAsState()
     val totalValor by viewModel.totalValor.collectAsState()
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .weight(1f),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Botão Voltar manual
-                item {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
+    StandardScreen(
+        title = "Carrinho",
+        onBackClick = onBackClick,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        bottomBar = {
+            if (items.isNotEmpty()) {
+                Surface(
+                    tonalElevation = 8.dp,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onBackClick() }
-                            .padding(vertical = 8.dp)
+                            .background(MaterialTheme.colorScheme.surface)
+                            .padding(16.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Voltar",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Carrinho",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-
-                if (items.isEmpty()) {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(200.dp),
-                            contentAlignment = Alignment.Center
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
+                            Text(text = "Total", style = MaterialTheme.typography.titleMedium)
                             Text(
-                                text = "Seu carrinho está vazio",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                text = "R$ ${String.format("%.2f", totalValor)}",
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Bold
                             )
                         }
-                    }
-                } else {
-                    items(items) { item ->
-                        CartItemCard(
-                            item = item,
-                            onIncrement = { viewModel.alterarQuantidade(item.id, item.quantidade + 1) },
-                            onDecrement = { viewModel.alterarQuantidade(item.id, item.quantidade - 1) },
-                            onDelete = { viewModel.removerItem(item.id) }
-                        )
+                        Button(
+                            onClick = onFinalizarVenda,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 16.dp)
+                        ) {
+                            Text("FINALIZAR VENDA")
+                        }
                     }
                 }
             }
-
-            // Barra Inferior de Total e Ação
-            if (items.isNotEmpty()) {
-                Column(
+        }
+    ) {
+        if (items.isEmpty()) {
+            item {
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surface)
-                        .padding(16.dp)
+                        .height(200.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(text = "Total", style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            text = "R$ ${String.format("%.2f", totalValor)}",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                    Button(
-                        onClick = onFinalizarVenda,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp)
-                    ) {
-                        Text("FINALIZAR VENDA")
-                    }
+                    Text(
+                        text = "Seu carrinho está vazio",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
+            }
+        } else {
+            items(items) { item ->
+                CartItemCard(
+                    item = item,
+                    onIncrement = { viewModel.alterarQuantidade(item.id, item.quantidade + 1) },
+                    onDecrement = { viewModel.alterarQuantidade(item.id, item.quantidade - 1) },
+                    onDelete = { viewModel.removerItem(item.id) }
+                )
             }
         }
     }

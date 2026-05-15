@@ -31,6 +31,7 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     object ChavePix : Screen("chave_pix", "Chave Pix", Icons.Default.Key)
     object Sobre : Screen("sobre", "Sobre", Icons.Default.Info)
     object Carrinho : Screen("carrinho", "Carrinho", Icons.Default.ShoppingCart)
+    object FinalizarVenda : Screen("finalizar_venda", "Finalizar Venda", Icons.Default.AttachMoney)
     object ClienteDetalhes : Screen("cliente_detalhes/{clientId}", "Detalhes do Cliente", Icons.Default.People) {
         fun createRoute(clientId: String) = "cliente_detalhes/$clientId"
     }

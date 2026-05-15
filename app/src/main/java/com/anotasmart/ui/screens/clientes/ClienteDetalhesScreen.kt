@@ -3,13 +3,10 @@ package com.anotasmart.ui.screens.clientes
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.LocationOn
@@ -35,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.anotasmart.model.entity.Client
 import com.anotasmart.ui.components.DoubleDeleteConfirmationDialog
+import com.anotasmart.ui.components.StandardScreen
 import com.anotasmart.ui.viewModels.ClientesViewModel
 import com.anotasmart.utils.PhoneUtils
 
@@ -70,49 +68,19 @@ fun ClienteDetalhesScreen(
             message2 = "Esta ação não pode ser desfeita. Todos os dados de ${client.nome} serão removidos permanentemente. Confirmar?"
         )
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // Cabeçalho com Voltar e Apagar
-            item {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .clickable { onBackClick() }
-                            .padding(vertical = 8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Voltar",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Detalhes do Cliente",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-
-                    IconButton(onClick = { showDeleteDialog = true }) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Apagar Cliente",
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                    }
+        StandardScreen(
+            title = "Detalhes do Cliente",
+            onBackClick = onBackClick,
+            headerActions = {
+                IconButton(onClick = { showDeleteDialog = true }) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Apagar Cliente",
+                        tint = MaterialTheme.colorScheme.error
+                    )
                 }
             }
-
+        ) {
             // Card Superior
             item {
                 CardClienteSuperior(

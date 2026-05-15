@@ -66,6 +66,7 @@ import com.anotasmart.ui.screens.documentacao.DocumentacaoScreen
 import com.anotasmart.ui.screens.chavepix.ChavePixScreen
 import com.anotasmart.ui.screens.sobre.SobreScreen
 import com.anotasmart.ui.screens.carrinho.CarrinhoScreen
+import com.anotasmart.ui.screens.vendas.FinalizarVendaScreen
 import com.anotasmart.ui.theme.AppTheme
 import com.anotasmart.ui.viewModels.CartViewModel
 import com.anotasmart.ui.viewModels.ClientesViewModel
@@ -185,7 +186,8 @@ fun ScreenStructure(
             },
             bottomBar = {
                 Column {
-                    if (quantidadeItens > 0 && currentRoute != Screen.Carrinho.route && currentRoute != Screen.ClienteDetalhes.route) {
+                    val routesToHideSummary = listOf(Screen.Carrinho.route, Screen.FinalizarVenda.route, Screen.ClienteDetalhes.route)
+                    if (quantidadeItens > 0 && currentRoute !in routesToHideSummary) {
                         ResumoCarrinho(
                             quantidadeItens = quantidadeItens,
                             totalValor = totalValor,
@@ -199,7 +201,7 @@ fun ScreenStructure(
                             }
                         )
                     }
-                    if (currentRoute != Screen.Carrinho.route && currentRoute != Screen.ClienteDetalhes.route) {
+                    if (currentRoute !in routesToHideSummary) {
                         BarraNavegacaoPrincipal(navController)
                     }
                 }
@@ -235,7 +237,15 @@ fun ScreenStructure(
                         CarrinhoScreen(
                             viewModel = cartViewModel,
                             onBackClick = { navController.popBackStack() },
-                            onFinalizarVenda = { /* Logica de finalizar */ }
+                            onFinalizarVenda = { 
+                                navController.navigate(Screen.FinalizarVenda.route)
+                            }
+                        )
+                    }
+                    composable(Screen.FinalizarVenda.route) {
+                        FinalizarVendaScreen(
+                            onBackClick = { navController.popBackStack() },
+                            onConfirmarVenda = { /* Próxima etapa */ }
                         )
                     }
                     composable(Screen.ClienteDetalhes.route) { backStackEntry ->

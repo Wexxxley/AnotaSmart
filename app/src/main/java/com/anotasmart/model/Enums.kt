@@ -21,7 +21,7 @@ enum class InstallmentStatus {
 }
 
 enum class PaymentMethod {
-    DINHEIRO, PIX, DEBITO, CREDITO
+    DINHEIRO, PIX, PARCELADO
 }
 
 enum class ImageDirectory(val folderName: String, val prefix: String) {
