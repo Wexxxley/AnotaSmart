@@ -16,7 +16,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class ProdutosViewModel(private val productDao: ProductDao) : ViewModel() {
+class ProdutosViewModel(
+    private val productDao: ProductDao,
+    private val cartItems: StateFlow<List<com.anotasmart.model.CartItem>> = MutableStateFlow(emptyList())
+) : ViewModel() {
     val produtos: StateFlow<List<Product>> = productDao.getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -37,6 +40,13 @@ class ProdutosViewModel(private val productDao: ProductDao) : ViewModel() {
 
     private val _mostrarModalNovoServico = MutableStateFlow(false)
     val mostrarModalNovoServico: StateFlow<Boolean> = _mostrarModalNovoServico.asStateFlow()
+
+    private val _mensagemErro = MutableStateFlow<String?>(null)
+    val mensagemErro: StateFlow<String?> = _mensagemErro.asStateFlow()
+
+    fun limparErro() {
+        _mensagemErro.value = null
+    }
 
     val produtosFiltrados = combine(produtos, _categoriaSelecionada, _searchQuery) { produtos, categoriaId, query ->
         produtos.filter { produto ->
@@ -90,6 +100,13 @@ class ProdutosViewModel(private val productDao: ProductDao) : ViewModel() {
     val produtoParaDeletar: StateFlow<Product?> = _produtoParaDeletar.asStateFlow()
 
     fun selecionarProdutoParaDelecao(produto: Product) {
+        // Validação: não pode deletar se estiver no carrinho
+        val noCarrinho = cartItems.value.any { it.product?.id == produto.id }
+        if (noCarrinho) {
+            _mensagemErro.value = "Não é possível excluir este item pois ele está no carrinho."
+            fecharModalEdicao()
+            return
+        }
         _produtoParaDeletar.value = produto
     }
 
@@ -216,11 +233,14 @@ class ProdutosViewModel(private val productDao: ProductDao) : ViewModel() {
     }
 }
 
-class ProdutosViewModelFactory(private val productDao: ProductDao) : ViewModelProvider.Factory {
+class ProdutosViewModelFactory(
+    private val productDao: ProductDao,
+    private val cartItems: StateFlow<List<com.anotasmart.model.CartItem>> = MutableStateFlow(emptyList())
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ProdutosViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return ProdutosViewModel(productDao) as T
+            return ProdutosViewModel(productDao, cartItems) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

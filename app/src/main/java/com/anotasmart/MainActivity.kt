@@ -216,7 +216,7 @@ fun ScreenStructure(
                     startDestination = Screen.Venda.route
                 ) {
                     composable(Screen.Venda.route) { VendaScreen(cartViewModel = cartViewModel) }
-                    composable(Screen.Produtos.route) { ProdutosScreen() }
+                    composable(Screen.Produtos.route) { ProdutosScreen(cartItems = cartViewModel.items) }
                     composable(Screen.Pedidos.route) { PedidosScreen() }
                     composable(Screen.Clientes.route) { 
                         ClientesScreen(

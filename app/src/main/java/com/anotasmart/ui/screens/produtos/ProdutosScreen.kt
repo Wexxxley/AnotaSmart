@@ -23,19 +23,29 @@ import com.anotasmart.ui.viewModels.ProdutosViewModel
 
 import androidx.compose.ui.platform.LocalContext
 import com.anotasmart.AnotaSmartApplication
+import com.anotasmart.model.CartItem
 import com.anotasmart.model.ImageDirectory
 import com.anotasmart.ui.components.DoubleDeleteConfirmationDialog
 import com.anotasmart.ui.viewModels.CategoriasViewModelFactory
 import com.anotasmart.ui.viewModels.ProdutosViewModelFactory
 import com.anotasmart.utils.ImageUtils
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
-fun ProdutosScreen() {
+fun ProdutosScreen(
+    cartItems: StateFlow<List<CartItem>> = MutableStateFlow(emptyList()),
+    produtosViewModel: ProdutosViewModel? = null
+) {
     val context = LocalContext.current
     val database = (context.applicationContext as AnotaSmartApplication).database
-    val viewModel: ProdutosViewModel = viewModel(
-        factory = ProdutosViewModelFactory(database.productDao())
+    
+    // Se o viewModel não for passado (ex: via NavHost), cria um localmente (sem cartItems)
+    // Mas no fluxo principal, o MainActivity passará o viewModel com cartItems injetado.
+    val viewModel: ProdutosViewModel = produtosViewModel ?: viewModel(
+        factory = ProdutosViewModelFactory(database.productDao(), cartItems)
     )
+
     val categoriasViewModel: CategoriasViewModel = viewModel(
         factory = CategoriasViewModelFactory(database.categoryDao())
     )
@@ -48,7 +58,16 @@ fun ProdutosScreen() {
     val mostrarModalNovoProduto by viewModel.mostrarModalNovoProduto.collectAsState()
     val mostrarModalNovoServico by viewModel.mostrarModalNovoServico.collectAsState()
     val produtoParaDeletar by viewModel.produtoParaDeletar.collectAsState()
+    val mensagemErro by viewModel.mensagemErro.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
     var expandedFab by remember { mutableStateOf(false) }
+
+    LaunchedEffect(mensagemErro) {
+        mensagemErro?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.limparErro()
+        }
+    }
 
     // Diálogo de Confirmação de Exclusão (Dupla Etapa)
     DoubleDeleteConfirmationDialog(
@@ -131,6 +150,11 @@ fun ProdutosScreen() {
                 )
             }
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 80.dp)
+        )
 
         // Modais
         produtoParaEstoque?.let { produto ->
