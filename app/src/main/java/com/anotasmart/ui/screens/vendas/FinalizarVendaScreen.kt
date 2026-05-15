@@ -40,7 +40,8 @@ fun FinalizarVendaScreen(
         factory = FinalizarVendaViewModelFactory(database.clientDao())
     )
 
-    val clientes by viewModel.clientes.collectAsState()
+    val clientes by viewModel.clientesFiltrados.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
     val clienteSelecionado by viewModel.clienteSelecionado.collectAsState()
     val metodoPagamento by viewModel.metodoPagamento.collectAsState()
 
@@ -73,11 +74,17 @@ fun FinalizarVendaScreen(
         item {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    text = "Selecionar Cliente *",
+                    text = "Selecionar Cliente",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 
+                com.anotasmart.ui.components.BarraBusca(
+                    query = searchQuery,
+                    onQueryChange = viewModel::onSearchQueryChanged,
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                )
+
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     contentPadding = PaddingValues(vertical = 8.dp)

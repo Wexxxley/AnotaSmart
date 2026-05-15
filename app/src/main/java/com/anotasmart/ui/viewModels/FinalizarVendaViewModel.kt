@@ -10,11 +10,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
 class FinalizarVendaViewModel(private val clientDao: ClientDao) : ViewModel() {
-    val clientes: StateFlow<List<Client>> = clientDao.getAll()
+    private val _clientes = clientDao.getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    val clientesFiltrados = combine(_clientes, _searchQuery) { clientes, query ->
+        if (query.isBlank()) clientes
+        else clientes.filter { it.nome.contains(query, ignoreCase = true) }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _clienteSelecionado = MutableStateFlow<Client?>(null)
     val clienteSelecionado: StateFlow<Client?> = _clienteSelecionado.asStateFlow()
@@ -28,6 +37,10 @@ class FinalizarVendaViewModel(private val clientDao: ClientDao) : ViewModel() {
 
     fun selecionarMetodoPagamento(metodo: PaymentMethod) {
         _metodoPagamento.value = metodo
+    }
+
+    fun onSearchQueryChanged(query: String) {
+        _searchQuery.value = query
     }
 }
 

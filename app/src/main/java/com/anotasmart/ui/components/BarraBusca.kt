@@ -13,13 +13,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun BarraBusca(query: String, onQueryChange: (String) -> Unit) {
+fun BarraBusca(
+    query: String, 
+    onQueryChange: (String) -> Unit,
+    modifier: Modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+) {
     OutlinedTextField(
         value = query,
         onValueChange = onQueryChange,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier = modifier,
         placeholder = { Text("Buscar") },
         leadingIcon = {
             Icon(
