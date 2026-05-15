@@ -48,6 +48,47 @@ class CategoriasViewModel(private val categoryDao: CategoryDao) : ViewModel() {
         _mostrarModalNovaCategoria.value = false
     }
 
+    private val _categoriaParaDeletar = MutableStateFlow<Category?>(null)
+    val categoriaParaDeletar: StateFlow<Category?> = _categoriaParaDeletar.asStateFlow()
+
+    private val _mensagemErro = MutableStateFlow<String?>(null)
+    val mensagemErro: StateFlow<String?> = _mensagemErro.asStateFlow()
+
+    fun limparErro() {
+        _mensagemErro.value = null
+    }
+
+    fun selecionarCategoriaParaDelecao(categoria: Category) {
+        viewModelScope.launch {
+            val countProducts = withContext(Dispatchers.IO) {
+                categoryDao.countProductsByCategory(categoria.id)
+            }
+            val countExpenses = withContext(Dispatchers.IO) {
+                categoryDao.countExpensesByCategory(categoria.id)
+            }
+
+            if (countProducts > 0 || countExpenses > 0) {
+                _mensagemErro.value = "Não é possível excluir esta categoria pois ela possui itens ou despesas associados."
+                return@launch
+            }
+
+            _categoriaParaDeletar.value = categoria
+        }
+    }
+
+    fun fecharModalDelecao() {
+        _categoriaParaDeletar.value = null
+    }
+
+    fun deletarCategoria(categoria: Category) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                categoryDao.delete(categoria)
+            }
+            fecharModalDelecao()
+        }
+    }
+
     fun salvarNovaCategoria(nome: String, tipo: CategoryType) {
         viewModelScope.launch {
             val novaCategoria = Category(

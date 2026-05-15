@@ -26,10 +26,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.anotasmart.AnotaSmartApplication
 import com.anotasmart.model.CategoryType
 import com.anotasmart.ui.components.DialogNovaCategoria
+import com.anotasmart.ui.components.DoubleDeleteConfirmationDialog
 import com.anotasmart.ui.viewModels.CategoriasViewModel
 import com.anotasmart.ui.viewModels.CategoriasViewModelFactory
+import androidx.compose.foundation.combinedClickable
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun CategoriasScreen() {
     val context = LocalContext.current
@@ -42,6 +44,26 @@ fun CategoriasScreen() {
     val categorias by viewModel.categorias.collectAsState()
     val categoriasFiltradas = categorias.filter { it.tipo == selectedType && it.id != "1" }
     val mostrarModalNovaCategoria by viewModel.mostrarModalNovaCategoria.collectAsState()
+    val categoriaParaDeletar by viewModel.categoriaParaDeletar.collectAsState()
+    val mensagemErro by viewModel.mensagemErro.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(mensagemErro) {
+        mensagemErro?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.limparErro()
+        }
+    }
+
+    DoubleDeleteConfirmationDialog(
+        showDialog = categoriaParaDeletar != null,
+        onDismissRequest = { viewModel.fecharModalDelecao() },
+        onConfirm = { categoriaParaDeletar?.let { viewModel.deletarCategoria(it) } },
+        title = "Excluir Categoria",
+        message1 = "Deseja excluir a categoria '${categoriaParaDeletar?.nome}'?",
+        message2 = "Esta ação removerá a categoria permanentemente. Confirmar?",
+        confirmButtonText = "Excluir Categoria"
+    )
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -91,32 +113,47 @@ fun CategoriasScreen() {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 categoriasFiltradas.forEach { categoria ->
-                    SuggestionChip(
-                        onClick = { },
-                        label = { 
-                            Text(
-                                text = categoria.nome,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            ) 
-                        },
-                        shape = RoundedCornerShape(8.dp)
-                    )
+                    Surface(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .combinedClickable(
+                                onClick = { },
+                                onLongClick = { viewModel.selecionarCategoriaParaDelecao(categoria) }
+                            ),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        tonalElevation = 1.dp,
+                        shape = RoundedCornerShape(8.dp),
+                        border = AssistChipDefaults.assistChipBorder(enabled = true)
+                    ) {
+                        Text(
+                            text = categoria.nome,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                            style = MaterialTheme.typography.labelLarge,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
             }
         }
 
-        // FAB
         FloatingActionButton(
             onClick = { viewModel.abrirModalNovaCategoria() },
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(16.dp),
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
+                .padding(16.dp)
         ) {
             Icon(Icons.Default.Add, contentDescription = "Nova Categoria")
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 80.dp) // Acima do FAB e BottomBar
+        )
 
         if (mostrarModalNovaCategoria) {
             DialogNovaCategoria(

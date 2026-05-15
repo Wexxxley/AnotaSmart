@@ -20,4 +20,10 @@ interface CategoryDao {
 
     @Query("SELECT * FROM Category WHERE id = :id")
     fun getById(id: String): Category?
+
+    @Query("SELECT COUNT(*) FROM Product WHERE categoryId = :categoryId AND isDeleted = 0")
+    suspend fun countProductsByCategory(categoryId: String): Int
+
+    @Query("SELECT COUNT(*) FROM Expense WHERE categoryId = :categoryId")
+    suspend fun countExpensesByCategory(categoryId: String): Int
 }
