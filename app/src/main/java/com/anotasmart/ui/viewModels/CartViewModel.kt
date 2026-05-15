@@ -1,39 +1,91 @@
 package com.anotasmart.ui.viewModels
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import com.anotasmart.database.dao.CartItemDao
+import com.anotasmart.database.dao.ProductDao
 import com.anotasmart.model.CartItem
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import com.anotasmart.model.entity.CartItemEntity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class CartViewModel : ViewModel() {
-    private val _items = MutableStateFlow<List<CartItem>>(emptyList())
-    val items: StateFlow<List<CartItem>> = _items.asStateFlow()
+class CartViewModel(
+    private val cartItemDao: CartItemDao,
+    private val productDao: ProductDao
+) : ViewModel() {
 
-    val totalItens: StateFlow<Int> = MutableStateFlow(0).apply {}
-    
-    private val _totalValor = MutableStateFlow(0.0)
-    val totalValor: StateFlow<Double> = _totalValor.asStateFlow()
-
-    fun adicionarItem(item: CartItem) {
-        _items.update { currentItems ->
-            val existingItem = currentItems.find { it.product?.id == item.product?.id && it.product != null }
-            if (existingItem != null) {
-                currentItems.map {
-                    if (it.id == existingItem.id) it.copy(quantidade = it.quantidade + item.quantidade)
-                    else it
+    // Transformamos as entidades do banco de volta para o modelo de UI CartItem
+    val items: StateFlow<List<CartItem>> = cartItemDao.getAll()
+        .map { entities ->
+            entities.map { entity ->
+                val product = entity.productId?.let { id ->
+                    withContext(Dispatchers.IO) { productDao.getById(id) }
                 }
-            } else {
-                currentItems + item
+                CartItem(
+                    id = entity.id,
+                    product = product,
+                    nome = entity.nome,
+                    precoVenda = entity.precoVenda,
+                    precoCusto = entity.precoCusto,
+                    quantidade = entity.quantidade,
+                    unidadeMedida = entity.unidadeMedida
+                )
             }
         }
-        atualizarTotais()
+        .flowOn(Dispatchers.IO)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val totalValor: StateFlow<Double> = items.map { list ->
+        list.sumOf { it.total }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
+
+    fun adicionarItem(item: CartItem) {
+        viewModelScope.launch {
+            val currentItems = items.value
+            val existingItem = currentItems.find { it.product?.id == item.product?.id && it.product != null }
+            
+            if (existingItem != null) {
+                val updatedEntity = CartItemEntity(
+                    id = existingItem.id,
+                    productId = existingItem.product?.id,
+                    nome = existingItem.nome,
+                    precoVenda = existingItem.precoVenda,
+                    precoCusto = existingItem.precoCusto,
+                    quantidade = existingItem.quantidade + item.quantidade,
+                    unidadeMedida = existingItem.unidadeMedida
+                )
+                withContext(Dispatchers.IO) {
+                    cartItemDao.update(updatedEntity)
+                }
+            } else {
+                val newEntity = CartItemEntity(
+                    id = item.id,
+                    productId = item.product?.id,
+                    nome = item.nome,
+                    precoVenda = item.precoVenda,
+                    precoCusto = item.precoCusto,
+                    quantidade = item.quantidade,
+                    unidadeMedida = item.unidadeMedida
+                )
+                withContext(Dispatchers.IO) {
+                    cartItemDao.insert(newEntity)
+                }
+            }
+        }
     }
 
     fun removerItem(itemId: String) {
-        _items.update { it.filterNot { item -> item.id == itemId } }
-        atualizarTotais()
+        viewModelScope.launch {
+            val item = withContext(Dispatchers.IO) { cartItemDao.getById(itemId) }
+            if (item != null) {
+                withContext(Dispatchers.IO) {
+                    cartItemDao.delete(item)
+                }
+            }
+        }
     }
 
     fun alterarQuantidade(itemId: String, novaQuantidade: Double) {
@@ -41,22 +93,35 @@ class CartViewModel : ViewModel() {
             removerItem(itemId)
             return
         }
-        _items.update { currentItems ->
-            currentItems.map {
-                if (it.id == itemId) it.copy(quantidade = novaQuantidade)
-                else it
+        viewModelScope.launch {
+            val entity = withContext(Dispatchers.IO) { cartItemDao.getById(itemId) }
+            if (entity != null) {
+                val updated = entity.copy(quantidade = novaQuantidade)
+                withContext(Dispatchers.IO) {
+                    cartItemDao.update(updated)
+                }
             }
         }
-        atualizarTotais()
     }
 
-    private fun atualizarTotais() {
-        val total = _items.value.sumOf { it.total }
-        _totalValor.value = total
-    }
-    
     fun limparCarrinho() {
-        _items.value = emptyList()
-        _totalValor.value = 0.0
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                cartItemDao.deleteAll()
+            }
+        }
+    }
+}
+
+class CartViewModelFactory(
+    private val cartItemDao: CartItemDao,
+    private val productDao: ProductDao
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(CartViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return CartViewModel(cartItemDao, productDao) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

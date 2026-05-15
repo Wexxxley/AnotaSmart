@@ -51,9 +51,10 @@ class EnumsConverters {
         Sale::class,
         SaleItem::class,
         Installment::class,
-        Expense::class
+        Expense::class,
+        CartItemEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(EnumsConverters::class)
@@ -62,6 +63,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun categoryDao(): CategoryDao
     abstract fun productDao(): com.anotasmart.database.dao.ProductDao
     abstract fun clientDao(): com.anotasmart.database.dao.ClientDao
+    abstract fun cartItemDao(): com.anotasmart.database.dao.CartItemDao
 
     companion object {
         @Volatile

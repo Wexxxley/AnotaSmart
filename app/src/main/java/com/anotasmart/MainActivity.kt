@@ -69,6 +69,7 @@ import com.anotasmart.ui.screens.carrinho.CarrinhoScreen
 import com.anotasmart.ui.screens.vendas.FinalizarVendaScreen
 import com.anotasmart.ui.theme.AppTheme
 import com.anotasmart.ui.viewModels.CartViewModel
+import com.anotasmart.ui.viewModels.CartViewModelFactory
 import com.anotasmart.ui.viewModels.ClientesViewModel
 import com.anotasmart.ui.viewModels.UserViewModel
 import com.anotasmart.ui.viewModels.UserViewModelFactory
@@ -113,8 +114,11 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    val db = (context.applicationContext as AnotaSmartApplication).database
                     val navController = rememberNavController()
-                    val cartViewModel: CartViewModel = viewModel()
+                    val cartViewModel: CartViewModel = viewModel(
+                        factory = CartViewModelFactory(db.cartItemDao(), db.productDao())
+                    )
                     ScreenStructure(
                         navController = navController,
                         cartViewModel = cartViewModel,
