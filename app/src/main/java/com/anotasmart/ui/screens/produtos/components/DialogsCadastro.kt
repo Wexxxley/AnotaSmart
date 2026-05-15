@@ -44,6 +44,7 @@ fun DialogEditarItem(
         tipoItem: ItemType,
         quantidadeEstoque: Double
     ) -> Unit,
+    onDeletar: (Product) -> Unit,
     onNovaCategoria: (String, CategoryType) -> Unit
 ) {
     var nome by remember { mutableStateOf(produto.nome) }
@@ -156,6 +157,15 @@ fun DialogEditarItem(
                 label = "Preço Venda",
                 modifier = Modifier.fillMaxWidth()
             )
+        }
+
+        OutlinedButton(
+            onClick = { onDeletar(produto) },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.error)
+        ) {
+            Text("Excluir ${if (produto.tipoItem == ItemType.PRODUTO) "Produto" else "Serviço"}")
         }
     }
 }

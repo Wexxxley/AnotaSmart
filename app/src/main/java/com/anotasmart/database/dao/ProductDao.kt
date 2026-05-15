@@ -6,10 +6,10 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ProductDao {
-    @Query("SELECT * FROM Product ORDER BY nome ASC")
+    @Query("SELECT * FROM Product WHERE isDeleted = 0 ORDER BY nome ASC")
     fun getAll(): Flow<List<Product>>
 
-    @Query("SELECT * FROM Product WHERE id = :id")
+    @Query("SELECT * FROM Product WHERE id = :id AND isDeleted = 0")
     fun getById(id: String): Product?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

@@ -28,5 +28,6 @@ data class Product(
     val unidadeMedida: UnitType,
     val tipoItem: ItemType,
     val quantidadeEstoque: Double,
-    val imagePath: String?
+    val imagePath: String?,
+    val isDeleted: Boolean = false
 )

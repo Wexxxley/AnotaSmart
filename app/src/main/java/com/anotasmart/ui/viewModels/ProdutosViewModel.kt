@@ -86,6 +86,37 @@ class ProdutosViewModel(private val productDao: ProductDao) : ViewModel() {
         _mostrarModalNovoServico.value = false
     }
 
+    private val _produtoParaDeletar = MutableStateFlow<Product?>(null)
+    val produtoParaDeletar: StateFlow<Product?> = _produtoParaDeletar.asStateFlow()
+
+    fun selecionarProdutoParaDelecao(produto: Product) {
+        _produtoParaDeletar.value = produto
+    }
+
+    fun fecharModalDelecao() {
+        _produtoParaDeletar.value = null
+    }
+
+    fun deletarProduto(produto: Product) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                // Limpeza da imagem física se existir
+                produto.imagePath?.let { path ->
+                    com.anotasmart.utils.ImageUtils.deleteImageFromInternalStorage(path)
+                }
+
+                // Soft delete no banco
+                val produtoDeletado = produto.copy(
+                    isDeleted = true,
+                    imagePath = null // Limpa o path pois o arquivo foi deletado
+                )
+                productDao.update(produtoDeletado)
+            }
+            fecharModalDelecao()
+            fecharModalEdicao()
+        }
+    }
+
     fun salvarNovoProduto(
         nome: String,
         categoryId: String?,

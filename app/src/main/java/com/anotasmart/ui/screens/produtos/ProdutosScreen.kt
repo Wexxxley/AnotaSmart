@@ -24,6 +24,7 @@ import com.anotasmart.ui.viewModels.ProdutosViewModel
 import androidx.compose.ui.platform.LocalContext
 import com.anotasmart.AnotaSmartApplication
 import com.anotasmart.model.ImageDirectory
+import com.anotasmart.ui.components.DoubleDeleteConfirmationDialog
 import com.anotasmart.ui.viewModels.CategoriasViewModelFactory
 import com.anotasmart.ui.viewModels.ProdutosViewModelFactory
 import com.anotasmart.utils.ImageUtils
@@ -46,7 +47,25 @@ fun ProdutosScreen() {
     val produtoParaEstoque by viewModel.produtoParaEstoque.collectAsState()
     val mostrarModalNovoProduto by viewModel.mostrarModalNovoProduto.collectAsState()
     val mostrarModalNovoServico by viewModel.mostrarModalNovoServico.collectAsState()
+    val produtoParaDeletar by viewModel.produtoParaDeletar.collectAsState()
     var expandedFab by remember { mutableStateOf(false) }
+
+    // Diálogo de Confirmação de Exclusão (Dupla Etapa)
+    DoubleDeleteConfirmationDialog(
+        showDialog = produtoParaDeletar != null,
+        onDismissRequest = { viewModel.fecharModalDelecao() },
+        onConfirm = { produtoParaDeletar?.let { viewModel.deletarProduto(it) } },
+        title = if ((produtoParaDeletar?.quantidadeEstoque ?: 0.0) > 0) "Aviso de Estoque" else "Confirmar Exclusão",
+        message1 = produtoParaDeletar?.let { produto ->
+            if (produto.quantidadeEstoque > 0) {
+                "ATENÇÃO: Este produto ainda possui ${produto.quantidadeEstoque} unidades em estoque. Ao excluir, você perderá o controle deste saldo. Deseja continuar?"
+            } else {
+                "Tem certeza que deseja excluir '${produto.nome}'? Ele não aparecerá mais nas suas listas, mas o histórico de vendas passadas será preservado."
+            }
+        } ?: "",
+        message2 = "O item será removido das listas de seleção, mas o histórico financeiro será mantido. Confirmar?",
+        confirmButtonText = "Confirmar Exclusão"
+    )
 
     Box(
         modifier = Modifier
@@ -174,6 +193,7 @@ fun ProdutosScreen() {
                     }
                     viewModel.salvarEdicao(id, nome, categoryId, precoVenda, precoCusto, unidade, internalPath, tipoItem, estoque)
                 },
+                onDeletar = { viewModel.selecionarProdutoParaDelecao(it) },
                 onNovaCategoria = { nome, tipo ->
                     categoriasViewModel.salvarNovaCategoria(nome, tipo)
                 }
