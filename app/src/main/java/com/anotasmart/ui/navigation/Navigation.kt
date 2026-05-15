@@ -2,6 +2,7 @@ package com.anotasmart.ui.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.MoreHoriz
@@ -32,6 +33,7 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     object Sobre : Screen("sobre", "Sobre", Icons.Default.Info)
     object Carrinho : Screen("carrinho", "Carrinho", Icons.Default.ShoppingCart)
     object FinalizarVenda : Screen("finalizar_venda", "Finalizar Venda", Icons.Default.AttachMoney)
+    object VendaSucesso : Screen("venda_sucesso", "Venda Realizada", Icons.Default.CheckCircle)
     object ClienteDetalhes : Screen("cliente_detalhes/{clientId}", "Detalhes do Cliente", Icons.Default.People) {
         fun createRoute(clientId: String) = "cliente_detalhes/$clientId"
     }

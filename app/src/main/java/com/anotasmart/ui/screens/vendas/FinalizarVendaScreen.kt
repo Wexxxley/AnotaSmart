@@ -26,24 +26,46 @@ import coil.compose.AsyncImage
 import com.anotasmart.AnotaSmartApplication
 import com.anotasmart.model.PaymentMethod
 import com.anotasmart.ui.components.StandardScreen
+import com.anotasmart.ui.screens.vendas.components.DialogConfirmacaoVenda
 import com.anotasmart.ui.viewModels.FinalizarVendaViewModel
 import com.anotasmart.ui.viewModels.FinalizarVendaViewModelFactory
 
 @Composable
 fun FinalizarVendaScreen(
     onBackClick: () -> Unit,
-    onConfirmarVenda: () -> Unit
+    onConfirmarVenda: () -> Unit // Este parâmetro pode ser renomeado ou usado para navegação após sucesso
 ) {
     val context = LocalContext.current
     val database = (context.applicationContext as AnotaSmartApplication).database
     val viewModel: FinalizarVendaViewModel = viewModel(
-        factory = FinalizarVendaViewModelFactory(database.clientDao())
+        factory = FinalizarVendaViewModelFactory(
+            database.clientDao(),
+            database.cartItemDao(),
+            database.saleDao(),
+            database.productDao()
+        )
     )
 
     val clientes by viewModel.clientesFiltrados.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val clienteSelecionado by viewModel.clienteSelecionado.collectAsState()
     val metodoPagamento by viewModel.metodoPagamento.collectAsState()
+    val totalVenda by viewModel.totalVenda.collectAsState()
+
+    var showConfirmDialog by remember { mutableStateOf(false) }
+
+    if (showConfirmDialog) {
+        DialogConfirmacaoVenda(
+            totalVenda = totalVenda,
+            onDismissRequest = { showConfirmDialog = false },
+            onConfirmar = {
+                viewModel.confirmarVendaAVista {
+                    showConfirmDialog = false
+                    onConfirmarVenda()
+                }
+            }
+        )
+    }
 
     StandardScreen(
         title = "Finalizar Venda",
@@ -60,7 +82,13 @@ fun FinalizarVendaScreen(
                         .padding(16.dp)
                 ) {
                     Button(
-                        onClick = onConfirmarVenda,
+                        onClick = {
+                            if (metodoPagamento == PaymentMethod.DINHEIRO || metodoPagamento == PaymentMethod.PIX) {
+                                showConfirmDialog = true
+                            } else {
+                                // Caso parcelado (venda a prazo) - será implementado depois
+                            }
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         enabled = (metodoPagamento != null)
                     ) {

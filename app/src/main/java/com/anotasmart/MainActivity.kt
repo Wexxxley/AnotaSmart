@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Brightness2
@@ -67,6 +68,7 @@ import com.anotasmart.ui.screens.chavepix.ChavePixScreen
 import com.anotasmart.ui.screens.sobre.SobreScreen
 import com.anotasmart.ui.screens.carrinho.CarrinhoScreen
 import com.anotasmart.ui.screens.vendas.FinalizarVendaScreen
+import com.anotasmart.ui.screens.vendas.VendaSucessoScreen
 import com.anotasmart.ui.theme.AppTheme
 import com.anotasmart.ui.viewModels.CartViewModel
 import com.anotasmart.ui.viewModels.CartViewModelFactory
@@ -175,22 +177,29 @@ fun ScreenStructure(
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
-                BarraSuperior(
-                    quantidadeItens = quantidadeItens,
-                    onMenuClick = { scope.launch { drawerState.open() } },
-                    onCartClick = { 
-                        if (currentRoute != Screen.Carrinho.route) {
-                            navController.navigate(Screen.Carrinho.route) {
-                                launchSingleTop = true
-                                restoreState = true
+                if (currentRoute != Screen.VendaSucesso.route) {
+                    BarraSuperior(
+                        quantidadeItens = quantidadeItens,
+                        onMenuClick = { scope.launch { drawerState.open() } },
+                        onCartClick = { 
+                            if (currentRoute != Screen.Carrinho.route) {
+                                navController.navigate(Screen.Carrinho.route) {
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
                             }
                         }
-                    }
-                )
+                    )
+                }
             },
             bottomBar = {
                 Column {
-                    val routesToHideSummary = listOf(Screen.Carrinho.route, Screen.FinalizarVenda.route, Screen.ClienteDetalhes.route)
+                    val routesToHideSummary = listOf(
+                        Screen.Carrinho.route, 
+                        Screen.FinalizarVenda.route, 
+                        Screen.ClienteDetalhes.route,
+                        Screen.VendaSucesso.route
+                    )
                     if (quantidadeItens > 0 && currentRoute !in routesToHideSummary) {
                         ResumoCarrinho(
                             quantidadeItens = quantidadeItens,
@@ -214,7 +223,7 @@ fun ScreenStructure(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
+                    .padding(if (currentRoute == Screen.VendaSucesso.route) PaddingValues(0.dp) else innerPadding)
                     .background(MaterialTheme.colorScheme.background)
             ) {
                 NavHost(
@@ -249,7 +258,20 @@ fun ScreenStructure(
                     composable(Screen.FinalizarVenda.route) {
                         FinalizarVendaScreen(
                             onBackClick = { navController.popBackStack() },
-                            onConfirmarVenda = { /* Próxima etapa */ }
+                            onConfirmarVenda = { 
+                                navController.navigate(Screen.VendaSucesso.route) {
+                                    popUpTo(Screen.Venda.route) { inclusive = false }
+                                }
+                            }
+                        )
+                    }
+                    composable(Screen.VendaSucesso.route) {
+                        VendaSucessoScreen(
+                            onNovaVendaClick = {
+                                navController.navigate(Screen.Venda.route) {
+                                    popUpTo(Screen.Venda.route) { inclusive = true }
+                                }
+                            }
                         )
                     }
                     composable(Screen.ClienteDetalhes.route) { backStackEntry ->
