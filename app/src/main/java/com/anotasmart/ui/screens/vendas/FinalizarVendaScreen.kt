@@ -27,6 +27,7 @@ import com.anotasmart.AnotaSmartApplication
 import com.anotasmart.model.PaymentMethod
 import com.anotasmart.ui.components.StandardScreen
 import com.anotasmart.ui.screens.vendas.components.DialogConfirmacaoVenda
+import com.anotasmart.ui.screens.vendas.components.DialogVendaParcelada
 import com.anotasmart.ui.viewModels.FinalizarVendaViewModel
 import com.anotasmart.ui.viewModels.FinalizarVendaViewModelFactory
 
@@ -53,6 +54,7 @@ fun FinalizarVendaScreen(
     val totalVenda by viewModel.totalVenda.collectAsState()
 
     var showConfirmDialog by remember { mutableStateOf(false) }
+    var showInstallmentDialog by remember { mutableStateOf(false) }
 
     if (showConfirmDialog) {
         DialogConfirmacaoVenda(
@@ -61,6 +63,19 @@ fun FinalizarVendaScreen(
             onConfirmar = {
                 viewModel.confirmarVendaAVista {
                     showConfirmDialog = false
+                    onConfirmarVenda()
+                }
+            }
+        )
+    }
+
+    if (showInstallmentDialog) {
+        DialogVendaParcelada(
+            totalVenda = totalVenda,
+            onDismissRequest = { showInstallmentDialog = false },
+            onConfirmar = { numParcelas, dataPrimeira ->
+                viewModel.confirmarVendaParcelada(numParcelas, dataPrimeira) {
+                    showInstallmentDialog = false
                     onConfirmarVenda()
                 }
             }
@@ -85,8 +100,8 @@ fun FinalizarVendaScreen(
                         onClick = {
                             if (metodoPagamento == PaymentMethod.DINHEIRO || metodoPagamento == PaymentMethod.PIX) {
                                 showConfirmDialog = true
-                            } else {
-                                // Caso parcelado (venda a prazo) - será implementado depois
+                            } else if (metodoPagamento == PaymentMethod.PARCELADO) {
+                                showInstallmentDialog = true
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),

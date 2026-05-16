@@ -25,6 +25,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.Instant
+import java.time.ZoneId
 import java.util.UUID
 
 class FinalizarVendaViewModel(
@@ -111,6 +113,84 @@ class FinalizarVendaViewModel(
             withContext(Dispatchers.IO) {
                 // Persistir venda
                 saleDao.completeSale(sale, saleItems, listOf(installment))
+
+                // Atualizar estoque
+                items.forEach { cartItem ->
+                    if (cartItem.productId != null) {
+                        val product = productDao.getById(cartItem.productId)
+                        if (product != null) {
+                            productDao.update(product.copy(quantidadeEstoque = product.quantidadeEstoque - cartItem.quantidade))
+                        }
+                    }
+                }
+
+                // Limpar carrinho
+                cartItemDao.deleteAll()
+            }
+
+            onSuccess()
+        }
+    }
+
+    fun confirmarVendaParcelada(numParcelas: Int, dataPrimeiraParcelaMillis: Long, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            val items = _cartItems.first()
+            if (items.isEmpty()) return@launch
+
+            val total = totalVenda.value
+            val saleId = UUID.randomUUID().toString()
+            val agora = System.currentTimeMillis()
+
+            val sale = Sale(
+                id = saleId,
+                clientId = _clienteSelecionado.value?.id,
+                dataVenda = agora,
+                status = SaleStatus.PENDENTE,
+                valorTotal = total
+            )
+
+            val saleItems = items.map { cartItem ->
+                SaleItem(
+                    id = UUID.randomUUID().toString(),
+                    saleId = saleId,
+                    productId = cartItem.productId,
+                    nomeCustomizado = if (cartItem.productId == null) cartItem.nome else null,
+                    quantidade = cartItem.quantidade,
+                    custoUnitarioNoAto = cartItem.precoCusto ?: 0.0,
+                    precoVendaNoAto = cartItem.precoVenda
+                )
+            }
+
+            val valorParcela = total / numParcelas
+            val installments = mutableListOf<Installment>()
+            
+            val dataInicial = Instant.ofEpochMilli(dataPrimeiraParcelaMillis)
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate()
+
+            for (i in 1..numParcelas) {
+                val dataVencimento = dataInicial.plusMonths((i - 1).toLong())
+                    .atStartOfDay(ZoneId.systemDefault())
+                    .toInstant()
+                    .toEpochMilli()
+
+                installments.add(
+                    Installment(
+                        id = UUID.randomUUID().toString(),
+                        saleId = saleId,
+                        numeroParcela = i,
+                        valor = valorParcela,
+                        dataVencimento = dataVencimento,
+                        dataPagamento = null,
+                        statusParcela = InstallmentStatus.PENDENTE,
+                        metodoPagamento = PaymentMethod.PARCELADO
+                    )
+                )
+            }
+
+            withContext(Dispatchers.IO) {
+                // Persistir venda
+                saleDao.completeSale(sale, saleItems, installments)
 
                 // Atualizar estoque
                 items.forEach { cartItem ->
