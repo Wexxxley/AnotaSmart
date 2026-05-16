@@ -19,10 +19,10 @@ fun GradeItemsProduto(
     onAddEstoqueClick: (Product) -> Unit
 ) {
     LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
-        contentPadding = PaddingValues(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        columns = GridCells.Fixed(4),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier.fillMaxSize()
     ) {
         items(produtos) { produto ->

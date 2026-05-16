@@ -41,13 +41,13 @@ fun ItemCard(
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
         ) {
             Column(
-                modifier = Modifier.padding(8.dp),
+                modifier = Modifier.padding(4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(100.dp)
+                        .aspectRatio(1f)
                         .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp)),
                     contentAlignment = Alignment.Center
                 ) {
@@ -57,8 +57,7 @@ fun ItemCard(
                             model = imageModel,
                             contentDescription = "Imagem do produto ${produto.nome}",
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(100.dp)
+                                .fillMaxSize()
                                 .clip(RoundedCornerShape(4.dp)),
                             contentScale = ContentScale.Crop
                         )
@@ -67,12 +66,12 @@ fun ItemCard(
                             imageVector = Icons.Default.Inventory2,
                             contentDescription = "Sem imagem",
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
                     text = produto.nome,
@@ -107,8 +106,8 @@ fun ItemCard(
                 onClick = onAddEstoqueClick,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(4.dp)
-                    .size(28.dp),
+                    .padding(2.dp)
+                    .size(20.dp),
                 shape = CircleShape,
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -116,7 +115,7 @@ fun ItemCard(
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Adicionar estoque",
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(12.dp)
                 )
             }
         }
