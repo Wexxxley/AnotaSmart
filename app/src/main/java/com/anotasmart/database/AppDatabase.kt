@@ -65,6 +65,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun clientDao(): com.anotasmart.database.dao.ClientDao
     abstract fun cartItemDao(): com.anotasmart.database.dao.CartItemDao
     abstract fun saleDao(): com.anotasmart.database.dao.SaleDao
+    abstract fun installmentDao(): com.anotasmart.database.dao.InstallmentDao
 
     companion object {
         @Volatile

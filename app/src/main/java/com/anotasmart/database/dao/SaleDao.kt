@@ -1,12 +1,22 @@
 package com.anotasmart.database.dao
 
 import androidx.room.*
+import com.anotasmart.model.SaleWithRelations
 import com.anotasmart.model.entity.Installment
 import com.anotasmart.model.entity.Sale
 import com.anotasmart.model.entity.SaleItem
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SaleDao {
+    @Transaction
+    @Query("SELECT * FROM Sale ORDER BY dataVenda DESC")
+    fun getAllWithRelations(): Flow<List<SaleWithRelations>>
+
+    @Transaction
+    @Query("SELECT * FROM Sale WHERE id = :id")
+    fun getByIdWithRelations(id: String): Flow<SaleWithRelations?>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSale(sale: Sale): Long
 

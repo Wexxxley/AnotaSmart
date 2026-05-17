@@ -232,7 +232,14 @@ fun ScreenStructure(
                 ) {
                     composable(Screen.Venda.route) { VendaScreen(cartViewModel = cartViewModel) }
                     composable(Screen.Produtos.route) { ProdutosScreen(cartItems = cartViewModel.items) }
-                    composable(Screen.Pedidos.route) { PedidosScreen() }
+                    composable(Screen.Pedidos.route) { 
+                        val context = LocalContext.current
+                        val db = (context.applicationContext as AnotaSmartApplication).database
+                        val pedidosViewModel: com.anotasmart.ui.viewModels.PedidosViewModel = viewModel(
+                            factory = com.anotasmart.ui.viewModels.PedidosViewModelFactory(db.saleDao(), db.installmentDao())
+                        )
+                        PedidosScreen(viewModel = pedidosViewModel) 
+                    }
                     composable(Screen.Clientes.route) { 
                         ClientesScreen(
                             onClientClick = { cliente ->
