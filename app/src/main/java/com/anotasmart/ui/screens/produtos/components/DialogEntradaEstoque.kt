@@ -52,7 +52,8 @@ fun DialogEntradaEstoque(
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     suffix = { Text(produto.unidadeMedida.name) },
-                    isError = quantidadeText.isNotEmpty() && quantidade <= 0
+                    isError = quantidadeText.isNotEmpty() && quantidade <= 0,
+                    singleLine = true
                 )
 
                 OutlinedTextField(
@@ -66,7 +67,8 @@ fun DialogEntradaEstoque(
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     prefix = { Text("R$ ") },
-                    isError = precoCustoText.isNotEmpty() && precoCusto < 0
+                    isError = precoCustoText.isNotEmpty() && precoCusto < 0,
+                    singleLine = true
                 )
 
                 Row(

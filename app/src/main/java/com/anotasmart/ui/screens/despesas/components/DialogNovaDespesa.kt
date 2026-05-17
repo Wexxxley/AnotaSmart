@@ -82,7 +82,8 @@ fun DialogNovaDespesa(
             value = descricao,
             onValueChange = { descricao = it },
             label = { Text("Descrição da despesa") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
 
         CampoMoeda(
@@ -106,6 +107,7 @@ fun DialogNovaDespesa(
             label = { Text("Data") },
             modifier = Modifier.fillMaxWidth(),
             readOnly = true,
+            singleLine = true,
             trailingIcon = {
                 IconButton(onClick = { showDatePicker = true }) {
                     Icon(Icons.Default.DateRange, contentDescription = "Selecionar Data")

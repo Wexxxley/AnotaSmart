@@ -108,7 +108,8 @@ fun DialogEditarItem(
             value = nome,
             onValueChange = { nome = it },
             label = { Text(if (produto.tipoItem == ItemType.PRODUTO) "Nome do Produto" else "Nome do Serviço") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
 
         // Categorias
@@ -240,7 +241,8 @@ fun DialogNovoProduto(
             value = nome,
             onValueChange = { nome = it },
             label = { Text("Nome do Produto") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
 
         Text("Categoria", style = MaterialTheme.typography.labelLarge)
@@ -347,7 +349,8 @@ fun DialogNovoServico(
             value = nome,
             onValueChange = { nome = it },
             label = { Text("Nome do Serviço") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
 
         Text("Categoria", style = MaterialTheme.typography.labelLarge)

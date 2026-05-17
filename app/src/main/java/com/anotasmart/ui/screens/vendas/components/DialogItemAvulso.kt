@@ -65,7 +65,8 @@ fun DialogItemAvulso(
                     label = { Text("Preço de Venda") },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    prefix = { Text("R$ ") }
+                    prefix = { Text("R$ ") },
+                    singleLine = true
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -76,7 +77,8 @@ fun DialogItemAvulso(
                     label = { Text("Preço de Custo (Opcional)") },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    prefix = { Text("R$ ") }
+                    prefix = { Text("R$ ") },
+                    singleLine = true
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))

@@ -82,6 +82,9 @@ fun FinalizarVendaScreen(
         )
     }
 
+    val isParceladoSemCliente = metodoPagamento == PaymentMethod.PARCELADO && clienteSelecionado == null
+    val isConfirmEnabled = metodoPagamento != null && !isParceladoSemCliente
+
     StandardScreen(
         title = "Finalizar Venda",
         onBackClick = onBackClick,
@@ -91,11 +94,19 @@ fun FinalizarVendaScreen(
                 tonalElevation = 8.dp,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Box(
+                Column(
                     modifier = Modifier
                         .background(MaterialTheme.colorScheme.surface)
                         .padding(16.dp)
                 ) {
+                    if (isParceladoSemCliente) {
+                        Text(
+                            text = "Selecione um cliente para vendas parceladas",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.padding(bottom = 8.dp).align(Alignment.CenterHorizontally)
+                        )
+                    }
                     Button(
                         onClick = {
                             if (metodoPagamento == PaymentMethod.DINHEIRO || metodoPagamento == PaymentMethod.PIX) {
@@ -105,7 +116,7 @@ fun FinalizarVendaScreen(
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = (metodoPagamento != null)
+                        enabled = isConfirmEnabled
                     ) {
                         Text("CONFIRMAR VENDA")
                     }

@@ -126,7 +126,8 @@ fun DialogNovoCliente(
                         value = nome,
                         onValueChange = { nome = it },
                         label = { Text("Nome do Cliente") },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
                     )
 
                     // Telefone
@@ -137,7 +138,8 @@ fun DialogNovoCliente(
                         modifier = Modifier.fillMaxWidth(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                         visualTransformation = PhoneVisualTransformation(),
-                        placeholder = { Text("(00) 00000-0000") }
+                        placeholder = { Text("(00) 00000-0000") },
+                        singleLine = true
                     )
 
                     // Endereço
@@ -145,7 +147,8 @@ fun DialogNovoCliente(
                         value = endereco,
                         onValueChange = { endereco = it },
                         label = { Text("Endereço") },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
                     )
                 }
 
