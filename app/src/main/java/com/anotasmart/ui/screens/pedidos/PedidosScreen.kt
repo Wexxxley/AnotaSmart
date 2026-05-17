@@ -157,7 +157,7 @@ fun VendaCard(vendaWithRelations: SaleWithRelations) {
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp, 8.dp)) {
+        Column(modifier = Modifier.padding(16.dp, 4.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -182,8 +182,6 @@ fun VendaCard(vendaWithRelations: SaleWithRelations) {
                     color = MaterialTheme.colorScheme.primary
                 )
             }
-
-            Spacer(modifier = Modifier.height(4.dp))
 
             val isParcelado = installments.size > 1 || 
                              (installments.size == 1 && installments.first().metodoPagamento == com.anotasmart.model.PaymentMethod.PARCELADO)
@@ -224,7 +222,8 @@ fun VendaCard(vendaWithRelations: SaleWithRelations) {
                 }
             } else {
                 val label = when {
-                    isParcelado -> "PARCELADO"
+                    installments.any { it.metodoPagamento == com.anotasmart.model.PaymentMethod.PARCELADO } -> "PARCELADO"
+                    installments.size > 1 -> "PARCELADO"
                     installments.isNotEmpty() -> installments.first().metodoPagamento?.name ?: "À VISTA"
                     else -> venda.status.name
                 }

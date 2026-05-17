@@ -67,7 +67,7 @@ class PedidosViewModel(
                     if (updatedInstallments.all { it.statusParcela == InstallmentStatus.PAGA }) {
                         // 4. If all paid, update Sale status to FINALIZADA
                         val updatedSale = targetSale.sale.copy(status = com.anotasmart.model.SaleStatus.FINALIZADA)
-                        saleDao.insertSale(updatedSale)
+                        saleDao.updateSale(updatedSale)
                     }
                 }
             }
