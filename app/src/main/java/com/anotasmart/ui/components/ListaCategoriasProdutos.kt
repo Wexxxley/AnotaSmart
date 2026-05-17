@@ -26,7 +26,7 @@ fun ListaCategoriasProdutos(categorias: List<Category>, categoriaSelecionadaId: 
     Box(modifier = Modifier.fillMaxWidth()) {
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(categorias) { categoria ->

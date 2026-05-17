@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 fun BarraBusca(
     query: String, 
     onQueryChange: (String) -> Unit,
-    modifier: Modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+    modifier: Modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)
 ) {
     OutlinedTextField(
         value = query,
