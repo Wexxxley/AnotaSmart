@@ -286,7 +286,11 @@ fun ScreenStructure(
                         val context = LocalContext.current
                         val db = (context.applicationContext as AnotaSmartApplication).database
                         val clientViewModel: com.anotasmart.ui.viewModels.ClientesViewModel = viewModel(
-                            factory = com.anotasmart.ui.viewModels.ClientesViewModelFactory(db.clientDao())
+                            factory = com.anotasmart.ui.viewModels.ClientesViewModelFactory(
+                                db.clientDao(),
+                                db.saleDao(),
+                                db.installmentDao()
+                            )
                         )
                         ClienteDetalhesScreen(
                             clientId = clientId,

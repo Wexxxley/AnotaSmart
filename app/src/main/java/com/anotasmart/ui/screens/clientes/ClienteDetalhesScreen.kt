@@ -7,18 +7,15 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,8 +30,14 @@ import coil.compose.AsyncImage
 import com.anotasmart.model.entity.Client
 import com.anotasmart.ui.components.DoubleDeleteConfirmationDialog
 import com.anotasmart.ui.components.StandardScreen
+import com.anotasmart.ui.components.expandableGroup
+import com.anotasmart.ui.screens.pedidos.EmptyListMessage
+import com.anotasmart.ui.screens.pedidos.ParcelaCard
+import com.anotasmart.ui.screens.pedidos.VendaCard
 import com.anotasmart.ui.viewModels.ClientesViewModel
+import com.anotasmart.utils.FormatUtils
 import com.anotasmart.utils.PhoneUtils
+import androidx.compose.foundation.lazy.items
 
 @Composable
 fun ClienteDetalhesScreen(
@@ -45,10 +48,19 @@ fun ClienteDetalhesScreen(
     val context = LocalContext.current
     var cliente by remember { mutableStateOf<Client?>(null) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    
+    var tabIndex by remember { mutableIntStateOf(0) }
+    val tabs = listOf("Histórico", "Contas a Receber")
+
+    val vendas by viewModel.vendasCliente.collectAsState()
+    val recebiveis by viewModel.recebiveisCliente.collectAsState()
+    
+    val expandedStates = remember { mutableStateMapOf<String, Boolean>() }
 
     LaunchedEffect(clientId) {
         clientId?.let {
             cliente = viewModel.getClientById(it)
+            viewModel.setSelectedClient(it)
         }
     }
 
@@ -93,29 +105,54 @@ fun ClienteDetalhesScreen(
                 )
             }
 
-            // Seção de Histórico
+            // Tabs de Navegação
             item {
-                Text(
-                    text = "Histórico de Compras",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
+                TabRow(selectedTabIndex = tabIndex, modifier = Modifier.padding(top = 16.dp)) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = tabIndex == index,
+                            onClick = { tabIndex = index },
+                            text = { Text(title) },
+                            icon = {
+                                Icon(
+                                    imageVector = if (index == 0) Icons.Default.History else Icons.Default.Payments,
+                                    contentDescription = null
+                                )
+                            }
+                        )
+                    }
+                }
             }
 
-            // Espaço vazio para o histórico
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Nenhuma compra registrada",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 14.sp
-                    )
+            // Conteúdo das Tabs
+            if (tabIndex == 0) {
+                if (vendas.isEmpty()) {
+                    item { EmptyListMessage("Nenhuma compra registrada.") }
+                } else {
+                    items(vendas, key = { it.sale.id }) { vendaWithRelations ->
+                        VendaCard(vendaWithRelations)
+                    }
+                }
+            } else {
+                if (recebiveis.isEmpty()) {
+                    item { EmptyListMessage("Nenhuma parcela pendente.") }
+                } else {
+                    val groupedRecebiveis = recebiveis.groupBy { it.second.id }
+                    
+                    groupedRecebiveis.forEach { (saleId, items) ->
+                        val isExpanded = expandedStates[saleId] ?: true
+
+                        expandableGroup(
+                            title = "Pedido #${saleId.takeLast(4)}",
+                            subtitle = "Total Pendente: ${FormatUtils.formatCurrency(items.sumOf { it.first.valor })}",
+                            items = items,
+                            isExpanded = isExpanded,
+                            onToggle = { expandedStates[saleId] = !isExpanded },
+                            key = { it.first.id }
+                        ) { (installment, sale, client) ->
+                            ParcelaCard(installment, sale, client, onBaixa = { viewModel.marcarComoPaga(it) })
+                        }
+                    }
                 }
             }
         }
@@ -196,7 +233,7 @@ fun CardClienteSuperior(
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(imageVector = Icons.Default.Chat, contentDescription = null, tint = Color.White)
+                    Icon(imageVector = Icons.AutoMirrored.Filled.Chat, contentDescription = null, tint = Color.White)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(text = "Abrir no WhatsApp", color = Color.White, fontWeight = FontWeight.Bold)
                 }

@@ -39,7 +39,11 @@ fun ClientesScreen(
     val context = LocalContext.current
     val database = (context.applicationContext as AnotaSmartApplication).database
     val viewModel: ClientesViewModel = viewModel(
-        factory = ClientesViewModelFactory(database.clientDao())
+        factory = ClientesViewModelFactory(
+            database.clientDao(),
+            database.saleDao(),
+            database.installmentDao()
+        )
     )
 
     val clientes by viewModel.clientesFiltrados.collectAsState(initial = emptyList())
