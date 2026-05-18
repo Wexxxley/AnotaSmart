@@ -9,7 +9,31 @@ import java.io.File
 import java.io.FileOutputStream
 import java.util.UUID
 
+import android.graphics.Color
+import com.yalantis.ucrop.UCrop
+import com.yalantis.ucrop.UCropActivity
+
 object ImageUtils {
+    /**
+     * Configura o uCrop para recorte circular.
+     */
+    fun startUCrop(context: Context, sourceUri: Uri, destinationUri: Uri): UCrop {
+        val options = UCrop.Options().apply {
+            setCircleDimmedLayer(true) // Máscara circular
+            setShowCropFrame(false)    // Esconder moldura quadrada
+            setShowCropGrid(false)     // Esconder grade
+            setCompressionFormat(Bitmap.CompressFormat.JPEG)
+            setCompressionQuality(80)
+            setHideBottomControls(false)
+            setFreeStyleCropEnabled(false)
+            setAllowedGestures(UCropActivity.ALL, UCropActivity.ALL, UCropActivity.ALL)
+        }
+
+        return UCrop.of(sourceUri, destinationUri)
+            .withAspectRatio(1f, 1f) // Quadrado (para o círculo caber)
+            .withOptions(options)
+    }
+
     /**
      * Copia uma imagem de uma URI para o armazenamento interno do app,
      * aplicando compressão para economizar espaço.

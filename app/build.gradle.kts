@@ -42,6 +42,7 @@ ksp {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
@@ -54,6 +55,7 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.zxing.core)
     implementation("androidx.compose.material:material-icons-extended")
+    implementation("com.github.yalantis:ucrop:2.2.10")
 
     // Room
     implementation(libs.androidx.room.runtime)

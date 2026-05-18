@@ -31,11 +31,12 @@ class UserPreferencesRepository(private val context: Context) {
         }
         .map { preferences ->
             UserPreferences(
-                userName = preferences[PreferencesKeys.USER_NAME] ?: "Usuário",
-                companyName = preferences[PreferencesKeys.COMPANY_NAME] ?: "Minha Empresa",
+                userName = preferences[PreferencesKeys.USER_NAME] ?: "",
+                companyName = preferences[PreferencesKeys.COMPANY_NAME] ?: "",
                 pixKey = preferences[PreferencesKeys.PIX_KEY] ?: "",
                 profileImagePath = preferences[PreferencesKeys.PROFILE_IMAGE_PATH],
-                selectedTheme = preferences[PreferencesKeys.SELECTED_THEME] ?: 0
+                selectedTheme = preferences[PreferencesKeys.SELECTED_THEME] ?: 0,
+                isLoaded = true
             )
         }
 
@@ -63,6 +64,18 @@ class UserPreferencesRepository(private val context: Context) {
                 preferences.remove(PreferencesKeys.PROFILE_IMAGE_PATH)
             } else {
                 preferences[PreferencesKeys.PROFILE_IMAGE_PATH] = path
+            }
+        }
+    }
+
+    suspend fun saveInitialSetup(name: String, company: String, imagePath: String?) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.USER_NAME] = name
+            preferences[PreferencesKeys.COMPANY_NAME] = company
+            if (imagePath == null) {
+                preferences.remove(PreferencesKeys.PROFILE_IMAGE_PATH)
+            } else {
+                preferences[PreferencesKeys.PROFILE_IMAGE_PATH] = imagePath
             }
         }
     }

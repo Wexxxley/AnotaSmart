@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.MoneyOff
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.VideoLibrary
@@ -34,6 +35,7 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     object Carrinho : Screen("carrinho", "Carrinho", Icons.Default.ShoppingCart)
     object FinalizarVenda : Screen("finalizar_venda", "Finalizar Venda", Icons.Default.AttachMoney)
     object VendaSucesso : Screen("venda_sucesso", "Venda Realizada", Icons.Default.CheckCircle)
+    object Setup : Screen("setup", "Configuração Inicial", Icons.Default.Person)
     object ClienteDetalhes : Screen("cliente_detalhes/{clientId}", "Detalhes do Cliente", Icons.Default.People) {
         fun createRoute(clientId: String) = "cliente_detalhes/$clientId"
     }

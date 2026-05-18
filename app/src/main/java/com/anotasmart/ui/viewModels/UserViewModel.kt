@@ -15,7 +15,7 @@ class UserViewModel(private val repository: UserPreferencesRepository) : ViewMod
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = UserPreferences()
+            initialValue = UserPreferences(isLoaded = false)
         )
 
     fun updateUserName(name: String) {
@@ -45,6 +45,13 @@ class UserViewModel(private val repository: UserPreferencesRepository) : ViewMod
     fun updateTheme(themeIndex: Int) {
         viewModelScope.launch {
             repository.updateTheme(themeIndex)
+        }
+    }
+
+    fun saveInitialSetup(name: String, company: String, imagePath: String?, onComplete: () -> Unit) {
+        viewModelScope.launch {
+            repository.saveInitialSetup(name, company, imagePath)
+            onComplete()
         }
     }
 }

@@ -38,13 +38,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -72,13 +71,14 @@ import com.anotasmart.ui.screens.vendas.VendaSucessoScreen
 import com.anotasmart.ui.theme.AppTheme
 import com.anotasmart.ui.viewModels.CartViewModel
 import com.anotasmart.ui.viewModels.CartViewModelFactory
-import com.anotasmart.ui.viewModels.ClientesViewModel
 import com.anotasmart.ui.viewModels.UserViewModel
 import com.anotasmart.ui.viewModels.UserViewModelFactory
 import com.anotasmart.data.preferences.UserPreferencesRepository
-import androidx.compose.material.icons.filled.Brightness4
+import com.anotasmart.ui.screens.setup.SetupScreen
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 import androidx.compose.material.icons.filled.Brightness5
-import androidx.compose.material.icons.filled.Brightness7
 import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
@@ -90,8 +90,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 
@@ -148,13 +146,32 @@ fun ScreenStructure(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+    // Redirecionamento para Setup se não estiver configurado
+    LaunchedEffect(userPrefs.isLoaded, userPrefs.userName, userPrefs.companyName, userPrefs.profileImagePath, currentRoute) {
+        if (userPrefs.isLoaded) {
+            val isSetupComplete = userPrefs.userName.isNotBlank() && 
+                                 userPrefs.companyName.isNotBlank() && 
+                                 !userPrefs.profileImagePath.isNullOrBlank()
+            
+            if (!isSetupComplete && currentRoute != Screen.Setup.route) {
+                navController.navigate(Screen.Setup.route) {
+                    popUpTo(0)
+                }
+            }
+        }
+    }
+
+    val showBars = currentRoute != Screen.Setup.route
+
     ModalNavigationDrawer(
         drawerState = drawerState,
+        gesturesEnabled = showBars,
         drawerContent = {
             ModalDrawerSheet (modifier = Modifier.width(300.dp)){
                 DrawerContent(
                     userName = userPrefs.userName,
                     companyName = userPrefs.companyName,
+                    profileImagePath = userPrefs.profileImagePath,
                     currentRoute = currentRoute,
                     selectedTheme = userPrefs.selectedTheme,
                     onThemeChange = { userViewModel.updateTheme(it) },
@@ -177,9 +194,10 @@ fun ScreenStructure(
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
-                if (currentRoute != Screen.VendaSucesso.route) {
+                if (showBars && currentRoute != Screen.VendaSucesso.route) {
                     BarraSuperior(
                         quantidadeItens = quantidadeItens,
+                        profileImagePath = userPrefs.profileImagePath,
                         onMenuClick = { scope.launch { drawerState.open() } },
                         onCartClick = { 
                             if (currentRoute != Screen.Carrinho.route) {
@@ -193,29 +211,31 @@ fun ScreenStructure(
                 }
             },
             bottomBar = {
-                Column {
-                    val routesToHideSummary = listOf(
-                        Screen.Carrinho.route, 
-                        Screen.FinalizarVenda.route, 
-                        Screen.ClienteDetalhes.route,
-                        Screen.VendaSucesso.route
-                    )
-                    if (quantidadeItens > 0 && currentRoute !in routesToHideSummary) {
-                        ResumoCarrinho(
-                            quantidadeItens = quantidadeItens,
-                            totalValor = totalValor,
-                            onVerCarrinhoClick = { 
-                                if (currentRoute != Screen.Carrinho.route) {
-                                    navController.navigate(Screen.Carrinho.route) {
-                                        launchSingleTop = true
-                                        restoreState = true
+                if (showBars) {
+                    Column {
+                        val routesToHideSummary = listOf(
+                            Screen.Carrinho.route, 
+                            Screen.FinalizarVenda.route, 
+                            Screen.ClienteDetalhes.route,
+                            Screen.VendaSucesso.route
+                        )
+                        if (quantidadeItens > 0 && currentRoute !in routesToHideSummary) {
+                            ResumoCarrinho(
+                                quantidadeItens = quantidadeItens,
+                                totalValor = totalValor,
+                                onVerCarrinhoClick = { 
+                                    if (currentRoute != Screen.Carrinho.route) {
+                                        navController.navigate(Screen.Carrinho.route) {
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
                                     }
                                 }
-                            }
-                        )
-                    }
-                    if (currentRoute !in routesToHideSummary) {
-                        BarraNavegacaoPrincipal(navController)
+                            )
+                        }
+                        if (currentRoute !in routesToHideSummary) {
+                            BarraNavegacaoPrincipal(navController)
+                        }
                     }
                 }
             }
@@ -223,7 +243,7 @@ fun ScreenStructure(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(if (currentRoute == Screen.VendaSucesso.route) PaddingValues(0.dp) else innerPadding)
+                    .padding(if (!showBars || currentRoute == Screen.VendaSucesso.route) PaddingValues(0.dp) else innerPadding)
                     .background(MaterialTheme.colorScheme.background)
             ) {
                 NavHost(
@@ -231,6 +251,16 @@ fun ScreenStructure(
                     startDestination = Screen.Venda.route
                 ) {
                     composable(Screen.Venda.route) { VendaScreen(cartViewModel = cartViewModel) }
+                    composable(Screen.Setup.route) {
+                        SetupScreen(
+                            userViewModel = userViewModel,
+                            onComplete = {
+                                navController.navigate(Screen.Venda.route) {
+                                    popUpTo(Screen.Setup.route) { inclusive = true }
+                                }
+                            }
+                        )
+                    }
                     composable(Screen.Produtos.route) { ProdutosScreen(cartItems = cartViewModel.items) }
                     composable(Screen.Pedidos.route) { 
                         val context = LocalContext.current
@@ -306,14 +336,36 @@ fun ScreenStructure(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BarraSuperior(quantidadeItens: Int, onMenuClick: () -> Unit, onCartClick: () -> Unit) {
+fun BarraSuperior(
+    quantidadeItens: Int,
+    profileImagePath: String? = null,
+    onMenuClick: () -> Unit,
+    onCartClick: () -> Unit
+) {
     CenterAlignedTopAppBar(
         title = {
-            IconButton(onClick = { }) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Perfil do Usuário"
-                )
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                if (profileImagePath != null) {
+                    AsyncImage(
+                        model = profileImagePath,
+                        contentDescription = "Perfil",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Perfil do Usuário",
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
             }
         },
         navigationIcon = {
@@ -349,6 +401,7 @@ fun BarraSuperior(quantidadeItens: Int, onMenuClick: () -> Unit, onCartClick: ()
 fun DrawerContent(
     userName: String,
     companyName: String,
+    profileImagePath: String?,
     currentRoute: String?,
     selectedTheme: Int,
     onThemeChange: (Int) -> Unit,
@@ -372,12 +425,21 @@ fun DrawerContent(
                     .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = null,
-                    modifier = Modifier.size(40.dp),
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                if (profileImagePath != null) {
+                    AsyncImage(
+                        model = profileImagePath,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = null,
+                        modifier = Modifier.size(40.dp),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column {
