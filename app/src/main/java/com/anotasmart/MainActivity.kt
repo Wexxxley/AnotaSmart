@@ -206,6 +206,11 @@ fun ScreenStructure(
                                     restoreState = true
                                 }
                             }
+                        },
+                        onProfileClick = {
+                            if (currentRoute != Screen.Setup.route) {
+                                navController.navigate(Screen.Setup.route)
+                            }
                         }
                     )
                 }
@@ -257,6 +262,11 @@ fun ScreenStructure(
                             onComplete = {
                                 navController.navigate(Screen.Venda.route) {
                                     popUpTo(Screen.Setup.route) { inclusive = true }
+                                }
+                            },
+                            onBackClick = {
+                                if (navController.previousBackStackEntry != null) {
+                                    navController.popBackStack()
                                 }
                             }
                         )
@@ -340,7 +350,8 @@ fun BarraSuperior(
     quantidadeItens: Int,
     profileImagePath: String? = null,
     onMenuClick: () -> Unit,
-    onCartClick: () -> Unit
+    onCartClick: () -> Unit,
+    onProfileClick: () -> Unit
 ) {
     CenterAlignedTopAppBar(
         title = {
@@ -348,7 +359,8 @@ fun BarraSuperior(
                 modifier = Modifier
                     .size(32.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer),
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .clickable { onProfileClick() },
                 contentAlignment = Alignment.Center
             ) {
                 if (profileImagePath != null) {
