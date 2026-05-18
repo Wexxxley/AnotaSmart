@@ -1,6 +1,6 @@
 package com.anotasmart.ui.screens.pedidos
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -8,6 +8,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
@@ -16,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.anotasmart.model.InstallmentStatus
@@ -24,6 +27,8 @@ import com.anotasmart.model.SaleWithRelations
 import com.anotasmart.model.entity.Client
 import com.anotasmart.model.entity.Installment
 import com.anotasmart.model.entity.Sale
+import com.anotasmart.ui.components.StandardItemCard
+import com.anotasmart.ui.components.expandableGroup
 import com.anotasmart.ui.viewModels.PedidosViewModel
 import com.anotasmart.utils.FormatUtils
 
@@ -135,13 +140,32 @@ fun ContasAReceberList(
     if (recebiveis.isEmpty()) {
         EmptyListMessage("Nenhuma parcela pendente.")
     } else {
+        // Agrupar por Sale (Pedido)
+        val groupedRecebiveis = remember(recebiveis) {
+            recebiveis.groupBy { it.second.id }
+        }
+        val expandedStates = remember { mutableStateMapOf<String, Boolean>() }
+
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(recebiveis) { (installment, sale, client) ->
-                ParcelaCard(installment, sale, client, onBaixa)
+            groupedRecebiveis.forEach { (saleId, items) ->
+                val firstItem = items.first()
+                val client = firstItem.third
+                val isExpanded = expandedStates[saleId] ?: true
+
+                expandableGroup(
+                    title = client?.nome ?: "Cliente Avulso",
+                    subtitle = "Total Pendente: ${FormatUtils.formatCurrency(items.sumOf { it.first.valor })}",
+                    items = items,
+                    isExpanded = isExpanded,
+                    onToggle = { expandedStates[saleId] = !isExpanded },
+                    key = { it.first.id }
+                ) { (installment, sale, client) ->
+                    ParcelaCard(installment, sale, client, onBaixa)
+                }
             }
         }
     }
@@ -251,7 +275,6 @@ fun ParcelaCard(
 ) {
     val hoje = System.currentTimeMillis()
     val estaAtrasada = installment.dataVencimento < hoje
-    val backgroundColor = if (estaAtrasada) Color(0xFFFFEBEE) else MaterialTheme.colorScheme.surface
 
     var showConfirmDialog by remember { mutableStateOf(false) }
 
@@ -278,59 +301,31 @@ fun ParcelaCard(
         )
     }
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = backgroundColor)
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = client?.nome ?: "Cliente Avulso",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
-                    if (estaAtrasada) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Icon(
-                            imageVector = Icons.Default.Warning,
-                            contentDescription = "Atrasada",
-                            tint = Color.Red,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                }
-                Text(
-                    text = "Parcela ${installment.numeroParcela} - Vence em ${FormatUtils.formatDate(installment.dataVencimento)}",
-                    fontSize = 12.sp,
-                    color = if (estaAtrasada) Color.Red else Color.Gray
-                )
-                Text(
-                    text = FormatUtils.formatCurrency(installment.valor),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    color = if (estaAtrasada) Color.Red else MaterialTheme.colorScheme.primary
-                )
-            }
-
+    StandardItemCard(
+        title = "Parcela ${installment.numeroParcela}",
+        label = "Vencimento: ${FormatUtils.formatDate(installment.dataVencimento)}",
+        value = FormatUtils.formatCurrency(installment.valor),
+        labelIcon = if (estaAtrasada) Icons.Default.Warning else null,
+        labelColor = if (estaAtrasada) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant,
+        valueColor = if (estaAtrasada) Color.Red else MaterialTheme.colorScheme.primary,
+        backgroundColor = if (estaAtrasada) Color(0xFFFFEBEE) else MaterialTheme.colorScheme.surfaceContainerLowest,
+        trailingContent = {
             IconButton(
                 onClick = { showConfirmDialog = true },
+                modifier = Modifier.size(40.dp),
                 colors = IconButtonDefaults.iconButtonColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             ) {
-                Icon(imageVector = Icons.Default.Check, contentDescription = "Dar Baixa")
+                Icon(
+                    imageVector = Icons.Default.Check, 
+                    contentDescription = "Dar Baixa",
+                    modifier = Modifier.size(20.dp)
+                )
             }
         }
-    }
+    )
 }
 
 @Composable
