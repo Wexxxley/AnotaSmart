@@ -127,7 +127,9 @@ fun ProdutosScreen(
                     },
                     icon = { Icon(Icons.Default.Add, contentDescription = null) },
                     text = { Text("Serviço") },
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 )
                 ExtendedFloatingActionButton(
                     onClick = {
@@ -136,7 +138,9 @@ fun ProdutosScreen(
                     },
                     icon = { Icon(Icons.Default.Add, contentDescription = null) },
                     text = { Text("Produto") },
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             }
             FloatingActionButton(

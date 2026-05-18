@@ -77,7 +77,9 @@ fun ClientesScreen(
             onClick = { viewModel.abrirModalNovoCliente() },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(16.dp)
+                .padding(16.dp),
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
         ) {
             Icon(Icons.Default.Add, contentDescription = "Novo Cliente")
         }

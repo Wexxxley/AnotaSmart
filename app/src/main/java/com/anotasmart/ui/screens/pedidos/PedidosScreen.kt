@@ -196,7 +196,7 @@ fun VendaCard(vendaWithRelations: SaleWithRelations) {
                     Text(
                         text = FormatUtils.formatDate(venda.dataVenda),
                         fontSize = 12.sp,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 Text(
@@ -306,9 +306,9 @@ fun ParcelaCard(
         label = "Vencimento: ${FormatUtils.formatDate(installment.dataVencimento)}",
         value = FormatUtils.formatCurrency(installment.valor),
         labelIcon = if (estaAtrasada) Icons.Default.Warning else null,
-        labelColor = if (estaAtrasada) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant,
-        valueColor = if (estaAtrasada) Color.Red else MaterialTheme.colorScheme.primary,
-        backgroundColor = if (estaAtrasada) Color(0xFFFFEBEE) else MaterialTheme.colorScheme.surfaceContainerLowest,
+        labelColor = if (estaAtrasada) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+        valueColor = if (estaAtrasada) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+        backgroundColor = if (estaAtrasada) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.surfaceContainerLowest,
         trailingContent = {
             IconButton(
                 onClick = { showConfirmDialog = true },
@@ -334,6 +334,6 @@ fun EmptyListMessage(message: String) {
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Text(text = message, color = Color.Gray)
+        Text(text = message, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

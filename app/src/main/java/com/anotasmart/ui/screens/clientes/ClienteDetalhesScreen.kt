@@ -113,7 +113,7 @@ fun ClienteDetalhesScreen(
                 ) {
                     Text(
                         text = "Nenhuma compra registrada",
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 14.sp
                     )
                 }
