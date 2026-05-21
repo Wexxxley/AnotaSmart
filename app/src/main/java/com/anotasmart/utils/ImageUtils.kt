@@ -15,13 +15,15 @@ import com.yalantis.ucrop.UCropActivity
 
 object ImageUtils {
     /**
-     * Configura o uCrop para recorte circular.
+     * Configura o uCrop para recorte.
      */
-    fun startUCrop(context: Context, sourceUri: Uri, destinationUri: Uri): UCrop {
+    fun startUCrop(context: Context, sourceUri: Uri, destinationUri: Uri, isCircular: Boolean = true): UCrop {
         val options = UCrop.Options().apply {
-            setCircleDimmedLayer(true) // Máscara circular
-            setShowCropFrame(false)    // Esconder moldura quadrada
-            setShowCropGrid(false)     // Esconder grade
+            if (isCircular) {
+                setCircleDimmedLayer(true) // Máscara circular
+            }
+            setShowCropFrame(!isCircular)    // Mostrar moldura quadrada se não for circular
+            setShowCropGrid(!isCircular)     // Mostrar grade se não for circular
             setCompressionFormat(Bitmap.CompressFormat.JPEG)
             setCompressionQuality(80)
             setHideBottomControls(false)
@@ -30,7 +32,7 @@ object ImageUtils {
         }
 
         return UCrop.of(sourceUri, destinationUri)
-            .withAspectRatio(1f, 1f) // Quadrado (para o círculo caber)
+            .withAspectRatio(1f, 1f) // Quadrado
             .withOptions(options)
     }
 

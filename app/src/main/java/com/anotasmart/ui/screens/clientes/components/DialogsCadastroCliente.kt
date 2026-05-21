@@ -20,12 +20,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
+import com.anotasmart.utils.ImageUtils
 import com.anotasmart.utils.PhoneVisualTransformation
+import com.yalantis.ucrop.UCrop
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,12 +46,25 @@ fun DialogNovoCliente(
     var telefone by remember { mutableStateOf("") }
     var endereco by remember { mutableStateOf("") }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    val context = LocalContext.current
+
+    // Launcher para o uCrop
+    val uCropLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
+        onResult = { result ->
+            if (result.resultCode == android.app.Activity.RESULT_OK) {
+                selectedImageUri = UCrop.getOutput(result.data!!)
+            }
+        }
+    )
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri -> 
             if (uri != null) {
-                selectedImageUri = uri
+                val destinationUri = Uri.fromFile(File(context.cacheDir, "temp_crop_client_${System.currentTimeMillis()}.jpg"))
+                val uCropIntent = ImageUtils.startUCrop(context, uri, destinationUri, isCircular = true).getIntent(context)
+                uCropLauncher.launch(uCropIntent)
             }
         }
     )
