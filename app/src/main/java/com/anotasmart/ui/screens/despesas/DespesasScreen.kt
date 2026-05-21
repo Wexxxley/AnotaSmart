@@ -72,16 +72,16 @@ fun DespesasScreen() {
         }
 
         // FAB
-        FloatingActionButton(
+        ExtendedFloatingActionButton(
             onClick = { viewModel.openAddModal() },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp),
             containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
-        ) {
-            Icon(Icons.Default.Add, contentDescription = "Adicionar Despesa")
-        }
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            icon = { Icon(Icons.Default.Add, contentDescription = null) },
+            text = { Text("Cadastrar despesa") }
+        )
 
         if (showAddModal) {
             DialogNovaDespesa(

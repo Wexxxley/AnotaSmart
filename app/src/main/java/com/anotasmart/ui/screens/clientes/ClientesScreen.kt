@@ -77,16 +77,16 @@ fun ClientesScreen(
             }
         }
 
-        FloatingActionButton(
+        ExtendedFloatingActionButton(
             onClick = { viewModel.abrirModalNovoCliente() },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp),
             containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
-        ) {
-            Icon(Icons.Default.Add, contentDescription = "Novo Cliente")
-        }
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            icon = { Icon(Icons.Default.Add, contentDescription = null) },
+            text = { Text("Cadastrar cliente") }
+        )
 
         if (mostrarModalNovoCliente) {
             DialogNovoCliente(

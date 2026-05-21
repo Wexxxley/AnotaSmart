@@ -143,16 +143,18 @@ fun ProdutosScreen(
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             }
-            FloatingActionButton(
+            ExtendedFloatingActionButton(
                 onClick = { expandedFab = !expandedFab },
                 containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Adicionar novo"
-                )
-            }
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Adicionar novo"
+                    )
+                },
+                text = { Text("Cadastrar item") }
+            )
         }
 
         SnackbarHost(

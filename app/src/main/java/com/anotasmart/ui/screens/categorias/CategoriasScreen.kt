@@ -137,16 +137,16 @@ fun CategoriasScreen() {
             }
         }
 
-        FloatingActionButton(
+        ExtendedFloatingActionButton(
             onClick = { viewModel.abrirModalNovaCategoria() },
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(16.dp)
-        ) {
-            Icon(Icons.Default.Add, contentDescription = "Nova Categoria")
-        }
+                .padding(16.dp),
+            icon = { Icon(Icons.Default.Add, contentDescription = null) },
+            text = { Text("Cadastrar categoria") }
+        )
 
         SnackbarHost(
             hostState = snackbarHostState,
