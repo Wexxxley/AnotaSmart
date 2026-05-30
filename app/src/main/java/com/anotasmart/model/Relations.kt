@@ -45,7 +45,4 @@ data class InstallmentWithClient(
         entityColumn = "id"
     )
     val sale: Sale
-) {
-    // We can't use @Relation nested easily without another wrapper or manual join
-    // But we can fetch it in the DAO with a custom query
-}
+)

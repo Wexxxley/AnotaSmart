@@ -15,9 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/**
- * Componente base para telas com cabeçalho (voltar + título) e conteúdo rolável.
- */
+//Componente base para telas com cabeçalho (voltar + título) e conteúdo rolável.
 @Composable
 fun StandardScreen(
     title: String,
@@ -33,7 +31,7 @@ fun StandardScreen(
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
             verticalArrangement = verticalArrangement,
-            contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp) // Espaço para o bottomBar
+            contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp)
         ) {
             // Cabeçalho Padronizado
             item {

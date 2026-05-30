@@ -40,7 +40,6 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
         fun createRoute(clientId: String) = "cliente_detalhes/$clientId"
     }
 }
-
 val bottomNavItems = listOf(
     Screen.Venda,
     Screen.Produtos,
@@ -48,7 +47,6 @@ val bottomNavItems = listOf(
     Screen.Clientes,
     Screen.Despesas
 )
-
 val drawerNavItems = listOf(
     Screen.Categorias,
     Screen.Relatorios,

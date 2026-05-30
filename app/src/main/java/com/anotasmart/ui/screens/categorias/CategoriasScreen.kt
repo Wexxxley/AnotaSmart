@@ -152,7 +152,7 @@ fun CategoriasScreen() {
             hostState = snackbarHostState,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 80.dp) // Acima do FAB e BottomBar
+                .padding(bottom = 80.dp) // Acima do FAB
         )
 
         if (mostrarModalNovaCategoria) {

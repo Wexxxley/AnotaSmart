@@ -133,7 +133,6 @@ fun DialogVendaParcelada(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         val date = LocalDate.ofEpochDay(dataSelecionada / (24 * 60 * 60 * 1000L))
-                        // Formatador manual simples para evitar problemas de compatibilidade
                         val formattedDate = Instant.ofEpochMilli(dataSelecionada)
                             .atZone(ZoneId.systemDefault())
                             .toLocalDate()

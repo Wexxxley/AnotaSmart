@@ -140,7 +140,6 @@ fun ScreenStructure(
     val items by cartViewModel.items.collectAsState()
     val totalValor by cartViewModel.totalValor.collectAsState()
     val quantidadeItens = items.sumOf { it.quantidade }.toInt()
-
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val navBackStackEntry by navController.currentBackStackEntryAsState()

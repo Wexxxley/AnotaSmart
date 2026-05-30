@@ -34,7 +34,7 @@ import com.anotasmart.ui.viewModels.FinalizarVendaViewModelFactory
 @Composable
 fun FinalizarVendaScreen(
     onBackClick: () -> Unit,
-    onConfirmarVenda: () -> Unit // Este parâmetro pode ser renomeado ou usado para navegação após sucesso
+    onConfirmarVenda: () -> Unit
 ) {
     val context = LocalContext.current
     val database = (context.applicationContext as AnotaSmartApplication).database
@@ -209,7 +209,7 @@ fun ClienteItem(
     ) {
         Box(
             modifier = Modifier
-                .size(64.dp) // Aumentado levemente para acomodar a borda
+                .size(64.dp)
                 .clip(CircleShape)
                 .background(
                     if (isSelected) MaterialTheme.colorScheme.primary
@@ -229,7 +229,7 @@ fun ClienteItem(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(if (isSelected) 3.dp else 0.dp) // Espaço para a borda não cortar a foto
+                        .padding(if (isSelected) 3.dp else 0.dp)
                         .clip(CircleShape)
                 )
             } else {

@@ -45,27 +45,23 @@ class PedidosViewModel(
     fun marcarComoPaga(installmentId: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                // 1. Get the installment and its saleId
                 val salesWithRelations = saleDao.getAllWithRelations().first()
                 val targetSale = salesWithRelations.find { relations ->
                     relations.installments.any { it.id == installmentId }
                 }
 
                 if (targetSale != null) {
-                    // 2. Update the installment status
                     installmentDao.updateStatus(
                         id = installmentId,
                         status = InstallmentStatus.PAGA,
                         dataPagamento = System.currentTimeMillis()
                     )
 
-                    // 3. Check if all installments of this sale are now paid
                     val updatedInstallments = targetSale.installments.map {
                         if (it.id == installmentId) it.copy(statusParcela = InstallmentStatus.PAGA) else it
                     }
 
                     if (updatedInstallments.all { it.statusParcela == InstallmentStatus.PAGA }) {
-                        // 4. If all paid, update Sale status to FINALIZADA
                         val updatedSale = targetSale.sale.copy(status = com.anotasmart.model.SaleStatus.FINALIZADA)
                         saleDao.updateSale(updatedSale)
                     }

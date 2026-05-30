@@ -126,7 +126,7 @@ fun ChavePixScreen() {
                 PixUtils.generatePixPayload(
                     userPreferences.pixKey,
                     userPreferences.companyName,
-                    "SAO PAULO" // Cidade padrão ou poderia vir das prefs
+                    "SAO PAULO" // Cidade padrão, poderia vir das prefs
                 )
             }
             

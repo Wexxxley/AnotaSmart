@@ -39,9 +39,7 @@ fun ProdutosScreen(
 ) {
     val context = LocalContext.current
     val database = (context.applicationContext as AnotaSmartApplication).database
-    
-    // Se o viewModel não for passado (ex: via NavHost), cria um localmente (sem cartItems)
-    // Mas no fluxo principal, o MainActivity passará o viewModel com cartItems injetado.
+
     val viewModel: ProdutosViewModel = produtosViewModel ?: viewModel(
         factory = ProdutosViewModelFactory(database.productDao(), cartItems)
     )
