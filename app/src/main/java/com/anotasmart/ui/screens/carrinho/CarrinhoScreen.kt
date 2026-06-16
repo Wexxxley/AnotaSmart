@@ -148,17 +148,30 @@ fun CartItemCard(
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
+                
+                val displayQuantidade = if (item.unidadeMedida == com.anotasmart.model.UnitType.UN) 
+                                            item.quantidade.toInt().toString() 
+                                        else item.quantidade.toString()
+                                        
                 Text(
-                    text = item.quantidade.toString(),
+                    text = displayQuantidade,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 4.dp)
                 )
-                IconButton(onClick = onIncrement) {
+
+                val estoqueDisponivel = item.product?.quantidadeEstoque ?: Double.MAX_VALUE
+                val isService = item.product?.tipoItem == com.anotasmart.model.ItemType.SERVICO
+                val canIncrement = isService || item.quantidade < estoqueDisponivel
+
+                IconButton(
+                    onClick = onIncrement,
+                    enabled = canIncrement
+                ) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Adicionar",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = if (canIncrement) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                     )
                 }
                 IconButton(onClick = onDelete) {

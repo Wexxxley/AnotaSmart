@@ -43,6 +43,7 @@ fun VendaScreen(
     val searchQuery by viewModel.searchQuery.collectAsState()
     val produtoSelecionado by viewModel.produtoSelecionado.collectAsState()
     val mostrarDialogItemAvulso by viewModel.mostrarDialogItemAvulso.collectAsState()
+    val itensNoCarrinho by cartViewModel.items.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -75,8 +76,10 @@ fun VendaScreen(
 
         // Renderização condicional
         produtoSelecionado?.let { produto ->
+            val quantidadeNoCarrinho = itensNoCarrinho.find { it.product?.id == produto.id }?.quantidade ?: 0.0
             DialogAdicionarCarrinho(
                 produto = produto,
+                quantidadeNoCarrinho = quantidadeNoCarrinho,
                 onDismissRequest = {
                     viewModel.limparProdutoSelecionado()
                 },

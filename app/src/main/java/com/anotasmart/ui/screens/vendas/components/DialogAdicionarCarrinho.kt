@@ -31,11 +31,13 @@ import com.anotasmart.model.entity.Product
 @Composable
 fun DialogAdicionarCarrinho(
     produto: Product,
+    quantidadeNoCarrinho: Double = 0.0,
     onDismissRequest: () -> Unit,
     onConfirmar: (Double) -> Unit
 ) {
     val isService = produto.tipoItem == ItemType.SERVICO
-    val estoqueDisponivel = produto.quantidadeEstoque
+    val estoqueTotal = produto.quantidadeEstoque
+    val estoqueDisponivel = (estoqueTotal - quantidadeNoCarrinho).coerceAtLeast(0.0)
 
     // Estado local para armazenar a quantidade, inicializado corretamente
     var quantidadeSelecionada by remember(produto.id) {
@@ -65,10 +67,25 @@ fun DialogAdicionarCarrinho(
             ) {
                 if (!isService) {
                     Text(
-                        text = "Estoque ${produto.quantidadeEstoque} ${produto.unidadeMedida.name}",
+                        text = "Estoque: ${String.format("%.2f", estoqueTotal)} ${produto.unidadeMedida.name}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    if (quantidadeNoCarrinho > 0) {
+                        Text(
+                            text = "Já no carrinho: ${if (produto.unidadeMedida == com.anotasmart.model.UnitType.UN) quantidadeNoCarrinho.toInt() else String.format("%.2f", quantidadeNoCarrinho)}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+
+                    Text(
+                        text = "Disponível: ${if (produto.unidadeMedida == com.anotasmart.model.UnitType.UN) estoqueDisponivel.toInt() else String.format("%.2f", estoqueDisponivel)}",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = if (estoqueDisponivel > 0) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(bottom = 16.dp)
+                        fontWeight = FontWeight.Bold,
+                        color = if (estoqueDisponivel > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(bottom = 16.dp, top = 4.dp)
                     )
                 } else {
                     Text(
@@ -85,7 +102,13 @@ fun DialogAdicionarCarrinho(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     IconButton(
-                        onClick = { if (quantidadeSelecionada > 1.0) quantidadeSelecionada -= 1.0 else if (quantidadeSelecionada > 0 && !isService) quantidadeSelecionada = 0.0 },
+                        onClick = { 
+                            if (quantidadeSelecionada > 1.0) {
+                                quantidadeSelecionada -= 1.0 
+                            } else {
+                                quantidadeSelecionada = 0.0
+                            }
+                        },
                         enabled = quantidadeSelecionada > 0
                     ) {
                         Icon(imageVector = Icons.Default.Remove, contentDescription = "Diminuir quantidade")
@@ -100,16 +123,19 @@ fun DialogAdicionarCarrinho(
                     )
 
                     IconButton(
-                        onClick = { quantidadeSelecionada += 1.0 },
+                        onClick = { 
+                            val proxima = quantidadeSelecionada + 1.0
+                            quantidadeSelecionada = if (isService) proxima else proxima.coerceAtMost(estoqueDisponivel)
+                        },
                         enabled = isService || quantidadeSelecionada < estoqueDisponivel
                     ) {
                         Icon(imageVector = Icons.Default.Add, contentDescription = "Aumentar quantidade")
                     }
                 }
-                
+
                 if (!isService && estoqueDisponivel <= 0) {
                     Text(
-                        text = "Produto sem estoque",
+                        text = "Limite de estoque atingido",
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.padding(top = 8.dp)
