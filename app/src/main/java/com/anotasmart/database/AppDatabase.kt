@@ -78,7 +78,6 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "anotasmart_database"
                 )
-                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance

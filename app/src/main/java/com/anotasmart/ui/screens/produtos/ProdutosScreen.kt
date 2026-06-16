@@ -177,9 +177,7 @@ fun ProdutosScreen(
                 onDismissRequest = { viewModel.fecharModalNovoProduto() },
                 onConfirmar = { nome, categoryId, precoVenda, precoCusto, unidade, imageUriString ->
                     val internalPath = imageUriString?.let {
-                        if (it.startsWith("content://")) {
-                            ImageUtils.saveImageToInternalStorage(context, Uri.parse(it), ImageDirectory.PRODUCTS)
-                        } else it
+                        ImageUtils.saveImageToInternalStorage(context, Uri.parse(it), ImageDirectory.PRODUCTS)
                     }
                     viewModel.salvarNovoProduto(nome, categoryId, precoVenda, precoCusto, unidade, internalPath)
                 },
@@ -195,9 +193,7 @@ fun ProdutosScreen(
                 onDismissRequest = { viewModel.fecharModalNovoServico() },
                 onConfirmar = { nome, categoryId, precoVenda, imageUriString ->
                     val internalPath = imageUriString?.let {
-                        if (it.startsWith("content://")) {
-                            ImageUtils.saveImageToInternalStorage(context, Uri.parse(it), ImageDirectory.SERVICES)
-                        } else it
+                        ImageUtils.saveImageToInternalStorage(context, Uri.parse(it), ImageDirectory.SERVICES)
                     }
                     viewModel.salvarNovoServico(nome, categoryId, precoVenda, internalPath)
                 },
@@ -213,11 +209,14 @@ fun ProdutosScreen(
                 categorias = categorias,
                 onDismissRequest = { viewModel.fecharModalEdicao() },
                 onConfirmar = { id, nome, categoryId, precoVenda, precoCusto, unidade, imageUriString, tipoItem, estoque ->
-                    val internalPath = imageUriString?.let {
-                        if (it.startsWith("content://")) {
+                    val internalPath = imageUriString?.let { uriStr ->
+                        // Só salva no armazenamento interno se a imagem mudou (URI diferente da atual)
+                        if (uriStr != produto.imagePath) {
                             val directory = if (tipoItem == com.anotasmart.model.ItemType.PRODUTO) ImageDirectory.PRODUCTS else ImageDirectory.SERVICES
-                            ImageUtils.saveImageToInternalStorage(context, Uri.parse(it), directory)
-                        } else it
+                            ImageUtils.saveImageToInternalStorage(context, Uri.parse(uriStr), directory)
+                        } else {
+                            uriStr
+                        }
                     }
                     viewModel.salvarEdicao(id, nome, categoryId, precoVenda, precoCusto, unidade, internalPath, tipoItem, estoque)
                 },
