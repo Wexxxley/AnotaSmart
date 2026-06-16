@@ -5,12 +5,16 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.MoneyOff
 import androidx.compose.material.icons.filled.Payments
+import androidx.compose.material.icons.filled.PriceCheck
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -37,7 +41,11 @@ fun RelatoriosScreen(
     val context = LocalContext.current
     val database = (context.applicationContext as AnotaSmartApplication).database
     val viewModel: RelatoriosViewModel = viewModel(
-        factory = RelatoriosViewModelFactory(database.saleDao(), database.expenseDao())
+        factory = RelatoriosViewModelFactory(
+            database.saleDao(), 
+            database.expenseDao(),
+            database.installmentDao()
+        )
     )
 
     val overview by viewModel.financialOverview.collectAsState()
@@ -55,12 +63,15 @@ fun RelatoriosScreen(
             )
         }
 
-        // Card de Lucro Líquido
+        // --- SEÇÃO 1: RESULTADO LÍQUIDO ---
+        item {
+            SectionHeader("Resumo de Lucros")
+        }
+
         item {
             MainProfitCard(overview.lucroLiquido)
         }
 
-        // Grid de Resumo
         item {
             Row(
                 modifier = Modifier
@@ -87,7 +98,6 @@ fun RelatoriosScreen(
             }
         }
 
-        // Cards de Detalhes
         item {
             DetailRow(
                 title = "Lucro Estimado (Itens)",
@@ -98,15 +108,110 @@ fun RelatoriosScreen(
             )
         }
 
+        // --- SEÇÃO 2: FLUXO DE CAIXA ---
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+            SectionHeader("Fluxo de Caixa (Entradas)")
+        }
+
+        item {
+            DetailRow(
+                title = "Dinheiro em Caixa",
+                value = FormatUtils.formatCurrency(overview.dinheiroEmCaixa),
+                description = "Total de parcelas pagas no período",
+                icon = Icons.Default.PriceCheck,
+                color = Color(0xFF2E7D32)
+            )
+        }
+
+        item {
+            DetailRow(
+                title = "Contas a Receber",
+                value = FormatUtils.formatCurrency(overview.contasAReceber),
+                description = "Tudo que ainda falta receber (total)",
+                icon = Icons.Default.AccountBalanceWallet,
+                color = MaterialTheme.colorScheme.secondary
+            )
+        }
+
+        item {
+            DetailRow(
+                title = "Inadimplência",
+                value = FormatUtils.formatCurrency(overview.inadimplencia),
+                description = "Parcelas vencidas e não pagas",
+                icon = Icons.Default.Warning,
+                color = Color(0xFFE65100)
+            )
+        }
+
+        // --- OUTRAS INFORMAÇÕES ---
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+            SectionHeader("Outros Dados")
+        }
+
         item {
             DetailRow(
                 title = "Volume de Vendas",
                 value = "${overview.totalVendas} pedidos",
                 description = "Quantidade de vendas no período",
                 icon = Icons.Default.ShoppingCart,
-                color = MaterialTheme.colorScheme.secondary
+                color = MaterialTheme.colorScheme.tertiary
             )
         }
+
+        item {
+            Spacer(modifier = Modifier.height(24.dp))
+            InfoExplanationCard()
+        }
+    }
+}
+
+@Composable
+fun SectionHeader(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(vertical = 8.dp)
+    )
+}
+
+@Composable
+fun InfoExplanationCard() {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "Entenda os conceitos:",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            ExplanationItem("Lucro Líquido", "É o lucro das vendas menos as despesas gerais.")
+            ExplanationItem("Dinheiro em Caixa", "Refere-se apenas ao que já foi efetivamente pago no período.")
+            ExplanationItem("Inadimplência", "Soma de todas as parcelas que já passaram da data de vencimento.")
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Nota: O lucro das vendas usa o preço de custo registrado no ato da venda.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+fun ExplanationItem(label: String, text: String) {
+    Column(modifier = Modifier.padding(vertical = 4.dp)) {
+        Text(text = label, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+        Text(text = text, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -150,7 +255,7 @@ fun MainProfitCard(lucro: Double) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp),
+            .padding(vertical = 8.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (lucro >= 0) Color(0xFFE8F5E9) else Color(0xFFFFEBEE)
         ),

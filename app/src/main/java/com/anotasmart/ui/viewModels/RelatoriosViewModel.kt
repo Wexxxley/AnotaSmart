@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.anotasmart.database.dao.ExpenseDao
+import com.anotasmart.database.dao.InstallmentDao
 import com.anotasmart.database.dao.SaleDao
 import kotlinx.coroutines.flow.*
 import java.util.*
@@ -17,12 +18,16 @@ data class FinancialOverviewState(
     val lucroEstimado: Double = 0.0,
     val despesas: Double = 0.0,
     val totalVendas: Int = 0,
-    val lucroLiquido: Double = 0.0
+    val lucroLiquido: Double = 0.0,
+    val dinheiroEmCaixa: Double = 0.0,
+    val contasAReceber: Double = 0.0,
+    val inadimplencia: Double = 0.0
 )
 
 class RelatoriosViewModel(
     private val saleDao: SaleDao,
-    private val expenseDao: ExpenseDao
+    private val expenseDao: ExpenseDao,
+    private val installmentDao: InstallmentDao
 ) : ViewModel() {
 
     private val _periodo = MutableStateFlow(PeriodoRelatorio.MES)
@@ -30,21 +35,34 @@ class RelatoriosViewModel(
 
     val financialOverview: StateFlow<FinancialOverviewState> = _periodo.flatMapLatest { p ->
         val range = getRangeFromPeriodo(p)
+        val now = System.currentTimeMillis()
+        
         combine(
             saleDao.getTotalRevenue(range.first, range.second),
             saleDao.getEstimatedProfit(range.first, range.second),
             expenseDao.getTotalExpenses(range.first, range.second),
-            saleDao.getSalesCount(range.first, range.second)
-        ) { rev, profit, exp, count ->
-            val revenue = rev ?: 0.0
-            val estProfit = profit ?: 0.0
-            val expenses = exp ?: 0.0
+            saleDao.getSalesCount(range.first, range.second),
+            installmentDao.getPaidAmount(range.first, range.second),
+            installmentDao.getTotalReceivables(),
+            installmentDao.getOverdueAmount(now)
+        ) { values ->
+            val rev = values[0] as? Double ?: 0.0
+            val profit = values[1] as? Double ?: 0.0
+            val exp = values[2] as? Double ?: 0.0
+            val count = values[3] as? Int ?: 0
+            val paid = values[4] as? Double ?: 0.0
+            val receivables = values[5] as? Double ?: 0.0
+            val overdue = values[6] as? Double ?: 0.0
+
             FinancialOverviewState(
-                faturamento = revenue,
-                lucroEstimado = estProfit,
-                despesas = expenses,
+                faturamento = rev,
+                lucroEstimado = profit,
+                despesas = exp,
                 totalVendas = count,
-                lucroLiquido = estProfit - expenses
+                lucroLiquido = profit - exp,
+                dinheiroEmCaixa = paid,
+                contasAReceber = receivables,
+                inadimplencia = overdue
             )
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), FinancialOverviewState())
@@ -87,12 +105,13 @@ class RelatoriosViewModel(
 
 class RelatoriosViewModelFactory(
     private val saleDao: SaleDao,
-    private val expenseDao: ExpenseDao
+    private val expenseDao: ExpenseDao,
+    private val installmentDao: InstallmentDao
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(RelatoriosViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return RelatoriosViewModel(saleDao, expenseDao) as T
+            return RelatoriosViewModel(saleDao, expenseDao, installmentDao) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

@@ -36,4 +36,13 @@ interface InstallmentDao {
 
     @Delete
     suspend fun delete(installment: Installment): Int
+
+    @Query("SELECT SUM(valor) FROM Installment WHERE statusParcela = 'PAGA' AND dataPagamento BETWEEN :startDate AND :endDate")
+    fun getPaidAmount(startDate: Long, endDate: Long): Flow<Double?>
+
+    @Query("SELECT SUM(valor) FROM Installment WHERE statusParcela != 'PAGA'")
+    fun getTotalReceivables(): Flow<Double?>
+
+    @Query("SELECT SUM(valor) FROM Installment WHERE statusParcela != 'PAGA' AND dataVencimento < :currentTime")
+    fun getOverdueAmount(currentTime: Long): Flow<Double?>
 }
