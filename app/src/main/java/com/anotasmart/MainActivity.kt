@@ -288,7 +288,9 @@ fun ScreenStructure(
                     }
                     composable(Screen.Despesas.route) { DespesasScreen() }
                     composable(Screen.Categorias.route) { CategoriasScreen() }
-                    composable(Screen.Relatorios.route) { RelatoriosScreen() }
+                    composable(Screen.Relatorios.route) { 
+                        RelatoriosScreen(onBackClick = { navController.popBackStack() }) 
+                    }
                     composable(Screen.Tutoriais.route) { DocumentacaoScreen() }
                     composable(Screen.ChavePix.route) { ChavePixScreen() }
                     composable(Screen.Sobre.route) { SobreScreen() }

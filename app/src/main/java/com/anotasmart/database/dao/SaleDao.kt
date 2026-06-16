@@ -40,4 +40,18 @@ interface SaleDao {
         insertInstallments(installments)
         return 1
     }
+
+    @Query("SELECT SUM(valorTotal) FROM Sale WHERE dataVenda BETWEEN :startDate AND :endDate AND status != 'CANCELADA'")
+    fun getTotalRevenue(startDate: Long, endDate: Long): Flow<Double?>
+
+    @Query("""
+        SELECT SUM((si.precoVendaNoAto - si.custoUnitarioNoAto) * si.quantidade) 
+        FROM SaleItem si 
+        INNER JOIN Sale s ON si.saleId = s.id 
+        WHERE s.dataVenda BETWEEN :startDate AND :endDate AND s.status != 'CANCELADA'
+    """)
+    fun getEstimatedProfit(startDate: Long, endDate: Long): Flow<Double?>
+
+    @Query("SELECT COUNT(*) FROM Sale WHERE dataVenda BETWEEN :startDate AND :endDate AND status != 'CANCELADA'")
+    fun getSalesCount(startDate: Long, endDate: Long): Flow<Int>
 }

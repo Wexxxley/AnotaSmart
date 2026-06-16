@@ -23,4 +23,7 @@ interface ExpenseDao {
 
     @Query("SELECT * FROM Expense WHERE categoryId = :categoryId")
     fun getByCategory(categoryId: String): Flow<List<Expense>>
+
+    @Query("SELECT SUM(amount) FROM Expense WHERE date BETWEEN :startDate AND :endDate")
+    fun getTotalExpenses(startDate: Long, endDate: Long): Flow<Double?>
 }
