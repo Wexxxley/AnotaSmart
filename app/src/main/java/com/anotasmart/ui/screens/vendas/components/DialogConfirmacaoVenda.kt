@@ -1,18 +1,30 @@
 package com.anotasmart.ui.screens.vendas.components
 
+import android.graphics.Bitmap
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.anotasmart.ui.components.CampoMoeda
+import com.anotasmart.utils.PixUtils
 
 @Composable
 fun DialogConfirmacaoVenda(
     totalVenda: Double,
+    isPix: Boolean = false,
+    pixKey: String = "",
+    companyName: String = "",
     onDismissRequest: () -> Unit,
     onConfirmar: () -> Unit
 ) {
@@ -50,26 +62,67 @@ fun DialogConfirmacaoVenda(
                     )
                 }
 
-                CampoMoeda(
-                    value = valorRecebidoStr,
-                    onValueChange = { valorRecebidoStr = it },
-                    label = "Valor Recebido (Opcional)",
-                    modifier = Modifier.fillMaxWidth()
-                )
+                if (isPix && pixKey.isNotBlank()) {
+                    val pixPayload = remember(pixKey, companyName) {
+                        PixUtils.generatePixPayload(pixKey, companyName, "SAO PAULO")
+                    }
+                    val qrBitmap = remember(pixPayload) {
+                        PixUtils.generateQRCode(pixPayload, 400)
+                    }
 
-                if (valorRecebido > totalVenda) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "Troco",
-                            style = MaterialTheme.typography.labelMedium,
+                            text = "Pague com Pix",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(180.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color.White)
+                                .padding(8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            qrBitmap?.let {
+                                Image(
+                                    bitmap = it.asImageBitmap(),
+                                    contentDescription = "QR Code Pix",
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            } ?: CircularProgressIndicator(modifier = Modifier.size(32.dp))
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = pixKey,
+                            style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Text(
-                            text = "R$ ${String.format("%.2f", troco)}",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
+                    }
+                } else {
+                    CampoMoeda(
+                        value = valorRecebidoStr,
+                        onValueChange = { valorRecebidoStr = it },
+                        label = "Valor Recebido (Opcional)",
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    if (valorRecebido > totalVenda) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "Troco",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = "R$ ${String.format("%.2f", troco)}",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                        }
                     }
                 }
             }

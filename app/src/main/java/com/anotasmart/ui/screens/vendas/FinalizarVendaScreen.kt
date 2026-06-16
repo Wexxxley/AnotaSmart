@@ -47,6 +47,13 @@ fun FinalizarVendaScreen(
         )
     )
 
+    // Acesso às preferências do usuário para o Pix
+    val userPrefsRepository = remember { com.anotasmart.data.preferences.UserPreferencesRepository(context) }
+    val userViewModel: com.anotasmart.ui.viewModels.UserViewModel = viewModel(
+        factory = com.anotasmart.ui.viewModels.UserViewModelFactory(userPrefsRepository)
+    )
+    val userPrefs by userViewModel.userPreferences.collectAsState()
+
     val clientes by viewModel.clientesFiltrados.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val clienteSelecionado by viewModel.clienteSelecionado.collectAsState()
@@ -59,6 +66,9 @@ fun FinalizarVendaScreen(
     if (showConfirmDialog) {
         DialogConfirmacaoVenda(
             totalVenda = totalVenda,
+            isPix = metodoPagamento == PaymentMethod.PIX,
+            pixKey = userPrefs.pixKey,
+            companyName = userPrefs.companyName,
             onDismissRequest = { showConfirmDialog = false },
             onConfirmar = {
                 viewModel.confirmarVendaAVista {
