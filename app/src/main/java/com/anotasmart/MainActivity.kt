@@ -293,7 +293,9 @@ fun ScreenStructure(
                     }
                     composable(Screen.Tutoriais.route) { DocumentacaoScreen() }
                     composable(Screen.ChavePix.route) { ChavePixScreen() }
-                    composable(Screen.Sobre.route) { SobreScreen() }
+                    composable(Screen.Sobre.route) { 
+                        SobreScreen(onBackClick = { navController.popBackStack() }) 
+                    }
                     composable(Screen.Carrinho.route) { 
                         CarrinhoScreen(
                             viewModel = cartViewModel,
