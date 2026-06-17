@@ -27,8 +27,8 @@ class PedidosViewModel(
                 .filter { it.statusParcela != InstallmentStatus.PAGA }
                 .map { installment ->
                     // Criamos um objeto temporário para exibir na lista de recebíveis
-                    // que contém a parcela, a venda e o cliente
-                    Triple(installment, saleWithRelations.sale, saleWithRelations.client)
+                    // que contém a parcela, a venda com relações e o cliente
+                    Triple(installment, saleWithRelations, saleWithRelations.client)
                 }
         }.sortedBy { it.first.dataVencimento }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())

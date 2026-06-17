@@ -42,7 +42,7 @@ class ClientesViewModel(
         sales.flatMap { saleWithRelations ->
             saleWithRelations.installments
                 .filter { it.statusParcela != InstallmentStatus.PAGA }
-                .map { Triple(it, saleWithRelations.sale, saleWithRelations.client) }
+                .map { Triple(it, saleWithRelations, saleWithRelations.client) }
         }.sortedBy { it.first.dataVencimento }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 

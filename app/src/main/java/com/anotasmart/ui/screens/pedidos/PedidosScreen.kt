@@ -134,7 +134,7 @@ fun HistoricoVendasList(vendas: List<SaleWithRelations>) {
 
 @Composable
 fun ContasAReceberList(
-    recebiveis: List<Triple<Installment, Sale, Client?>>,
+    recebiveis: List<Triple<Installment, SaleWithRelations, Client?>>,
     onBaixa: (String) -> Unit
 ) {
     if (recebiveis.isEmpty()) {
@@ -142,7 +142,7 @@ fun ContasAReceberList(
     } else {
         // Agrupar por Sale (Pedido)
         val groupedRecebiveis = remember(recebiveis) {
-            recebiveis.groupBy { it.second.id }
+            recebiveis.groupBy { it.second.sale.id }
         }
         val expandedStates = remember { mutableStateMapOf<String, Boolean>() }
 
@@ -163,8 +163,8 @@ fun ContasAReceberList(
                     isExpanded = isExpanded,
                     onToggle = { expandedStates[saleId] = !isExpanded },
                     key = { it.first.id }
-                ) { (installment, sale, client) ->
-                    ParcelaCard(installment, sale, client, onBaixa)
+                ) { (installment, saleWithRelations, client) ->
+                    ParcelaCard(installment, saleWithRelations, client, onBaixa)
                 }
             }
         }
@@ -176,18 +176,23 @@ fun VendaCard(vendaWithRelations: SaleWithRelations) {
     val venda = vendaWithRelations.sale
     val client = vendaWithRelations.client
     val installments = vendaWithRelations.installments
+    val items = vendaWithRelations.items
+
+    var expanded by remember { mutableStateOf(false) }
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { expanded = !expanded },
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp, 4.dp)) {
+        Column(modifier = Modifier.padding(16.dp, 8.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = client?.nome ?: "Cliente Avulso",
                         fontWeight = FontWeight.Bold,
@@ -199,12 +204,51 @@ fun VendaCard(vendaWithRelations: SaleWithRelations) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                Text(
-                    text = FormatUtils.formatCurrency(venda.valorTotal),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = FormatUtils.formatCurrency(venda.valorTotal),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Icon(
+                        imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                        contentDescription = if (expanded) "Ver menos" else "Ver itens",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+
+            if (expanded) {
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), thickness = 0.5.dp)
+                items.forEach { itemWithProduct ->
+                    val item = itemWithProduct.saleItem
+                    val product = itemWithProduct.product
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 2.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        val qtdText = if (item.quantidade % 1.0 == 0.0) item.quantidade.toInt().toString() else item.quantidade.toString()
+                        val unit = product?.unidadeMedida?.name?.lowercase() ?: ""
+                        
+                        Text(
+                            text = "$qtdText $unit ${item.nomeCustomizado ?: product?.nome ?: "Item"}",
+                            fontSize = 13.sp,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = FormatUtils.formatCurrency(item.precoVendaNoAto * item.quantidade),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), thickness = 0.5.dp)
             }
 
             val isParcelado = installments.size > 1 || 
@@ -269,7 +313,7 @@ fun VendaCard(vendaWithRelations: SaleWithRelations) {
 @Composable
 fun ParcelaCard(
     installment: Installment,
-    sale: Sale,
+    saleWithRelations: SaleWithRelations,
     client: Client?,
     onBaixa: (String) -> Unit
 ) {

@@ -137,7 +137,7 @@ fun ClienteDetalhesScreen(
                 if (recebiveis.isEmpty()) {
                     item { EmptyListMessage("Nenhuma parcela pendente.") }
                 } else {
-                    val groupedRecebiveis = recebiveis.groupBy { it.second.id }
+                    val groupedRecebiveis = recebiveis.groupBy { it.second.sale.id }
                     
                     groupedRecebiveis.forEach { (saleId, items) ->
                         val isExpanded = expandedStates[saleId] ?: true
@@ -149,8 +149,8 @@ fun ClienteDetalhesScreen(
                             isExpanded = isExpanded,
                             onToggle = { expandedStates[saleId] = !isExpanded },
                             key = { it.first.id }
-                        ) { (installment, sale, client) ->
-                            ParcelaCard(installment, sale, client, onBaixa = { viewModel.marcarComoPaga(it) })
+                        ) { (installment, saleWithRelations, client) ->
+                            ParcelaCard(installment, saleWithRelations, client, onBaixa = { viewModel.marcarComoPaga(it) })
                         }
                     }
                 }
