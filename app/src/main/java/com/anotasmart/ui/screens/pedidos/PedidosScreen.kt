@@ -30,7 +30,10 @@ import com.anotasmart.model.entity.Sale
 import com.anotasmart.ui.components.StandardItemCard
 import com.anotasmart.ui.components.expandableGroup
 import com.anotasmart.ui.viewModels.PedidosViewModel
-import com.anotasmart.utils.FormatUtils
+import com.anotasmart.utils.formatCurrency
+import com.anotasmart.utils.formatDate
+import com.anotasmart.utils.formatDateTime
+import com.anotasmart.utils.formatSafe
 
 @Composable
 fun PedidosScreen(
@@ -92,7 +95,7 @@ fun BannerResumo(totalAReceber: Double, totalAtrasado: Double) {
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 Text(
-                    text = FormatUtils.formatCurrency(totalAReceber),
+                    text = formatCurrency(totalAReceber),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -105,7 +108,7 @@ fun BannerResumo(totalAReceber: Double, totalAtrasado: Double) {
                     color = MaterialTheme.colorScheme.error
                 )
                 Text(
-                    text = FormatUtils.formatCurrency(totalAtrasado),
+                    text = formatCurrency(totalAtrasado),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.error
@@ -158,7 +161,7 @@ fun ContasAReceberList(
 
                 expandableGroup(
                     title = client?.nome ?: "Cliente Avulso",
-                    subtitle = "Total Pendente: ${FormatUtils.formatCurrency(items.sumOf { it.first.valor })}",
+                    subtitle = "Total Pendente: ${formatCurrency(items.sumOf { it.first.valor })}",
                     items = items,
                     isExpanded = isExpanded,
                     onToggle = { expandedStates[saleId] = !isExpanded },
@@ -199,14 +202,14 @@ fun VendaCard(vendaWithRelations: SaleWithRelations) {
                         fontSize = 16.sp
                     )
                     Text(
-                        text = FormatUtils.formatDate(venda.dataVenda),
+                        text = formatDate(venda.dataVenda),
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        text = FormatUtils.formatCurrency(venda.valorTotal),
+                        text = formatCurrency(venda.valorTotal),
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
                         color = MaterialTheme.colorScheme.primary
@@ -241,7 +244,7 @@ fun VendaCard(vendaWithRelations: SaleWithRelations) {
                             modifier = Modifier.weight(1f)
                         )
                         Text(
-                            text = FormatUtils.formatCurrency(item.precoVendaNoAto * item.quantidade),
+                            text = formatCurrency(item.precoVendaNoAto * item.quantidade),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurface
@@ -340,15 +343,15 @@ fun ParcelaCard(
             },
             title = { Text("Confirmar Pagamento") },
             text = { 
-                Text("Deseja registrar o pagamento da parcela ${installment.numeroParcela} no valor de ${FormatUtils.formatCurrency(installment.valor)}?")
+                Text("Deseja registrar o pagamento da parcela ${installment.numeroParcela} no valor de ${formatCurrency(installment.valor)}?")
             }
         )
     }
 
     StandardItemCard(
         title = "Parcela ${installment.numeroParcela}",
-        label = "Vencimento: ${FormatUtils.formatDate(installment.dataVencimento)}",
-        value = FormatUtils.formatCurrency(installment.valor),
+        label = "Vencimento: ${formatDate(installment.dataVencimento)}",
+        value = formatCurrency(installment.valor),
         labelIcon = if (estaAtrasada) Icons.Default.Warning else null,
         labelColor = if (estaAtrasada) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
         valueColor = if (estaAtrasada) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,

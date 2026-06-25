@@ -6,8 +6,13 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
 import android.content.Context
+import com.anotasmart.database.dao.CartItemDao
 import com.anotasmart.database.dao.CategoryDao
+import com.anotasmart.database.dao.ClientDao
 import com.anotasmart.database.dao.ExpenseDao
+import com.anotasmart.database.dao.InstallmentDao
+import com.anotasmart.database.dao.ProductDao
+import com.anotasmart.database.dao.SaleDao
 import com.anotasmart.model.*
 import com.anotasmart.model.entity.*
 
@@ -61,11 +66,11 @@ class EnumsConverters {
 abstract class AppDatabase : RoomDatabase() {
     abstract fun expenseDao(): ExpenseDao
     abstract fun categoryDao(): CategoryDao
-    abstract fun productDao(): com.anotasmart.database.dao.ProductDao
-    abstract fun clientDao(): com.anotasmart.database.dao.ClientDao
-    abstract fun cartItemDao(): com.anotasmart.database.dao.CartItemDao
-    abstract fun saleDao(): com.anotasmart.database.dao.SaleDao
-    abstract fun installmentDao(): com.anotasmart.database.dao.InstallmentDao
+    abstract fun productDao(): ProductDao
+    abstract fun clientDao(): ClientDao
+    abstract fun cartItemDao(): CartItemDao
+    abstract fun saleDao(): SaleDao
+    abstract fun installmentDao(): InstallmentDao
 
     companion object {
         @Volatile

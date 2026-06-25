@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.anotasmart.model.CartItem
+import com.anotasmart.utils.formatSafe
 import com.anotasmart.ui.components.StandardScreen
 import com.anotasmart.ui.viewModels.CartViewModel
 
@@ -49,7 +50,7 @@ fun CarrinhoScreen(
                         ) {
                             Text(text = "Total", style = MaterialTheme.typography.titleMedium)
                             Text(
-                                text = "R$ ${String.format("%.2f", totalValor)}",
+                                text = "R$ ${formatSafe(totalValor)}",
                                 style = MaterialTheme.typography.titleLarge,
                                 color = MaterialTheme.colorScheme.primary,
                                 fontWeight = FontWeight.Bold
@@ -124,12 +125,12 @@ fun CartItemCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "R$ ${String.format("%.2f", item.precoVenda)} x ${item.quantidade} ${item.unidadeMedida.name}",
+                    text = "R$ ${formatSafe(item.precoVenda)} x ${item.quantidade} ${item.unidadeMedida.name}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )
                 Text(
-                    text = "Subtotal: R$ ${String.format("%.2f", item.total)}",
+                    text = "Subtotal: R$ ${formatSafe(item.total)}",
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary,

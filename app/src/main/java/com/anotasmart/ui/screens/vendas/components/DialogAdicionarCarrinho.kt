@@ -26,7 +26,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.anotasmart.model.ItemType
+import com.anotasmart.model.UnitType
 import com.anotasmart.model.entity.Product
+
+// Função auxiliar de formatação segura
+fun formatSafe(value: Double?): String {
+    return value?.let { "%.2f".format(it) } ?: "0,00"
+}
 
 @Composable
 fun DialogAdicionarCarrinho(
@@ -67,21 +73,21 @@ fun DialogAdicionarCarrinho(
             ) {
                 if (!isService) {
                     Text(
-                        text = "Estoque: ${String.format("%.2f", estoqueTotal)} ${produto.unidadeMedida.name}",
+                        text = "Estoque: ${formatSafe(estoqueTotal)} ${produto.unidadeMedida.name}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
                     if (quantidadeNoCarrinho > 0) {
                         Text(
-                            text = "Já no carrinho: ${if (produto.unidadeMedida == com.anotasmart.model.UnitType.UN) quantidadeNoCarrinho.toInt() else String.format("%.2f", quantidadeNoCarrinho)}",
+                            text = "Já no carrinho: ${if (produto.unidadeMedida == UnitType.UN) quantidadeNoCarrinho.toInt() else formatSafe(quantidadeNoCarrinho)}",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.secondary
                         )
                     }
 
                     Text(
-                        text = "Disponível: ${if (produto.unidadeMedida == com.anotasmart.model.UnitType.UN) estoqueDisponivel.toInt() else String.format("%.2f", estoqueDisponivel)}",
+                        text = "Disponível: ${if (produto.unidadeMedida == UnitType.UN) estoqueDisponivel.toInt() else formatSafe(estoqueDisponivel)}",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = if (estoqueDisponivel > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
@@ -115,9 +121,9 @@ fun DialogAdicionarCarrinho(
                     }
 
                     Text(
-                        text = if (produto.unidadeMedida == com.anotasmart.model.UnitType.UN) 
+                        text = if (produto.unidadeMedida == UnitType.UN) 
                                    quantidadeSelecionada.toInt().toString() 
-                               else String.format("%.2f", quantidadeSelecionada),
+                               else formatSafe(quantidadeSelecionada),
                         style = MaterialTheme.typography.headlineMedium,
                         modifier = Modifier.padding(horizontal = 24.dp)
                     )
@@ -155,7 +161,7 @@ fun DialogAdicionarCarrinho(
                 ) {
                     val valorTotal = produto.precoVenda * quantidadeSelecionada
                     Text(
-                        text = "ADICIONAR R$ ${String.format("%.2f", valorTotal)}",
+                        text = "ADICIONAR R$ ${formatSafe(valorTotal)}",
                         fontWeight = FontWeight.Bold
                     )
                 }

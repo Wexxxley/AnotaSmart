@@ -8,21 +8,18 @@ import com.anotasmart.model.ImageDirectory
 import java.io.File
 import java.io.FileOutputStream
 import java.util.UUID
-
-import android.graphics.Color
 import com.yalantis.ucrop.UCrop
 import com.yalantis.ucrop.UCropActivity
 
 object ImageUtils {
-    /**
-     * Configura o uCrop para recorte.
-     */
+
+    // Configura UCROP para cortes
     fun startUCrop(context: Context, sourceUri: Uri, destinationUri: Uri, isCircular: Boolean = true): UCrop {
         val options = UCrop.Options().apply {
             if (isCircular) {
                 setCircleDimmedLayer(true) // Máscara circular
             }
-            setShowCropFrame(!isCircular)    // Mostrar moldura quadrada se não for circular
+            setShowCropFrame(!isCircular)    // Mostra moldura quadrada se não for circula
             setShowCropGrid(!isCircular)     // Mostrar grade se não for circular
             setCompressionFormat(Bitmap.CompressFormat.JPEG)
             setCompressionQuality(80)
@@ -36,11 +33,8 @@ object ImageUtils {
             .withOptions(options)
     }
 
-    /**
-     * Copia uma imagem de uma URI para o armazenamento interno do app,
-     * aplicando compressão para economizar espaço.
-     * Retorna o caminho absoluto do novo arquivo ou null em caso de erro.
-     */
+    // copia uma img para o armazenamento do app.
+    // Aplica compressão e retorna o caminho absolto
     fun saveImageToInternalStorage(context: Context, uri: Uri, directory: ImageDirectory): String? {
         return try {
             val inputStream = context.contentResolver.openInputStream(uri) ?: return null
@@ -57,7 +51,7 @@ object ImageUtils {
             val fileName = "${directory.prefix}_${UUID.randomUUID()}.jpg"
             val destFile = File(dir, fileName)
 
-            // Salvar com compressão (80% de qualidade)
+            // Salvar com compressão
             val out = FileOutputStream(destFile)
             bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out)
             out.flush()
@@ -70,9 +64,7 @@ object ImageUtils {
         }
     }
 
-    /**
-     * Remove um arquivo do armazenamento interno.
-     */
+   // Remove um arq do armezenamento interno
     fun deleteImageFromInternalStorage(path: String) {
         try {
             val file = File(path)

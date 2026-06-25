@@ -45,6 +45,7 @@ fun VendaScreen(
     val mostrarDialogItemAvulso by viewModel.mostrarDialogItemAvulso.collectAsState()
     val itensNoCarrinho by cartViewModel.items.collectAsState()
 
+    // Esse box permite a sobreposição feita pelos dialogs adicionar ao carrinho e item avulso
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier

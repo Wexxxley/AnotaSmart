@@ -68,17 +68,12 @@ object PhoneUtils {
         }
     }
 
-    /**
-     * Remove todos os caracteres não numéricos.
-     */
+    // Remove todos os caracteres não numéricos.
     fun cleanPhoneNumber(phone: String): String {
         return phone.filter { it.isDigit() }
     }
 
-    /**
-     * Gera o link do WhatsApp para o número fornecido.
-     * Adiciona o DDI +55 (Brasil) caso não exista.
-     */
+    // Gera o link do WhatsApp para o número fornecido
     fun getWhatsAppLink(phone: String, message: String = ""): String {
         val cleanPhone = cleanPhoneNumber(phone)
         val phoneWithDDI = if (cleanPhone.length <= 11) "55$cleanPhone" else cleanPhone

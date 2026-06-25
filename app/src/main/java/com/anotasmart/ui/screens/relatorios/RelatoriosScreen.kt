@@ -32,7 +32,7 @@ import com.anotasmart.ui.viewModels.FinancialOverviewState
 import com.anotasmart.ui.viewModels.PeriodoRelatorio
 import com.anotasmart.ui.viewModels.RelatoriosViewModel
 import com.anotasmart.ui.viewModels.RelatoriosViewModelFactory
-import com.anotasmart.utils.FormatUtils
+import com.anotasmart.utils.formatCurrency
 
 @Composable
 fun RelatoriosScreen(
@@ -101,7 +101,7 @@ fun RelatoriosScreen(
         item {
             DetailRow(
                 title = "Lucro Estimado (Itens)",
-                value = FormatUtils.formatCurrency(overview.lucroEstimado),
+                value = formatCurrency(overview.lucroEstimado),
                 description = "Ganho real sobre os produtos/serviços",
                 icon = Icons.Default.TrendingUp,
                 color = MaterialTheme.colorScheme.primary
@@ -117,7 +117,7 @@ fun RelatoriosScreen(
         item {
             DetailRow(
                 title = "Dinheiro em Caixa",
-                value = FormatUtils.formatCurrency(overview.dinheiroEmCaixa),
+                value = formatCurrency(overview.dinheiroEmCaixa),
                 description = "Total de parcelas pagas no período",
                 icon = Icons.Default.PriceCheck,
                 color = Color(0xFF2E7D32)
@@ -127,7 +127,7 @@ fun RelatoriosScreen(
         item {
             DetailRow(
                 title = "Contas a Receber",
-                value = FormatUtils.formatCurrency(overview.contasAReceber),
+                value = formatCurrency(overview.contasAReceber),
                 description = "Tudo que ainda falta receber (total)",
                 icon = Icons.Default.AccountBalanceWallet,
                 color = MaterialTheme.colorScheme.secondary
@@ -137,7 +137,7 @@ fun RelatoriosScreen(
         item {
             DetailRow(
                 title = "Inadimplência",
-                value = FormatUtils.formatCurrency(overview.inadimplencia),
+                value = formatCurrency(overview.inadimplencia),
                 description = "Parcelas vencidas e não pagas",
                 icon = Icons.Default.Warning,
                 color = Color(0xFFE65100)
@@ -272,7 +272,7 @@ fun MainProfitCard(lucro: Double) {
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = FormatUtils.formatCurrency(lucro),
+                text = formatCurrency(lucro),
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
                 color = if (lucro >= 0) Color(0xFF1B5E20) else Color(0xFFB71C1C)
@@ -301,7 +301,7 @@ fun SummaryCard(
             Spacer(modifier = Modifier.height(12.dp))
             Text(text = title, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(
-                text = FormatUtils.formatCurrency(value),
+                text = formatCurrency(value),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface

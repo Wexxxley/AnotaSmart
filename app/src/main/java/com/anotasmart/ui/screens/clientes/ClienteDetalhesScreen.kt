@@ -35,9 +35,9 @@ import com.anotasmart.ui.screens.pedidos.EmptyListMessage
 import com.anotasmart.ui.screens.pedidos.ParcelaCard
 import com.anotasmart.ui.screens.pedidos.VendaCard
 import com.anotasmart.ui.viewModels.ClientesViewModel
-import com.anotasmart.utils.FormatUtils
 import com.anotasmart.utils.PhoneUtils
 import androidx.compose.foundation.lazy.items
+import com.anotasmart.utils.formatCurrency
 
 @Composable
 fun ClienteDetalhesScreen(
@@ -144,7 +144,7 @@ fun ClienteDetalhesScreen(
 
                         expandableGroup(
                             title = "Pedido #${saleId.takeLast(4)}",
-                            subtitle = "Total Pendente: ${FormatUtils.formatCurrency(items.sumOf { it.first.valor })}",
+                            subtitle = "Total Pendente: ${formatCurrency(items.sumOf { it.first.valor })}",
                             items = items,
                             isExpanded = isExpanded,
                             onToggle = { expandedStates[saleId] = !isExpanded },

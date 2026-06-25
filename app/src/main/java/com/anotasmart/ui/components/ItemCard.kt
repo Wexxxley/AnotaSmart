@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.anotasmart.model.ItemType
 import com.anotasmart.model.entity.Product
+import com.anotasmart.utils.formatSafe
 
 @SuppressLint("DefaultLocale")
 @Composable
@@ -83,7 +84,7 @@ fun ItemCard(
                 )
 
                 Text(
-                    text = "R$ ${String.format("%.2f", produto.precoVenda)}",
+                    text = "R$ ${formatSafe(produto.precoVenda)}",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary,

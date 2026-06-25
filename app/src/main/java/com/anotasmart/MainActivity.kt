@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -49,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.anotasmart.utils.formatSafe
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -92,7 +92,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 
@@ -101,15 +100,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            // Contexto fornece a ligação entre o código e o ambiente do SO.
+            // Provedor de acesso a recursos do sistema: arquivos, banco de dados e etc
             val context = LocalContext.current
             val userPrefsRepository = remember { UserPreferencesRepository(context) }
             val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userPrefsRepository))
             val userPrefs by userViewModel.userPreferences.collectAsState()
-            
+
             val isDarkTheme = when (userPrefs.selectedTheme) {
                 1 -> false
                 2 -> true
-                else -> isSystemInDarkTheme()
+                else -> isSystemInDarkTheme() // retorna true or false
             }
 
             AppTheme(darkTheme = isDarkTheme) {
@@ -118,7 +119,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val db = (context.applicationContext as AnotaSmartApplication).database
-                    val navController = rememberNavController()
+                    val navController = rememberNavController() // Gerencia navegação
                     val cartViewModel: CartViewModel = viewModel(
                         factory = CartViewModelFactory(db.cartItemDao(), db.productDao())
                     )
@@ -133,6 +134,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+// ScreenStructure utiliza o padrão de State Hoisting para gerenciar três sistemas complexos: o menu lateral, a barra de navegação e o conteúdo central.
 @Composable
 fun ScreenStructure(
     navController: NavHostController,
@@ -180,11 +182,12 @@ fun ScreenStructure(
                     onItemClick = { screen ->
                         if (currentRoute != screen.route) {
                             navController.navigate(screen.route) {
+                                // Antes de ir, a pilha de navegação é limpa voltando até a tela inicial
                                 popUpTo(navController.graph.startDestinationId) {
-                                    saveState = true
+                                    saveState = true // salva o estado de cada tela intermediária
                                 }
-                                launchSingleTop = true
-                                restoreState = true
+                                launchSingleTop = true // impede cópias de telas iguais
+                                restoreState = true // se a tela de destino já foi visitada, esse estado será restaurado.
                             }
                         }
                         scope.launch { drawerState.close() }
@@ -211,7 +214,10 @@ fun ScreenStructure(
                         },
                         onProfileClick = {
                             if (currentRoute != Screen.Setup.route) {
-                                navController.navigate(Screen.Setup.route)
+                                navController.navigate(Screen.Setup.route) {
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
                             }
                         }
                     )
@@ -220,6 +226,7 @@ fun ScreenStructure(
             bottomBar = {
                 if (showBars) {
                     Column {
+                        // telas em que a bottom bar deve ser oculta
                         val routesToHideSummary = listOf(
                             Screen.Carrinho.route, 
                             Screen.FinalizarVenda.route, 
@@ -253,6 +260,7 @@ fun ScreenStructure(
                     .padding(if (!showBars || currentRoute == Screen.VendaSucesso.route) PaddingValues(0.dp) else innerPadding)
                     .background(MaterialTheme.colorScheme.background)
             ) {
+                // funciona como o catálogo central de destinos do aplicativo
                 NavHost(
                     navController = navController,
                     startDestination = Screen.Venda.route
@@ -550,7 +558,7 @@ fun ResumoCarrinho(quantidadeItens: Int, totalValor: Double, onVerCarrinhoClick:
         ) {
             Column {
                 Text(
-                    text = "TOTAL: R$ ${String.format("%.2f", totalValor)}",
+                    text = "TOTAL: R$ ${formatSafe(totalValor)}",
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(

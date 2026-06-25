@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 
 class UserViewModel(private val repository: UserPreferencesRepository) : ViewModel() {
 
+    // Usando o Preferences DataStore(chave valor e assíncrono)
     val userPreferences: StateFlow<UserPreferences> = repository.userPreferencesFlow
         .stateIn(
             scope = viewModelScope,
