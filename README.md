@@ -38,18 +38,29 @@ Espera-se que o projeto reduza a junção entre dinheiro pessoal e profissional,
 > Daqui em diante o README.md só deve ser preenchido no momento da entrega final.
 
 ##  Tecnologias: 
-Liste aqui as tecnologias e bibliotecas que foram utilizadas no projeto.
+
+Este projeto foi desenvolvido utilizando as seguintes tecnologias e bibliotecas:
+
+- **Linguagem:** Kotlin
+- **Interface:** Jetpack Compose (Material Design 3)
+- **Navegação:** Navigation Compose
+- **Banco de Dados:** Room
+- **Armazenamento:** DataStore
+- **Imagens:** Coil e uCrop
+- **QR Code:** ZXing
 
 ---
 
 ## Instruções para Execução
-[Inclua instruções claras sobre como rodar o projeto localmente. Isso é crucial para que você possa testá-lo nas próximas entregas. **Somente caso haja alguma coisa diferente do usual**
+
+Para rodar o projeto localmente, siga os passos abaixo:
 
 ```bash
 # Clone o repositório
-git clone [https://docs.github.com/pt/repositories/creating-and-managing-repositories/about-repositories](https://docs.github.com/pt/repositories/creating-and-managing-repositories/about-repositories)
-
+git clone https://github.com/profBruno-UFC-Qx/classroom-mobile-final-piqueense/tree/Wexxxley-telas-iniciais
 # Navegue para o diretório
-cd [nome-do-repositorio]
-
-# Siga as instruções específicas para a sua tecnologia...
+cd AnotaSmart
+# Abra o projeto no Android Studio
+# Sincronize as dependências do Gradle
+# Execute o aplicativo em um emulador ou dispositivo físico
+```
