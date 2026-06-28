@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.anotasmart.ui.components.CampoMoeda
 import com.anotasmart.utils.PixUtils
+import com.anotasmart.utils.formatSafe
 
 @Composable
 fun DialogConfirmacaoVenda(
@@ -55,7 +56,7 @@ fun DialogConfirmacaoVenda(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "R$ ${String.format("%.2f", totalVenda)}",
+                        text = formatSafe(totalVenda),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
@@ -117,7 +118,7 @@ fun DialogConfirmacaoVenda(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
-                                text = "R$ ${String.format("%.2f", troco)}",
+                                text =formatSafe(troco),
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.secondary

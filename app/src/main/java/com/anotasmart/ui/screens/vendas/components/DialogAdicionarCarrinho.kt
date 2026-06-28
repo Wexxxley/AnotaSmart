@@ -28,11 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.anotasmart.model.ItemType
 import com.anotasmart.model.UnitType
 import com.anotasmart.model.entity.Product
-
-// Função auxiliar de formatação segura
-fun formatSafe(value: Double?): String {
-    return value?.let { "%.2f".format(it) } ?: "0,00"
-}
+import com.anotasmart.utils.formatSafe
 
 @Composable
 fun DialogAdicionarCarrinho(

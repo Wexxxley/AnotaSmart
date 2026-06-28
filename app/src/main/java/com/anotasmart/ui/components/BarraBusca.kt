@@ -33,3 +33,4 @@ fun BarraBusca(
         shape = RoundedCornerShape(8.dp)
     )
 }
+
