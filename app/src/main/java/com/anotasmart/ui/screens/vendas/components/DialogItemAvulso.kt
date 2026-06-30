@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.anotasmart.utils.formatSafe
 
 @Composable
 fun DialogItemAvulso(
@@ -123,7 +124,7 @@ fun DialogItemAvulso(
                     enabled = precoVenda.isNotEmpty() && pVenda > 0
                 ) {
                     Text(
-                        text = "ADICIONAR R$ ${String.format("%.2f", valorTotal)}",
+                        text = "ADICIONAR R$ ${formatSafe(valorTotal)}",
                         fontWeight = FontWeight.Bold
                     )
                 }

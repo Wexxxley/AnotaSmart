@@ -25,7 +25,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.anotasmart.AnotaSmartApplication
 import com.anotasmart.model.PaymentMethod
+import com.anotasmart.ui.components.BarraBusca
 import com.anotasmart.ui.components.StandardScreen
+import com.anotasmart.ui.screens.vendas.components.ClienteItem
 import com.anotasmart.ui.screens.vendas.components.DialogConfirmacaoVenda
 import com.anotasmart.ui.screens.vendas.components.DialogVendaParcelada
 import com.anotasmart.ui.viewModels.FinalizarVendaViewModel
@@ -143,7 +145,7 @@ fun FinalizarVendaScreen(
                     fontWeight = FontWeight.Bold
                 )
                 
-                com.anotasmart.ui.components.BarraBusca(
+                BarraBusca(
                     query = searchQuery,
                     onQueryChange = viewModel::onSearchQueryChanged,
                     modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
@@ -204,63 +206,6 @@ fun FinalizarVendaScreen(
     }
 }
 
-@Composable
-fun ClienteItem(
-    nome: String,
-    imagePath: String?,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .width(80.dp)
-            .clickable { onClick() }
-    ) {
-        Box(
-            modifier = Modifier
-                .size(64.dp)
-                .clip(CircleShape)
-                .background(
-                    if (isSelected) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.surfaceVariant
-                )
-                .then(
-                    if (isSelected) Modifier.border(3.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                    else Modifier
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            if (!imagePath.isNullOrEmpty()) {
-                val imageModel: Any = imagePath.toIntOrNull() ?: imagePath
-                AsyncImage(
-                    model = imageModel,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(if (isSelected) 3.dp else 0.dp)
-                        .clip(CircleShape)
-                )
-            } else {
-                Icon(
-                    imageVector = if (nome == "Nenhum") Icons.Default.PersonAdd else Icons.Default.Person,
-                    contentDescription = null,
-                    tint = if (isSelected) MaterialTheme.colorScheme.onPrimary
-                    else MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-        Text(
-            text = nome,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Normal,
-            maxLines = 1,
-            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(top = 4.dp)
-        )
-    }
-}
 
 @Composable
 fun PaymentMethodButton(

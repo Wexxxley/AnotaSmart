@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.anotasmart.utils.formatSafe
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -27,7 +28,7 @@ fun DialogVendaParcelada(
     var numParcelas by remember { mutableIntStateOf(2) }
     var showDatePicker by remember { mutableStateOf(false) }
     
-    // Data da primeira parcela (padrão: hoje + 30 dias)
+    // Data da primeira parcela (hoje + 30 dias)
     var dataSelecionada by remember {
         mutableLongStateOf(
             LocalDate.now().plusMonths(1)
@@ -154,11 +155,11 @@ fun DialogVendaParcelada(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "${numParcelas} parcelas de",
+                            text = "$numParcelas parcelas de",
                             style = MaterialTheme.typography.bodyMedium
                         )
                         Text(
-                            text = "R$ ${String.format("%.2f", valorParcela)}",
+                            text = "R$ ${formatSafe(valorParcela)}",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.primary
