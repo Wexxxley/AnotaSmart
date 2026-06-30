@@ -30,7 +30,7 @@ fun VendaSucessoScreen(
         try {
             val mediaPlayer = MediaPlayer.create(context, R.raw.som_venda)
             mediaPlayer?.apply {
-                setVolume(0.5f, 0.5f)
+                setVolume(0.4f, 0.4f)
                 setOnCompletionListener { 
                     it.release() 
                 }

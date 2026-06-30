@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.anotasmart.R
 import com.anotasmart.ui.components.StandardScreen
+import androidx.core.net.toUri
 
 @Composable
 fun SobreScreen(
@@ -43,7 +44,7 @@ fun SobreScreen(
                     .padding(vertical = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Foto do Desenvolvedor (Redonda)
+                // Foto (Redonda)
                 Surface(
                     modifier = Modifier
                         .size(150.dp)
@@ -93,9 +94,10 @@ fun SobreScreen(
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(bottom = 12.dp)
                         )
-                        
+
                         Text(
-                            text = "Desenvolvido para simplificar a vida do microempreendedor e do trabalhador autônomo. O foco é oferecer um controle financeiro e de vendas que seja rápido, prático e sem complicações.",
+                            text = "Desenvolvido para simplificar a vida do microempreendedor e do trabalhador autônomo. " +
+                                    "O foco é oferecer um controle financeiro e de vendas que seja rápido, prático e sem complicações.",
                             style = MaterialTheme.typography.bodyLarge,
                             lineHeight = 26.sp,
                             textAlign = TextAlign.Center
@@ -109,7 +111,8 @@ fun SobreScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Button(
                         onClick = {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Wexxxley"))
+                            val intent = Intent(Intent.ACTION_VIEW,
+                                "https://github.com/Wexxxley".toUri())
                             context.startActivity(intent)
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -124,7 +127,7 @@ fun SobreScreen(
                     OutlinedButton(
                         onClick = {
                             val intent = Intent(Intent.ACTION_SENDTO).apply {
-                                data = Uri.parse("mailto:wesleyfr.sobrinho@gmail.com")
+                                data = "mailto:wesleyfr.sobrinho@gmail.com".toUri()
                                 putExtra(Intent.EXTRA_SUBJECT, "AnotaSmart - Contato")
                             }
                             context.startActivity(intent)
@@ -139,7 +142,7 @@ fun SobreScreen(
                 }
 
                 Spacer(modifier = Modifier.height(48.dp))
-                
+
                 Text(
                     text = "Versão 1.0.0",
                     style = MaterialTheme.typography.labelMedium,

@@ -34,6 +34,7 @@ import com.yalantis.ucrop.UCrop
 import java.io.File
 
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.core.net.toUri
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,7 +55,7 @@ fun SetupScreen(
             userName = userPrefs.userName
             companyName = userPrefs.companyName
             userPrefs.profileImagePath?.let {
-                croppedImageUri = Uri.parse(it)
+                croppedImageUri = it.toUri()
             }
         }
     }

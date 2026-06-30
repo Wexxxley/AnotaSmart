@@ -183,19 +183,16 @@ fun FinalizarVendaScreen(
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
-
                 PaymentMethodButton(
                     title = "Dinheiro",
                     isSelected = metodoPagamento == PaymentMethod.DINHEIRO,
                     onClick = { viewModel.selecionarMetodoPagamento(PaymentMethod.DINHEIRO) }
                 )
-
                 PaymentMethodButton(
                     title = "Pix",
                     isSelected = metodoPagamento == PaymentMethod.PIX,
                     onClick = { viewModel.selecionarMetodoPagamento(PaymentMethod.PIX) }
                 )
-
                 PaymentMethodButton(
                     title = "Parcelado (Venda a Prazo)",
                     isSelected = metodoPagamento == PaymentMethod.PARCELADO,

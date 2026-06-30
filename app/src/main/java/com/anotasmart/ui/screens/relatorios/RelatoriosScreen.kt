@@ -144,7 +144,6 @@ fun RelatoriosScreen(
             )
         }
 
-        // --- OUTRAS INFORMAÇÕES ---
         item {
             Spacer(modifier = Modifier.height(16.dp))
             SectionHeader("Outros Dados")
@@ -220,14 +219,14 @@ fun PeriodSelector(
     selected: PeriodoRelatorio,
     onSelected: (PeriodoRelatorio) -> Unit
 ) {
-    ScrollableTabRow(
+    PrimaryScrollableTabRow(
         selectedTabIndex = selected.ordinal,
-        edgePadding = 0.dp,
-        containerColor = Color.Transparent,
-        divider = {},
-        indicator = {}
+        edgePadding = 16.dp, // Um pequeno respiro nas bordas
+        containerColor = MaterialTheme.colorScheme.surface, // Ou Color.Transparent
+        contentColor = MaterialTheme.colorScheme.primary,
+        divider = {} // Remove a linha fina se desejar
     ) {
-        PeriodoRelatorio.values().forEach { periodo ->
+        PeriodoRelatorio.entries.forEach { periodo ->
             val isSelected = selected == periodo
             Tab(
                 selected = isSelected,
@@ -244,7 +243,9 @@ fun PeriodSelector(
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                     )
-                }
+                },
+                unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                selectedContentColor = MaterialTheme.colorScheme.primary
             )
         }
     }
