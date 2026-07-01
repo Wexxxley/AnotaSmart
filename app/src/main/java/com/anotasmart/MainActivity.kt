@@ -231,7 +231,8 @@ fun ScreenStructure(
                             Screen.Carrinho.route, 
                             Screen.FinalizarVenda.route, 
                             Screen.ClienteDetalhes.route,
-                            Screen.VendaSucesso.route
+                            Screen.VendaSucesso.route,
+                            Screen.Relatorios.route
                         )
                         if (quantidadeItens > 0 && currentRoute !in routesToHideSummary) {
                             ResumoCarrinho(

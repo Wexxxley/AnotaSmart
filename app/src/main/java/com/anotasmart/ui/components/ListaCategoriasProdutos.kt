@@ -49,13 +49,13 @@ fun ListaCategoriasProdutos(categorias: List<Category>, categoriaSelecionadaId: 
                 }
             }
         }
-        Box( // máscara de transparência
+        Box( // transparência
             modifier = Modifier
                 .matchParentSize()
                 .background(
                     brush = Brush.horizontalGradient(
-                        0.85f to Color.Transparent,
-                        1.0f to MaterialTheme.colorScheme.background
+                        0.85f to Color.Transparent, // Até 85% da largura, a cor da máscara será transparente.
+                        1.0f to MaterialTheme.colorScheme.background // Entre 85% e 100%, é realizado uma transição suave com preto
                     )
                 )
         )

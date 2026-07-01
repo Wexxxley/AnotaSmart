@@ -2,15 +2,11 @@ package com.anotasmart.ui.screens.relatorios
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.MoneyOff
-import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.PriceCheck
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.TrendingUp
@@ -24,15 +20,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.anotasmart.AnotaSmartApplication
 import com.anotasmart.ui.components.StandardScreen
-import com.anotasmart.ui.viewModels.FinancialOverviewState
-import com.anotasmart.ui.viewModels.PeriodoRelatorio
 import com.anotasmart.ui.viewModels.RelatoriosViewModel
 import com.anotasmart.ui.viewModels.RelatoriosViewModelFactory
 import com.anotasmart.utils.formatCurrency
+import com.anotasmart.model.PeriodoRelatorio
+
 
 @Composable
 fun RelatoriosScreen(
@@ -47,13 +42,13 @@ fun RelatoriosScreen(
             database.installmentDao()
         )
     )
-
     val overview by viewModel.financialOverview.collectAsState()
     val periodoSelecionado by viewModel.periodo.collectAsState()
 
     StandardScreen(
         title = "Relatórios Financeiros",
-        onBackClick = onBackClick
+        onBackClick = onBackClick,
+        hasBottomBar = false
     ) {
         // Seleção de Período
         item {
@@ -221,10 +216,10 @@ fun PeriodSelector(
 ) {
     PrimaryScrollableTabRow(
         selectedTabIndex = selected.ordinal,
-        edgePadding = 16.dp, // Um pequeno respiro nas bordas
-        containerColor = MaterialTheme.colorScheme.surface, // Ou Color.Transparent
+        edgePadding = 16.dp,
+        containerColor = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.primary,
-        divider = {} // Remove a linha fina se desejar
+        divider = {}
     ) {
         PeriodoRelatorio.entries.forEach { periodo ->
             val isSelected = selected == periodo

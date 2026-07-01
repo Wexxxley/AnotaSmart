@@ -22,6 +22,7 @@ fun StandardScreen(
     onBackClick: () -> Unit,
     headerActions: @Composable RowScope.() -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
+    hasBottomBar: Boolean = true,
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(16.dp),
     content: LazyListScope.() -> Unit
 ) {
@@ -31,7 +32,7 @@ fun StandardScreen(
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
             verticalArrangement = verticalArrangement,
-            contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp)
+            contentPadding = PaddingValues(top = 16.dp, bottom = if (hasBottomBar) 100.dp else 16.dp)
         ) {
             // Cabeçalho Padronizado
             item {

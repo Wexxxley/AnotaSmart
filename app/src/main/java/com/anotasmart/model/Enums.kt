@@ -30,3 +30,7 @@ enum class ImageDirectory(val folderName: String, val prefix: String) {
     SERVICES("services", "serv"),
     PROFILE("profile", "user")
 }
+
+enum class PeriodoRelatorio {
+    HOJE, SEMANA, MES, ANO, TUDO
+}

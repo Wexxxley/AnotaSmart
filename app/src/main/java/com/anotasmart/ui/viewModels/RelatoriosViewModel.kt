@@ -6,12 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.anotasmart.database.dao.ExpenseDao
 import com.anotasmart.database.dao.InstallmentDao
 import com.anotasmart.database.dao.SaleDao
+import com.anotasmart.model.PeriodoRelatorio
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import java.util.*
-
-enum class PeriodoRelatorio {
-    HOJE, SEMANA, MES, ANO, TUDO
-}
 
 data class FinancialOverviewState(
     val faturamento: Double = 0.0,
@@ -33,11 +31,14 @@ class RelatoriosViewModel(
     private val _periodo = MutableStateFlow(PeriodoRelatorio.MES)
     val periodo: StateFlow<PeriodoRelatorio> = _periodo.asStateFlow()
 
+    // flatMapLatest escuta cada mudança em _periodo. Quando muda, o flatMapLatest cancela todas as consultas em andamento e inicia as novas.
+    @OptIn(ExperimentalCoroutinesApi::class)
     val financialOverview: StateFlow<FinancialOverviewState> = _periodo.flatMapLatest { p ->
         val range = getRangeFromPeriodo(p)
         val now = System.currentTimeMillis()
-        
-        combine(
+
+        // Combine orquestrar múltiplas chamadas assíncronas ao db
+        val combine = combine(
             saleDao.getTotalRevenue(range.first, range.second),
             saleDao.getEstimatedProfit(range.first, range.second),
             expenseDao.getTotalExpenses(range.first, range.second),
@@ -65,40 +66,43 @@ class RelatoriosViewModel(
                 inadimplencia = overdue
             )
         }
+        combine //Retorno
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), FinancialOverviewState())
 
     fun setPeriodo(p: PeriodoRelatorio) {
         _periodo.value = p
     }
 
+    //Cálculo do intervalo temporal. Retorna o intervalo em milissegundos contendo a data inicial e a data final
     private fun getRangeFromPeriodo(p: PeriodoRelatorio): Pair<Long, Long> {
-        val cal = Calendar.getInstance()
-        val now = cal.timeInMillis
+        val calendario = Calendar.getInstance()
+        val now = calendario.timeInMillis
         
         return when (p) {
+            // Se for HOJE, zera horas, minutos e segundos. Retornando o milissegundo inicial do dia até o momento atual
             PeriodoRelatorio.HOJE -> {
-                cal.set(Calendar.HOUR_OF_DAY, 0)
-                cal.set(Calendar.MINUTE, 0)
-                cal.set(Calendar.SECOND, 0)
-                cal.set(Calendar.MILLISECOND, 0)
-                cal.timeInMillis to now
+                calendario.set(Calendar.HOUR_OF_DAY, 0)
+                calendario.set(Calendar.MINUTE, 0)
+                calendario.set(Calendar.SECOND, 0)
+                calendario.set(Calendar.MILLISECOND, 0)
+                calendario.timeInMillis to now
             }
             PeriodoRelatorio.SEMANA -> {
-                cal.set(Calendar.DAY_OF_WEEK, cal.firstDayOfWeek)
-                cal.set(Calendar.HOUR_OF_DAY, 0)
-                cal.timeInMillis to now
+                calendario.set(Calendar.DAY_OF_WEEK, calendario.firstDayOfWeek)
+                calendario.set(Calendar.HOUR_OF_DAY, 0)
+                calendario.timeInMillis to now
             }
             PeriodoRelatorio.MES -> {
-                cal.set(Calendar.DAY_OF_MONTH, 1)
-                cal.set(Calendar.HOUR_OF_DAY, 0)
-                cal.timeInMillis to now
+                calendario.set(Calendar.DAY_OF_MONTH, 1)
+                calendario.set(Calendar.HOUR_OF_DAY, 0)
+                calendario.timeInMillis to now
             }
             PeriodoRelatorio.ANO -> {
-                cal.set(Calendar.DAY_OF_YEAR, 1)
-                cal.set(Calendar.HOUR_OF_DAY, 0)
-                cal.timeInMillis to now
+                calendario.set(Calendar.DAY_OF_YEAR, 1)
+                calendario.set(Calendar.HOUR_OF_DAY, 0)
+                calendario.timeInMillis to now
             }
-            PeriodoRelatorio.TUDO -> 0L to now
+            PeriodoRelatorio.TUDO -> 0L to now // Do início (tempo zero) até agora.
         }
     }
 }
