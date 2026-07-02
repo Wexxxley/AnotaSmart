@@ -1,19 +1,14 @@
 package com.anotasmart.ui.screens.despesas
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.anotasmart.AnotaSmartApplication
@@ -25,6 +20,7 @@ import com.anotasmart.ui.viewModels.CategoriasViewModel
 import com.anotasmart.ui.viewModels.CategoriasViewModelFactory
 import com.anotasmart.ui.viewModels.DespesasViewModel
 import com.anotasmart.ui.viewModels.DespesasViewModelFactory
+import com.anotasmart.utils.formatSafe
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -57,7 +53,7 @@ fun DespesasScreen() {
 
                 expandableGroup(
                     title = monthYear,
-                    subtitle = "Subtotal: R$ ${String.format("%.2f", subtotal)}",
+                    subtitle = "Subtotal: R$ ${formatSafe(subtotal)}",
                     items = monthExpenses,
                     isExpanded = isExpanded,
                     onToggle = { expandedStates[monthYear] = !isExpanded },
@@ -101,11 +97,10 @@ fun DespesasScreen() {
 @Composable
 fun ExpenseCard(expense: Expense, categoryName: String) {
     val dateFormatter = remember { SimpleDateFormat("dd/MM/yyyy", Locale.forLanguageTag("pt-BR")) }
-
     StandardItemCard(
         title = expense.description,
-        label = "${categoryName} • ${dateFormatter.format(Date(expense.date))}",
-        value = "R$ ${String.format("%.2f", expense.amount)}",
+        label = "$categoryName ${dateFormatter.format(Date(expense.date))}",
+        value = "R$ ${formatSafe(expense.amount)}",
         valueColor = MaterialTheme.colorScheme.error,
         backgroundColor = MaterialTheme.colorScheme.surfaceContainerLowest
     )

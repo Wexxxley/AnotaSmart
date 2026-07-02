@@ -27,7 +27,7 @@ fun DialogNovaDespesa(
     var descricao by remember { mutableStateOf("") }
     var valorText by remember { mutableStateOf("") }
     var categoryId by remember { mutableStateOf<String?>(null) }
-    var dataSelecionada by remember { mutableStateOf(System.currentTimeMillis()) }
+    var dataSelecionada by remember { mutableLongStateOf(System.currentTimeMillis()) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showNovaCategoriaDialog by remember { mutableStateOf(false) }
 

@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.anotasmart.model.SaleWithRelations
 import com.anotasmart.model.entity.Client
 import com.anotasmart.model.entity.Installment
+import com.anotasmart.ui.components.AppTabRow
 import com.anotasmart.ui.screens.pedidos.components.BannerResumo
 import com.anotasmart.ui.components.EmptyListMessagePedidos
 import com.anotasmart.ui.components.ParcelaCard
@@ -36,30 +37,12 @@ fun PedidosScreen(
     Column(modifier = Modifier.fillMaxSize()) {
         BannerResumo(totalAReceber, totalAtrasado)
 
-        PrimaryTabRow(
-            selectedTabIndex = tabIndex,
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.primary
-        ) {
-            tabs.forEachIndexed { index, title ->
-                Tab(
-                    selected = tabIndex == index,
-                    onClick = { tabIndex = index },
-                    text = {
-                        Text(
-                            text = title,
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                    },
-                    icon = {
-                        Icon(
-                            imageVector = if (index == 0) Icons.Default.History else Icons.Default.Payments,
-                            contentDescription = null
-                        )
-                    }
-                )
-            }
-        }
+        AppTabRow(
+            tabIndex = tabIndex,
+            tabs = tabs,
+            icons = listOf(Icons.Default.History, Icons.Default.Payments),
+            onTabSelected = { tabIndex = it }
+        )
 
         when (tabIndex) {
             0 -> HistoricoVendasList(vendas)

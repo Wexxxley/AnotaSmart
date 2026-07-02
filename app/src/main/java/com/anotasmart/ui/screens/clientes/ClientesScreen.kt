@@ -31,6 +31,7 @@ import com.anotasmart.ui.viewModels.ClientesViewModel
 import com.anotasmart.ui.viewModels.ClientesViewModelFactory
 import com.anotasmart.utils.ImageUtils
 import com.anotasmart.utils.PhoneUtils
+import androidx.core.net.toUri
 
 @Composable
 fun ClientesScreen(
@@ -45,7 +46,6 @@ fun ClientesScreen(
             database.installmentDao()
         )
     )
-
     val clientes by viewModel.clientesFiltrados.collectAsState(initial = emptyList())
     val searchQuery by viewModel.searchQuery.collectAsState()
     val mostrarModalNovoCliente by viewModel.mostrarModalNovoCliente.collectAsState()
@@ -93,7 +93,8 @@ fun ClientesScreen(
                 onDismissRequest = { viewModel.fecharModalNovoCliente() },
                 onConfirmar = { nome, telefone, endereco, imageUriString ->
                     val internalImagePath = imageUriString?.let {
-                        ImageUtils.saveImageToInternalStorage(context, Uri.parse(it), ImageDirectory.CLIENTS)
+                        ImageUtils.saveImageToInternalStorage(context,
+                            it.toUri(), ImageDirectory.CLIENTS)
                     }
                     viewModel.salvarNovoCliente(nome, telefone, endereco, internalImagePath)
                 }
