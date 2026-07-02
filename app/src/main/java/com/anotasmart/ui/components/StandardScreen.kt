@@ -21,7 +21,7 @@ fun StandardScreen(
     title: String,
     onBackClick: () -> Unit,
     headerActions: @Composable RowScope.() -> Unit = {},
-    bottomBar: @Composable () -> Unit = {},
+    bottomBar: @Composable () -> Unit = {}, // Slot para passar um componente para ser fixado no final da tela
     hasBottomBar: Boolean = true,
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(16.dp),
     content: LazyListScope.() -> Unit

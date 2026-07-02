@@ -31,6 +31,7 @@ import com.anotasmart.ui.viewModels.ProdutosViewModelFactory
 import com.anotasmart.utils.ImageUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import androidx.core.net.toUri
 
 @Composable
 fun ProdutosScreen(
@@ -67,30 +68,13 @@ fun ProdutosScreen(
         }
     }
 
-    // Diálogo de Confirmação de Exclusão (Dupla Etapa)
-    DoubleDeleteConfirmationDialog(
-        showDialog = produtoParaDeletar != null,
-        onDismissRequest = { viewModel.fecharModalDelecao() },
-        onConfirm = { produtoParaDeletar?.let { viewModel.deletarProduto(it) } },
-        title = if ((produtoParaDeletar?.quantidadeEstoque ?: 0.0) > 0) "Aviso de Estoque" else "Confirmar Exclusão",
-        message1 = produtoParaDeletar?.let { produto ->
-            if (produto.quantidadeEstoque > 0) {
-                "ATENÇÃO: Este produto ainda possui ${produto.quantidadeEstoque} unidades em estoque. Ao excluir, você perderá o controle deste saldo. Deseja continuar?"
-            } else {
-                "Tem certeza que deseja excluir '${produto.nome}'? Ele não aparecerá mais nas suas listas, mas o histórico de vendas passadas será preservado."
-            }
-        } ?: "",
-        message2 = "O item será removido das listas de seleção, mas o histórico financeiro será mantido. Confirmar?",
-        confirmButtonText = "Confirmar Exclusão"
-    )
-
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+
     ) {
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
         ) {
             BarraBusca(
                 query = searchQuery,
@@ -110,7 +94,7 @@ fun ProdutosScreen(
             )
         }
 
-        // FAB e Menu de Opções posicionados manualmente para evitar Scaffold aninhado
+        // FAB e Opções
         Column(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -177,7 +161,8 @@ fun ProdutosScreen(
                 onDismissRequest = { viewModel.fecharModalNovoProduto() },
                 onConfirmar = { nome, categoryId, precoVenda, precoCusto, unidade, imageUriString ->
                     val internalPath = imageUriString?.let {
-                        ImageUtils.saveImageToInternalStorage(context, Uri.parse(it), ImageDirectory.PRODUCTS)
+                        ImageUtils.saveImageToInternalStorage(context,
+                            it.toUri(), ImageDirectory.PRODUCTS)
                     }
                     viewModel.salvarNovoProduto(nome, categoryId, precoVenda, precoCusto, unidade, internalPath)
                 },
@@ -193,7 +178,8 @@ fun ProdutosScreen(
                 onDismissRequest = { viewModel.fecharModalNovoServico() },
                 onConfirmar = { nome, categoryId, precoVenda, imageUriString ->
                     val internalPath = imageUriString?.let {
-                        ImageUtils.saveImageToInternalStorage(context, Uri.parse(it), ImageDirectory.SERVICES)
+                        ImageUtils.saveImageToInternalStorage(context,
+                            it.toUri(), ImageDirectory.SERVICES)
                     }
                     viewModel.salvarNovoServico(nome, categoryId, precoVenda, internalPath)
                 },
@@ -213,7 +199,7 @@ fun ProdutosScreen(
                         // Só salva no armazenamento interno se a imagem mudou (URI diferente da atual)
                         if (uriStr != produto.imagePath) {
                             val directory = if (tipoItem == com.anotasmart.model.ItemType.PRODUTO) ImageDirectory.PRODUCTS else ImageDirectory.SERVICES
-                            ImageUtils.saveImageToInternalStorage(context, Uri.parse(uriStr), directory)
+                            ImageUtils.saveImageToInternalStorage(context, uriStr.toUri(), directory)
                         } else {
                             uriStr
                         }
@@ -224,6 +210,23 @@ fun ProdutosScreen(
                 onNovaCategoria = { nome, tipo ->
                     categoriasViewModel.salvarNovaCategoria(nome, tipo)
                 }
+            )
+        }
+
+        // Diálogo de Confirmação de Exclusão (Dupla Etapa)
+        produtoParaDeletar?.let { produto ->
+            DoubleDeleteConfirmationDialog(
+                showDialog = true,
+                onDismissRequest = { viewModel.fecharModalDelecao() },
+                onConfirm = { viewModel.deletarProduto(produto) },
+                title = if (produto.quantidadeEstoque > 0) "Aviso de Estoque" else "Confirmar Exclusão",
+                message1 = if (produto.quantidadeEstoque > 0) {
+                    "ATENÇÃO: Este produto ainda possui ${produto.quantidadeEstoque} unidades em estoque. Ao excluir, você perderá o controle deste saldo. Deseja continuar?"
+                } else {
+                    "Tem certeza que deseja excluir '${produto.nome}'? Ele não aparecerá mais nas suas listas, mas o histórico de vendas passadas será preservado."
+                },
+                message2 = "O item será removido das listas de seleção, mas o histórico financeiro será mantido. Confirmar?",
+                confirmButtonText = "Confirmar Exclusão"
             )
         }
     }

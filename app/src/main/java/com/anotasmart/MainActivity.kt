@@ -95,6 +95,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 
+val screensWithoutBottomBar = listOf(
+    Screen.Carrinho.route,
+    Screen.FinalizarVenda.route,
+    Screen.ClienteDetalhes.route,
+    Screen.VendaSucesso.route,
+    Screen.Relatorios.route,
+    Screen.Setup.route
+)
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -134,7 +143,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// ScreenStructure utiliza o padrão de State Hoisting para gerenciar três sistemas complexos: o menu lateral, a barra de navegação e o conteúdo central.
+// utiliza State Hoisting para gerenciar três sistemas: o menu lateral, a barra de navegação e o conteúdo central.
 @Composable
 fun ScreenStructure(
     navController: NavHostController,
@@ -224,21 +233,13 @@ fun ScreenStructure(
                 }
             },
             bottomBar = {
-                if (showBars) {
+                if ( currentRoute !in screensWithoutBottomBar) {
                     Column {
-                        // telas em que a bottom bar deve ser oculta
-                        val routesToHideSummary = listOf(
-                            Screen.Carrinho.route, 
-                            Screen.FinalizarVenda.route, 
-                            Screen.ClienteDetalhes.route,
-                            Screen.VendaSucesso.route,
-                            Screen.Relatorios.route
-                        )
-                        if (quantidadeItens > 0 && currentRoute !in routesToHideSummary) {
+                        if (quantidadeItens > 0) {
                             ResumoCarrinho(
                                 quantidadeItens = quantidadeItens,
                                 totalValor = totalValor,
-                                onVerCarrinhoClick = { 
+                                onVerCarrinhoClick = {
                                     if (currentRoute != Screen.Carrinho.route) {
                                         navController.navigate(Screen.Carrinho.route) {
                                             launchSingleTop = true
@@ -248,9 +249,7 @@ fun ScreenStructure(
                                 }
                             )
                         }
-                        if (currentRoute !in routesToHideSummary) {
-                            BarraNavegacaoPrincipal(navController)
-                        }
+                        BarraNavegacaoPrincipal(navController)
                     }
                 }
             }

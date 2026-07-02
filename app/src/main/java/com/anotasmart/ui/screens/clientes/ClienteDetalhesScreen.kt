@@ -31,13 +31,13 @@ import com.anotasmart.model.entity.Client
 import com.anotasmart.ui.components.DoubleDeleteConfirmationDialog
 import com.anotasmart.ui.components.StandardScreen
 import com.anotasmart.ui.components.expandableGroup
-import com.anotasmart.ui.screens.pedidos.EmptyListMessage
-import com.anotasmart.ui.screens.pedidos.ParcelaCard
-import com.anotasmart.ui.screens.pedidos.VendaCard
+import com.anotasmart.ui.components.EmptyListMessagePedidos
 import com.anotasmart.ui.viewModels.ClientesViewModel
 import com.anotasmart.utils.PhoneUtils
 import androidx.compose.foundation.lazy.items
-import com.anotasmart.utils.formatCurrency
+import com.anotasmart.ui.components.ParcelaCard
+import com.anotasmart.ui.components.VendaCard
+import com.anotasmart.utils.formatSafe
 
 @Composable
 fun ClienteDetalhesScreen(
@@ -127,7 +127,7 @@ fun ClienteDetalhesScreen(
             // Conteúdo das Tabs
             if (tabIndex == 0) {
                 if (vendas.isEmpty()) {
-                    item { EmptyListMessage("Nenhuma compra registrada.") }
+                    item { EmptyListMessagePedidos("Nenhuma compra registrada.") }
                 } else {
                     items(vendas, key = { it.sale.id }) { vendaWithRelations ->
                         VendaCard(vendaWithRelations)
@@ -135,7 +135,7 @@ fun ClienteDetalhesScreen(
                 }
             } else {
                 if (recebiveis.isEmpty()) {
-                    item { EmptyListMessage("Nenhuma parcela pendente.") }
+                    item { EmptyListMessagePedidos("Nenhuma parcela pendente.") }
                 } else {
                     val groupedRecebiveis = recebiveis.groupBy { it.second.sale.id }
                     
@@ -144,7 +144,7 @@ fun ClienteDetalhesScreen(
 
                         expandableGroup(
                             title = "Pedido #${saleId.takeLast(4)}",
-                            subtitle = "Total Pendente: ${formatCurrency(items.sumOf { it.first.valor })}",
+                            subtitle = "Total Pendente: R$ ${formatSafe(items.sumOf { it.first.valor })}",
                             items = items,
                             isExpanded = isExpanded,
                             onToggle = { expandedStates[saleId] = !isExpanded },

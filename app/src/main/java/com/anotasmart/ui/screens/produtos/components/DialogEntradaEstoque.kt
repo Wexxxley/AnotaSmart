@@ -10,6 +10,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.anotasmart.model.entity.Product
+import com.anotasmart.utils.formatSafe
 
 @Composable
 fun DialogEntradaEstoque(
@@ -81,7 +82,7 @@ fun DialogEntradaEstoque(
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
-                        text = "R$ ${String.format("%.2f", produto.precoCusto)}",
+                        text = "R$ ${formatSafe(produto.precoCusto)}",
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary

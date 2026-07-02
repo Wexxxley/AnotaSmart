@@ -1,38 +1,24 @@
 package com.anotasmart.ui.screens.pedidos
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Payments
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.anotasmart.model.InstallmentStatus
-import com.anotasmart.model.SaleStatus
 import com.anotasmart.model.SaleWithRelations
 import com.anotasmart.model.entity.Client
 import com.anotasmart.model.entity.Installment
-import com.anotasmart.model.entity.Sale
-import com.anotasmart.ui.components.StandardItemCard
+import com.anotasmart.ui.screens.pedidos.components.BannerResumo
+import com.anotasmart.ui.components.EmptyListMessagePedidos
+import com.anotasmart.ui.components.ParcelaCard
+import com.anotasmart.ui.components.VendaCard
 import com.anotasmart.ui.components.expandableGroup
 import com.anotasmart.ui.viewModels.PedidosViewModel
-import com.anotasmart.utils.formatCurrency
-import com.anotasmart.utils.formatDate
-import com.anotasmart.utils.formatDateTime
 import com.anotasmart.utils.formatSafe
 
 @Composable
@@ -50,12 +36,21 @@ fun PedidosScreen(
     Column(modifier = Modifier.fillMaxSize()) {
         BannerResumo(totalAReceber, totalAtrasado)
 
-        TabRow(selectedTabIndex = tabIndex) {
+        PrimaryTabRow(
+            selectedTabIndex = tabIndex,
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.primary
+        ) {
             tabs.forEachIndexed { index, title ->
                 Tab(
                     selected = tabIndex == index,
                     onClick = { tabIndex = index },
-                    text = { Text(title) },
+                    text = {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                    },
                     icon = {
                         Icon(
                             imageVector = if (index == 0) Icons.Default.History else Icons.Default.Payments,
@@ -74,54 +69,9 @@ fun PedidosScreen(
 }
 
 @Composable
-fun BannerResumo(totalAReceber: Double, totalAtrasado: Double) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp, 8.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column {
-                Text(
-                    text = "A Receber",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-                Text(
-                    text = formatCurrency(totalAReceber),
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text = "Em Atraso",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.error
-                )
-                Text(
-                    text = formatCurrency(totalAtrasado),
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
-        }
-    }
-}
-
-@Composable
 fun HistoricoVendasList(vendas: List<SaleWithRelations>) {
     if (vendas.isEmpty()) {
-        EmptyListMessage("Nenhuma venda registrada.")
+        EmptyListMessagePedidos("Nenhuma venda registrada.")
     } else {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -141,9 +91,9 @@ fun ContasAReceberList(
     onBaixa: (String) -> Unit
 ) {
     if (recebiveis.isEmpty()) {
-        EmptyListMessage("Nenhuma parcela pendente.")
+        EmptyListMessagePedidos("Nenhuma parcela pendente.")
     } else {
-        // Agrupar por Sale (Pedido)
+        // Agrupar por Sale
         val groupedRecebiveis = remember(recebiveis) {
             recebiveis.groupBy { it.second.sale.id }
         }
@@ -151,7 +101,7 @@ fun ContasAReceberList(
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
+            contentPadding = PaddingValues(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             groupedRecebiveis.forEach { (saleId, items) ->
@@ -161,7 +111,7 @@ fun ContasAReceberList(
 
                 expandableGroup(
                     title = client?.nome ?: "Cliente Avulso",
-                    subtitle = "Total Pendente: ${formatCurrency(items.sumOf { it.first.valor })}",
+                    subtitle = "Total Pendente: R$ ${formatSafe(items.sumOf { it.first.valor })}",
                     items = items,
                     isExpanded = isExpanded,
                     onToggle = { expandedStates[saleId] = !isExpanded },
@@ -171,216 +121,5 @@ fun ContasAReceberList(
                 }
             }
         }
-    }
-}
-
-@Composable
-fun VendaCard(vendaWithRelations: SaleWithRelations) {
-    val venda = vendaWithRelations.sale
-    val client = vendaWithRelations.client
-    val installments = vendaWithRelations.installments
-    val items = vendaWithRelations.items
-
-    var expanded by remember { mutableStateOf(false) }
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { expanded = !expanded },
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp, 8.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = client?.nome ?: "Cliente Avulso",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
-                    Text(
-                        text = formatDate(venda.dataVenda),
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = formatCurrency(venda.valorTotal),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Icon(
-                        imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                        contentDescription = if (expanded) "Ver menos" else "Ver itens",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-
-            if (expanded) {
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), thickness = 0.5.dp)
-                items.forEach { itemWithProduct ->
-                    val item = itemWithProduct.saleItem
-                    val product = itemWithProduct.product
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 2.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        val qtdText = if (item.quantidade % 1.0 == 0.0) item.quantidade.toInt().toString() else item.quantidade.toString()
-                        val unit = product?.unidadeMedida?.name?.lowercase() ?: ""
-                        
-                        Text(
-                            text = "$qtdText $unit ${item.nomeCustomizado ?: product?.nome ?: "Item"}",
-                            fontSize = 13.sp,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Text(
-                            text = formatCurrency(item.precoVendaNoAto * item.quantidade),
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), thickness = 0.5.dp)
-            }
-
-            val isParcelado = installments.size > 1 || 
-                             (installments.size == 1 && installments.first().metodoPagamento == com.anotasmart.model.PaymentMethod.PARCELADO)
-
-            val pagas = installments.count { it.statusParcela == InstallmentStatus.PAGA }
-            val total = installments.size
-            val progresso = if (total > 0) pagas.toFloat() / total else 0f
-            val finalizada = total > 0 && pagas == total
-
-            if (isParcelado && !finalizada) {
-                Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Progresso: $pagas/$total pagas",
-                            fontSize = 12.sp
-                        )
-                        if (installments.any { it.statusParcela == InstallmentStatus.ATRASADA || (it.statusParcela == InstallmentStatus.PENDENTE && it.dataVencimento < System.currentTimeMillis()) }) {
-                            Text(
-                                text = "ATRASADA",
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
-                    }
-                    LinearProgressIndicator(
-                        progress = { progresso },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(8.dp)
-                            .padding(top = 4.dp),
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                    )
-                }
-            } else {
-                val label = when {
-                    installments.any { it.metodoPagamento == com.anotasmart.model.PaymentMethod.PARCELADO } -> "PARCELADO"
-                    installments.size > 1 -> "PARCELADO"
-                    installments.isNotEmpty() -> installments.first().metodoPagamento?.name ?: "À VISTA"
-                    else -> venda.status.name
-                }
-
-                SuggestionChip(
-                    onClick = { },
-                    label = { Text(label, fontSize = 10.sp) },
-                    colors = SuggestionChipDefaults.suggestionChipColors(
-                        containerColor = Color(0xFFE8F5E9),
-                        labelColor = Color(0xFF2E7D32)
-                    ),
-                    border = null
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun ParcelaCard(
-    installment: Installment,
-    saleWithRelations: SaleWithRelations,
-    client: Client?,
-    onBaixa: (String) -> Unit
-) {
-    val hoje = System.currentTimeMillis()
-    val estaAtrasada = installment.dataVencimento < hoje
-
-    var showConfirmDialog by remember { mutableStateOf(false) }
-
-    if (showConfirmDialog) {
-        AlertDialog(
-            onDismissRequest = { showConfirmDialog = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    onBaixa(installment.id)
-                    showConfirmDialog = false
-                }) {
-                    Text("CONFIRMAR")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showConfirmDialog = false }) {
-                    Text("CANCELAR")
-                }
-            },
-            title = { Text("Confirmar Pagamento") },
-            text = { 
-                Text("Deseja registrar o pagamento da parcela ${installment.numeroParcela} no valor de ${formatCurrency(installment.valor)}?")
-            }
-        )
-    }
-
-    StandardItemCard(
-        title = "Parcela ${installment.numeroParcela}",
-        label = "Vencimento: ${formatDate(installment.dataVencimento)}",
-        value = formatCurrency(installment.valor),
-        labelIcon = if (estaAtrasada) Icons.Default.Warning else null,
-        labelColor = if (estaAtrasada) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
-        valueColor = if (estaAtrasada) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-        backgroundColor = if (estaAtrasada) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.surfaceContainerLowest,
-        trailingContent = {
-            IconButton(
-                onClick = { showConfirmDialog = true },
-                modifier = Modifier.size(40.dp),
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Check, 
-                    contentDescription = "Dar Baixa",
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
-    )
-}
-
-@Composable
-fun EmptyListMessage(message: String) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = message, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
