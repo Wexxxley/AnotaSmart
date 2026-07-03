@@ -159,22 +159,7 @@ fun ScreenStructure(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    // Redirecionamento para Setup se não estiver configurado
-    LaunchedEffect(userPrefs.isLoaded, userPrefs.userName, userPrefs.companyName, userPrefs.profileImagePath, currentRoute) {
-        if (userPrefs.isLoaded) {
-            val isSetupComplete = userPrefs.userName.isNotBlank() && 
-                                 userPrefs.companyName.isNotBlank() && 
-                                 !userPrefs.profileImagePath.isNullOrBlank()
-            
-            if (!isSetupComplete && currentRoute != Screen.Setup.route) {
-                navController.navigate(Screen.Setup.route) {
-                    popUpTo(0)
-                }
-            }
-        }
-    }
-
-    val showBars = currentRoute != Screen.Setup.route
+    val showBars = currentRoute != Screen.Setup.route && currentRoute != Screen.Loading.route
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -263,8 +248,22 @@ fun ScreenStructure(
                 // funciona como o catálogo central de destinos do aplicativo
                 NavHost(
                     navController = navController,
-                    startDestination = Screen.Venda.route
+                    startDestination = Screen.Loading.route
                 ) {
+                    composable(Screen.Loading.route) {
+                        LaunchedEffect(userPrefs.isLoaded) {
+                            if (userPrefs.isLoaded) {
+                                val isSetupComplete = userPrefs.userName.isNotBlank() && 
+                                                     userPrefs.companyName.isNotBlank() && 
+                                                     !userPrefs.profileImagePath.isNullOrBlank()
+                                
+                                val destination = if (isSetupComplete) Screen.Venda.route else Screen.Setup.route
+                                navController.navigate(destination) {
+                                    popUpTo(Screen.Loading.route) { inclusive = true }
+                                }
+                            }
+                        }
+                    }
                     composable(Screen.Venda.route) { VendaScreen(cartViewModel = cartViewModel) }
                     composable(Screen.Setup.route) {
                         SetupScreen(
@@ -281,6 +280,7 @@ fun ScreenStructure(
                             }
                         )
                     }
+
                     composable(Screen.Produtos.route) { ProdutosScreen(cartItems = cartViewModel.items) }
                     composable(Screen.Pedidos.route) { 
                         val context = LocalContext.current

@@ -36,6 +36,7 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     object FinalizarVenda : Screen("finalizar_venda", "Finalizar Venda", Icons.Default.AttachMoney)
     object VendaSucesso : Screen("venda_sucesso", "Venda Realizada", Icons.Default.CheckCircle)
     object Setup : Screen("setup", "Configuração Inicial", Icons.Default.Person)
+    object Loading : Screen("loading", "Carregando", Icons.Default.Info)
     object ClienteDetalhes : Screen("cliente_detalhes/{clientId}", "Detalhes do Cliente", Icons.Default.People) {
         fun createRoute(clientId: String) = "cliente_detalhes/$clientId"
     }

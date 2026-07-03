@@ -6,7 +6,6 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.anotasmart.model.CategoryType
 import com.anotasmart.model.entity.Category
 import com.anotasmart.ui.components.CampoMoeda

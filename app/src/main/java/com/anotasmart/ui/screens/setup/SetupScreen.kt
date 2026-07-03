@@ -54,8 +54,14 @@ fun SetupScreen(
         if (userPrefs.isLoaded) {
             userName = userPrefs.userName
             companyName = userPrefs.companyName
-            userPrefs.profileImagePath?.let {
-                croppedImageUri = it.toUri()
+            userPrefs.profileImagePath?.let { path ->
+                if (path.isNotEmpty()) {
+                    try {
+                        croppedImageUri = File(path).toUri()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
             }
         }
     }
@@ -71,7 +77,9 @@ fun SetupScreen(
         contract = ActivityResultContracts.StartActivityForResult(),
         onResult = { result ->
             if (result.resultCode == android.app.Activity.RESULT_OK) {
-                croppedImageUri = UCrop.getOutput(result.data!!)
+                result.data?.let { data ->
+                    croppedImageUri = UCrop.getOutput(data)
+                }
             }
         }
     )
