@@ -27,8 +27,6 @@ import com.anotasmart.AnotaSmartApplication
 import com.anotasmart.model.CategoryType
 import com.anotasmart.ui.components.DialogNovaCategoria
 import com.anotasmart.ui.components.DoubleDeleteConfirmationDialog
-import com.anotasmart.ui.viewModels.CategoriasViewModel
-import com.anotasmart.ui.viewModels.CategoriasViewModelFactory
 import androidx.compose.foundation.combinedClickable
 
 @OptIn(ExperimentalLayoutApi::class, androidx.compose.foundation.ExperimentalFoundationApi::class)

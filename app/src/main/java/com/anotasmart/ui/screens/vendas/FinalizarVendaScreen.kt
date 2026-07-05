@@ -1,37 +1,30 @@
 package com.anotasmart.ui.screens.vendas
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
 import com.anotasmart.AnotaSmartApplication
 import com.anotasmart.model.PaymentMethod
 import com.anotasmart.ui.components.BarraBusca
 import com.anotasmart.ui.components.StandardScreen
+import com.anotasmart.ui.screens.setup.UserViewModel
+import com.anotasmart.ui.screens.setup.UserViewModelFactory
 import com.anotasmart.ui.screens.vendas.components.ClienteItem
 import com.anotasmart.ui.screens.vendas.components.DialogConfirmacaoVenda
 import com.anotasmart.ui.screens.vendas.components.DialogVendaParcelada
-import com.anotasmart.ui.viewModels.FinalizarVendaViewModel
-import com.anotasmart.ui.viewModels.FinalizarVendaViewModelFactory
 
 @Composable
 fun FinalizarVendaScreen(
@@ -51,8 +44,8 @@ fun FinalizarVendaScreen(
 
     // Acesso às preferências do usuário para o Pix
     val userPrefsRepository = remember { com.anotasmart.data.preferences.UserPreferencesRepository(context) }
-    val userViewModel: com.anotasmart.ui.viewModels.UserViewModel = viewModel(
-        factory = com.anotasmart.ui.viewModels.UserViewModelFactory(userPrefsRepository)
+    val userViewModel: UserViewModel = viewModel(
+        factory = UserViewModelFactory(userPrefsRepository)
     )
     val userPrefs by userViewModel.userPreferences.collectAsState()
 

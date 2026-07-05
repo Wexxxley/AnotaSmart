@@ -22,8 +22,7 @@ import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
-    object Venda : Screen("venda", "Venda", Icons.Default.ShoppingBag)
-    object Produtos : Screen("produtos", "Produtos", Icons.Default.Inventory)
+    object Loja : Screen("loja", "Loja", Icons.Default.Inventory)
     object Pedidos : Screen("pedidos", "Pedidos", Icons.Default.ListAlt)
     object Clientes : Screen("clientes", "Clientes", Icons.Default.People)
     object Despesas : Screen("despesas", "Despesas", Icons.Default.MoneyOff)
@@ -41,9 +40,9 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
         fun createRoute(clientId: String) = "cliente_detalhes/$clientId"
     }
 }
+
 val bottomNavItems = listOf(
-    Screen.Venda,
-    Screen.Produtos,
+    Screen.Loja,
     Screen.Pedidos,
     Screen.Clientes,
     Screen.Despesas

@@ -1,4 +1,4 @@
-package com.anotasmart.ui.viewModels
+package com.anotasmart.ui.screens.vendas
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

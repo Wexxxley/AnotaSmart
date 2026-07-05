@@ -26,10 +26,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.anotasmart.model.ImageDirectory
-import com.anotasmart.ui.viewModels.UserViewModel
 import com.anotasmart.utils.ImageUtils
 
-import androidx.activity.result.ActivityResult
 import com.yalantis.ucrop.UCrop
 import java.io.File
 

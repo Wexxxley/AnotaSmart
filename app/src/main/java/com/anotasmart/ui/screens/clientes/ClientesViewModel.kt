@@ -1,4 +1,4 @@
-package com.anotasmart.ui.viewModels
+package com.anotasmart.ui.screens.clientes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -7,10 +7,8 @@ import com.anotasmart.database.dao.ClientDao
 import com.anotasmart.database.dao.InstallmentDao
 import com.anotasmart.database.dao.SaleDao
 import com.anotasmart.model.InstallmentStatus
-import com.anotasmart.model.SaleWithRelations
+import com.anotasmart.model.SaleStatus
 import com.anotasmart.model.entity.Client
-import com.anotasmart.model.entity.Installment
-import com.anotasmart.model.entity.Sale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -69,7 +67,7 @@ class ClientesViewModel(
                     }
 
                     if (updatedInstallments.all { it.statusParcela == InstallmentStatus.PAGA }) {
-                        val updatedSale = targetSale.sale.copy(status = com.anotasmart.model.SaleStatus.FINALIZADA)
+                        val updatedSale = targetSale.sale.copy(status = SaleStatus.FINALIZADA)
                         saleDao.updateSale(updatedSale)
                     }
                 }

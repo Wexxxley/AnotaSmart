@@ -1,7 +1,5 @@
 package com.anotasmart.ui.screens.chavepix
 
-import android.R
-import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -26,8 +24,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.anotasmart.data.preferences.UserPreferencesRepository
-import com.anotasmart.ui.viewModels.UserViewModel
-import com.anotasmart.ui.viewModels.UserViewModelFactory
+import com.anotasmart.ui.screens.setup.UserViewModel
+import com.anotasmart.ui.screens.setup.UserViewModelFactory
 import com.anotasmart.utils.PixUtils
 
 @Composable

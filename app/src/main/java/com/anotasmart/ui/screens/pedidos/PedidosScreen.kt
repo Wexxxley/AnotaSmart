@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Payments
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -19,7 +18,6 @@ import com.anotasmart.ui.components.EmptyListMessagePedidos
 import com.anotasmart.ui.components.ParcelaCard
 import com.anotasmart.ui.components.VendaCard
 import com.anotasmart.ui.components.expandableGroup
-import com.anotasmart.ui.viewModels.PedidosViewModel
 import com.anotasmart.utils.formatSafe
 
 @Composable

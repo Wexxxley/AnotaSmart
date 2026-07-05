@@ -1,4 +1,4 @@
-package com.anotasmart.ui.viewModels
+package com.anotasmart.ui.screens.pedidos
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.anotasmart.database.dao.InstallmentDao
 import com.anotasmart.database.dao.SaleDao
 import com.anotasmart.model.InstallmentStatus
+import com.anotasmart.model.SaleStatus
 import com.anotasmart.model.SaleWithRelations
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -62,7 +63,7 @@ class PedidosViewModel(
                     }
 
                     if (updatedInstallments.all { it.statusParcela == InstallmentStatus.PAGA }) {
-                        val updatedSale = targetSale.sale.copy(status = com.anotasmart.model.SaleStatus.FINALIZADA)
+                        val updatedSale = targetSale.sale.copy(status = SaleStatus.FINALIZADA)
                         saleDao.updateSale(updatedSale)
                     }
                 }

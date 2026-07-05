@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import com.anotasmart.utils.formatSafe
 import com.anotasmart.ui.components.StandardScreen
 import com.anotasmart.ui.screens.carrinho.componentes.CartItemCard
-import com.anotasmart.ui.viewModels.CartViewModel
 
 @Composable
 fun CarrinhoScreen(

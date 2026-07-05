@@ -1,6 +1,5 @@
 package com.anotasmart.ui.screens.relatorios
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -22,8 +21,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.anotasmart.AnotaSmartApplication
 import com.anotasmart.ui.components.StandardScreen
-import com.anotasmart.ui.viewModels.RelatoriosViewModel
-import com.anotasmart.ui.viewModels.RelatoriosViewModelFactory
 import com.anotasmart.ui.screens.relatorios.components.DetailRow
 import com.anotasmart.ui.screens.relatorios.components.PeriodSelector
 import com.anotasmart.ui.screens.relatorios.components.SummaryCard

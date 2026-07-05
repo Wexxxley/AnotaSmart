@@ -18,7 +18,6 @@ import com.anotasmart.ui.components.DoubleDeleteConfirmationDialog
 import com.anotasmart.ui.components.StandardScreen
 import com.anotasmart.ui.components.expandableGroup
 import com.anotasmart.ui.components.EmptyListMessagePedidos
-import com.anotasmart.ui.viewModels.ClientesViewModel
 import com.anotasmart.utils.PhoneUtils
 import androidx.compose.foundation.lazy.items
 import com.anotasmart.ui.components.ParcelaCard

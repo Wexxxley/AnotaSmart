@@ -1,6 +1,5 @@
 package com.anotasmart.ui.screens.clientes
 
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -27,8 +26,6 @@ import com.anotasmart.model.ImageDirectory
 import com.anotasmart.model.entity.Client
 import com.anotasmart.ui.components.BarraBusca
 import com.anotasmart.ui.screens.clientes.components.DialogNovoCliente
-import com.anotasmart.ui.viewModels.ClientesViewModel
-import com.anotasmart.ui.viewModels.ClientesViewModelFactory
 import com.anotasmart.utils.ImageUtils
 import com.anotasmart.utils.PhoneUtils
 import androidx.core.net.toUri

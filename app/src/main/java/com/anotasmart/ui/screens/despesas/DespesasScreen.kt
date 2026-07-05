@@ -16,10 +16,8 @@ import com.anotasmart.model.entity.Expense
 import com.anotasmart.ui.components.StandardItemCard
 import com.anotasmart.ui.components.expandableGroup
 import com.anotasmart.ui.screens.despesas.components.DialogNovaDespesa
-import com.anotasmart.ui.viewModels.CategoriasViewModel
-import com.anotasmart.ui.viewModels.CategoriasViewModelFactory
-import com.anotasmart.ui.viewModels.DespesasViewModel
-import com.anotasmart.ui.viewModels.DespesasViewModelFactory
+import com.anotasmart.ui.screens.categorias.CategoriasViewModel
+import com.anotasmart.ui.screens.categorias.CategoriasViewModelFactory
 import com.anotasmart.utils.formatSafe
 import java.text.SimpleDateFormat
 import java.util.*

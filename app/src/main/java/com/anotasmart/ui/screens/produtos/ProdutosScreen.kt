@@ -1,6 +1,5 @@
 package com.anotasmart.ui.screens.produtos
 
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -17,17 +16,19 @@ import com.anotasmart.ui.screens.produtos.components.DialogEditarItem
 import com.anotasmart.ui.screens.produtos.components.DialogEntradaEstoque
 import com.anotasmart.ui.screens.produtos.components.DialogNovoProduto
 import com.anotasmart.ui.screens.produtos.components.DialogNovoServico
-import com.anotasmart.ui.screens.produtos.components.GradeItemsProduto
-import com.anotasmart.ui.viewModels.CategoriasViewModel
-import com.anotasmart.ui.viewModels.ProdutosViewModel
+import com.anotasmart.ui.components.ProdutoGrid
+import com.anotasmart.ui.screens.categorias.CategoriasViewModel
+import com.anotasmart.ui.viewModels.ProdutosVendasViewModel
+import com.anotasmart.ui.viewModels.ProdutosVendasViewModelFactory
+import com.anotasmart.ui.screens.carrinho.CartViewModel
+import com.anotasmart.ui.screens.vendas.components.DialogAdicionarCarrinho
 
 import androidx.compose.ui.platform.LocalContext
 import com.anotasmart.AnotaSmartApplication
 import com.anotasmart.model.CartItem
 import com.anotasmart.model.ImageDirectory
 import com.anotasmart.ui.components.DoubleDeleteConfirmationDialog
-import com.anotasmart.ui.viewModels.CategoriasViewModelFactory
-import com.anotasmart.ui.viewModels.ProdutosViewModelFactory
+import com.anotasmart.ui.screens.categorias.CategoriasViewModelFactory
 import com.anotasmart.utils.ImageUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,20 +36,22 @@ import androidx.core.net.toUri
 
 @Composable
 fun ProdutosScreen(
-    cartItems: StateFlow<List<CartItem>> = MutableStateFlow(emptyList()),
-    produtosViewModel: ProdutosViewModel? = null
+    cartViewModel: CartViewModel,
+    produtosVendasViewModel: ProdutosVendasViewModel? = null
 ) {
+    val cartItems = cartViewModel.items
     val context = LocalContext.current
     val database = (context.applicationContext as AnotaSmartApplication).database
 
-    val viewModel: ProdutosViewModel = produtosViewModel ?: viewModel(
-        factory = ProdutosViewModelFactory(database.productDao(), cartItems)
+    val viewModel: ProdutosVendasViewModel = produtosVendasViewModel ?: viewModel(
+        factory = ProdutosVendasViewModelFactory(database.productDao(), cartItems)
     )
 
     val categoriasViewModel: CategoriasViewModel = viewModel(
         factory = CategoriasViewModelFactory(database.categoryDao())
     )
     val produtos by viewModel.produtosFiltrados.collectAsState(initial = emptyList())
+    val isManagementMode by viewModel.isManagementMode.collectAsState()
     val categorias by categoriasViewModel.categoriasItens.collectAsState(initial = emptyList())
     val categoriaSelecionada by viewModel.categoriaSelecionada.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -57,6 +60,8 @@ fun ProdutosScreen(
     val mostrarModalNovoProduto by viewModel.mostrarModalNovoProduto.collectAsState()
     val mostrarModalNovoServico by viewModel.mostrarModalNovoServico.collectAsState()
     val produtoParaDeletar by viewModel.produtoParaDeletar.collectAsState()
+    val produtoSelecionado by viewModel.produtoSelecionado.collectAsState()
+    val itensNoCarrinho by cartViewModel.items.collectAsState()
     val mensagemErro by viewModel.mensagemErro.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var expandedFab by remember { mutableStateOf(false) }
@@ -76,6 +81,18 @@ fun ProdutosScreen(
         Column(
             modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
         ) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "Modo: ${if (isManagementMode) "Gerenciamento" else "Venda"}", style = MaterialTheme.typography.titleMedium)
+                Spacer(modifier = Modifier.weight(1f))
+                Switch(
+                    checked = isManagementMode,
+                    onCheckedChange = { viewModel.toggleManagementMode() }
+                )
+            }
+
             BarraBusca(
                 query = searchQuery,
                 onQueryChange = viewModel::onSearchQueryChanged
@@ -87,56 +104,65 @@ fun ProdutosScreen(
                 onCategoriaClick = viewModel::onCategoriaSelecionada
             )
 
-            GradeItemsProduto(
+            ProdutoGrid(
                 produtos = produtos,
-                onProdutoClick = { viewModel.selecionarProdutoParaEdicao(it) },
+                isManagementMode = isManagementMode,
+                onProdutoClick = { produto ->
+                    if (isManagementMode) {
+                        viewModel.selecionarProdutoParaEdicao(produto)
+                    } else {
+                        viewModel.selecionarProdutoParaCarrinho(produto)
+                    }
+                },
                 onAddEstoqueClick = { viewModel.selecionarProdutoParaEstoque(it) }
             )
         }
 
         // FAB e Opções
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.End
-        ) {
-            if (expandedFab) {
+        if (isManagementMode) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.End
+            ) {
+                if (expandedFab) {
+                    ExtendedFloatingActionButton(
+                        onClick = {
+                            viewModel.abrirModalNovoServico()
+                            expandedFab = false
+                        },
+                        icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                        text = { Text("Serviço") },
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                    ExtendedFloatingActionButton(
+                        onClick = {
+                            viewModel.abrirModalNovoProduto()
+                            expandedFab = false
+                        },
+                        icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                        text = { Text("Produto") },
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
                 ExtendedFloatingActionButton(
-                    onClick = {
-                        viewModel.abrirModalNovoServico()
-                        expandedFab = false
-                    },
-                    icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                    text = { Text("Serviço") },
-                    modifier = Modifier.padding(bottom = 8.dp),
+                    onClick = { expandedFab = !expandedFab },
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
-                ExtendedFloatingActionButton(
-                    onClick = {
-                        viewModel.abrirModalNovoProduto()
-                        expandedFab = false
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Adicionar novo"
+                        )
                     },
-                    icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                    text = { Text("Produto") },
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    text = { Text("Cadastrar item") }
                 )
             }
-            ExtendedFloatingActionButton(
-                onClick = { expandedFab = !expandedFab },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Adicionar novo"
-                    )
-                },
-                text = { Text("Cadastrar item") }
-            )
         }
 
         SnackbarHost(
@@ -145,6 +171,20 @@ fun ProdutosScreen(
         )
 
         // Modais
+        produtoSelecionado?.let { produto ->
+            val quantidadeNoCarrinho = itensNoCarrinho.find { it.product?.id == produto.id }?.quantidade ?: 0.0
+            DialogAdicionarCarrinho(
+                produto = produto,
+                quantidadeNoCarrinho = quantidadeNoCarrinho,
+                onDismissRequest = { viewModel.limparProdutoSelecionado() },
+                onConfirmar = { quantidade ->
+                    viewModel.adicionarAoCarrinho(produto, quantidade) { item ->
+                        cartViewModel.adicionarItem(item)
+                    }
+                }
+            )
+        }
+
         produtoParaEstoque?.let { produto ->
             DialogEntradaEstoque(
                 produto = produto,

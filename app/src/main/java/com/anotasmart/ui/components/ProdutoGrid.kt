@@ -1,4 +1,4 @@
-package com.anotasmart.ui.screens.vendas.components
+package com.anotasmart.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,16 +10,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.anotasmart.model.entity.Product
-import com.anotasmart.ui.components.ItemCard
 
 @Composable
-fun GradeItems(
+fun ProdutoGrid(
     produtos: List<Product>,
-    onProdutoClick: (Product) -> Unit
+    isManagementMode: Boolean,
+    onProdutoClick: (Product) -> Unit,
+    onAddEstoqueClick: ((Product) -> Unit)? = null
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier.fillMaxSize()
@@ -27,7 +28,9 @@ fun GradeItems(
         items(produtos) { produto ->
             ItemCard(
                 produto = produto,
-                onClick = { onProdutoClick(produto) }
+                isManagementMode = isManagementMode,
+                onClick = { onProdutoClick(produto) },
+                onAddEstoqueClick = if (onAddEstoqueClick != null) { { onAddEstoqueClick(produto) } } else null
             )
         }
     }

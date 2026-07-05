@@ -1,6 +1,7 @@
-package com.anotasmart.ui.viewModels
+package com.anotasmart.ui.screens.setup
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.anotasmart.data.preferences.UserPreferences
 import com.anotasmart.data.preferences.UserPreferencesRepository
@@ -57,8 +58,8 @@ class UserViewModel(private val repository: UserPreferencesRepository) : ViewMod
     }
 }
 
-class UserViewModelFactory(private val repository: UserPreferencesRepository) : androidx.lifecycle.ViewModelProvider.Factory {
-    override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+class UserViewModelFactory(private val repository: UserPreferencesRepository) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(UserViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
             return UserViewModel(repository) as T

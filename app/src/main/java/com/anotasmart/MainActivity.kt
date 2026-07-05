@@ -39,9 +39,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -56,7 +54,6 @@ import androidx.navigation.compose.rememberNavController
 import com.anotasmart.ui.navigation.Screen
 import com.anotasmart.ui.navigation.bottomNavItems
 import com.anotasmart.ui.navigation.drawerNavItems
-import com.anotasmart.ui.screens.vendas.VendaScreen
 import com.anotasmart.ui.screens.produtos.ProdutosScreen
 import com.anotasmart.ui.screens.pedidos.PedidosScreen
 import com.anotasmart.ui.screens.clientes.ClientesScreen
@@ -71,10 +68,10 @@ import com.anotasmart.ui.screens.carrinho.CarrinhoScreen
 import com.anotasmart.ui.screens.vendas.FinalizarVendaScreen
 import com.anotasmart.ui.screens.vendas.VendaSucessoScreen
 import com.anotasmart.ui.theme.AppTheme
-import com.anotasmart.ui.viewModels.CartViewModel
-import com.anotasmart.ui.viewModels.CartViewModelFactory
-import com.anotasmart.ui.viewModels.UserViewModel
-import com.anotasmart.ui.viewModels.UserViewModelFactory
+import com.anotasmart.ui.screens.carrinho.CartViewModel
+import com.anotasmart.ui.screens.carrinho.CartViewModelFactory
+import com.anotasmart.ui.screens.setup.UserViewModel
+import com.anotasmart.ui.screens.setup.UserViewModelFactory
 import com.anotasmart.data.preferences.UserPreferencesRepository
 import com.anotasmart.ui.screens.setup.SetupScreen
 import androidx.compose.runtime.LaunchedEffect
@@ -93,6 +90,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.anotasmart.ui.screens.clientes.ClientesViewModel
+import com.anotasmart.ui.screens.clientes.ClientesViewModelFactory
+import com.anotasmart.ui.screens.pedidos.PedidosViewModel
+import com.anotasmart.ui.screens.pedidos.PedidosViewModelFactory
 import kotlinx.coroutines.launch
 
 val screensWithoutBottomBar = listOf(
@@ -257,36 +258,21 @@ fun ScreenStructure(
                                                      userPrefs.companyName.isNotBlank() && 
                                                      !userPrefs.profileImagePath.isNullOrBlank()
                                 
-                                val destination = if (isSetupComplete) Screen.Venda.route else Screen.Setup.route
+                                val destination = if (isSetupComplete) Screen.Loja.route else Screen.Setup.route
                                 navController.navigate(destination) {
                                     popUpTo(Screen.Loading.route) { inclusive = true }
                                 }
                             }
                         }
                     }
-                    composable(Screen.Venda.route) { VendaScreen(cartViewModel = cartViewModel) }
-                    composable(Screen.Setup.route) {
-                        SetupScreen(
-                            userViewModel = userViewModel,
-                            onComplete = {
-                                navController.navigate(Screen.Venda.route) {
-                                    popUpTo(Screen.Setup.route) { inclusive = true }
-                                }
-                            },
-                            onBackClick = {
-                                if (navController.previousBackStackEntry != null) {
-                                    navController.popBackStack()
-                                }
-                            }
-                        )
+                    composable(Screen.Loja.route) { 
+                        ProdutosScreen(cartViewModel = cartViewModel) 
                     }
-
-                    composable(Screen.Produtos.route) { ProdutosScreen(cartItems = cartViewModel.items) }
                     composable(Screen.Pedidos.route) { 
                         val context = LocalContext.current
                         val db = (context.applicationContext as AnotaSmartApplication).database
-                        val pedidosViewModel: com.anotasmart.ui.viewModels.PedidosViewModel = viewModel(
-                            factory = com.anotasmart.ui.viewModels.PedidosViewModelFactory(db.saleDao(), db.installmentDao())
+                        val pedidosViewModel: PedidosViewModel = viewModel(
+                            factory = PedidosViewModelFactory(db.saleDao(), db.installmentDao())
                         )
                         PedidosScreen(viewModel = pedidosViewModel) 
                     }
@@ -319,9 +305,9 @@ fun ScreenStructure(
                     composable(Screen.FinalizarVenda.route) {
                         FinalizarVendaScreen(
                             onBackClick = { navController.popBackStack() },
-                            onConfirmarVenda = { 
+                            onConfirmarVenda = {
                                 navController.navigate(Screen.VendaSucesso.route) {
-                                    popUpTo(Screen.Venda.route) { inclusive = false }
+                                    popUpTo(Screen.Loja.route) { inclusive = false }
                                 }
                             }
                         )
@@ -329,8 +315,8 @@ fun ScreenStructure(
                     composable(Screen.VendaSucesso.route) {
                         VendaSucessoScreen(
                             onNovaVendaClick = {
-                                navController.navigate(Screen.Venda.route) {
-                                    popUpTo(Screen.Venda.route) { inclusive = true }
+                                navController.navigate(Screen.Loja.route) {
+                                    popUpTo(Screen.Loja.route) { inclusive = true }
                                 }
                             }
                         )
@@ -339,8 +325,8 @@ fun ScreenStructure(
                         val clientId = backStackEntry.arguments?.getString("clientId")
                         val context = LocalContext.current
                         val db = (context.applicationContext as AnotaSmartApplication).database
-                        val clientViewModel: com.anotasmart.ui.viewModels.ClientesViewModel = viewModel(
-                            factory = com.anotasmart.ui.viewModels.ClientesViewModelFactory(
+                        val clientViewModel: ClientesViewModel = viewModel(
+                            factory = ClientesViewModelFactory(
                                 db.clientDao(),
                                 db.saleDao(),
                                 db.installmentDao()

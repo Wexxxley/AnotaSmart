@@ -1,4 +1,4 @@
-package com.anotasmart.ui.viewModels
+package com.anotasmart.ui.screens.categorias
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

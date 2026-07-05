@@ -29,6 +29,7 @@ import com.anotasmart.utils.formatSafe
 @Composable
 fun ItemCard(
     produto: Product,
+    isManagementMode: Boolean,
     onClick: () -> Unit,
     onAddEstoqueClick: (() -> Unit)? = null
 ) {
@@ -102,7 +103,7 @@ fun ItemCard(
             }
         }
 
-        if (produto.tipoItem == ItemType.PRODUTO && onAddEstoqueClick != null) {
+        if (isManagementMode && produto.tipoItem == ItemType.PRODUTO && onAddEstoqueClick != null) {
             SmallFloatingActionButton(
                 onClick = onAddEstoqueClick,
                 modifier = Modifier
