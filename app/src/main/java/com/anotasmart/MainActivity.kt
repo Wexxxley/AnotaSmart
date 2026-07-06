@@ -265,6 +265,16 @@ fun ScreenStructure(
                             }
                         }
                     }
+                    composable(Screen.Setup.route) {
+                        SetupScreen(
+                            userViewModel = userViewModel,
+                            onComplete = {
+                                navController.navigate(Screen.Loja.route) {
+                                    popUpTo(Screen.Setup.route) { inclusive = true }
+                                }
+                            }
+                        )
+                    }
                     composable(Screen.Loja.route) { 
                         ProdutosScreen(cartViewModel = cartViewModel) 
                     }
