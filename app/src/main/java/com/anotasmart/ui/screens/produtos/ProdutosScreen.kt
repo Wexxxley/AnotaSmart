@@ -81,15 +81,20 @@ fun ProdutosScreen(
         Column(
             modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier.fillMaxWidth().padding(8.dp)
             ) {
-                Text(text = "Modo: ${if (isManagementMode) "Gerenciamento" else "Venda"}", style = MaterialTheme.typography.titleMedium)
-                Spacer(modifier = Modifier.weight(1f))
-                Switch(
-                    checked = isManagementMode,
-                    onCheckedChange = { viewModel.toggleManagementMode() }
+                SegmentedButton(
+                    selected = !isManagementMode,
+                    onClick = { if (isManagementMode) viewModel.toggleManagementMode() },
+                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                    label = { Text("Venda") }
+                )
+                SegmentedButton(
+                    selected = isManagementMode,
+                    onClick = { if (!isManagementMode) viewModel.toggleManagementMode() },
+                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                    label = { Text("Gerenciamento") }
                 )
             }
 
