@@ -118,9 +118,9 @@ fun RelatoriosScreen(
 
         item {
             DetailRow(
-                title = "Lucro Estimado (Itens)",
-                value = "R$ ${formatSafe(overview.lucroEstimado)}",
-                description = "Ganho real sobre os produtos/serviços",
+                title = "Lucro Bruto",
+                value = "R$ ${formatSafe(overview.lucroBruto)}",
+                description = "Ganho bruto sobre os produtos/serviços",
                 icon = Icons.Default.TrendingUp,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -134,8 +134,8 @@ fun RelatoriosScreen(
 
         item {
             DetailRow(
-                title = "Dinheiro em Caixa",
-                value = "R$ ${formatSafe(overview.dinheiroEmCaixa)}",
+                title = "Recebimentos Realizados",
+                value = "R$ ${formatSafe(overview.recebimentosRealizados)}",
                 description = "Total de parcelas pagas no período",
                 icon = Icons.Default.PriceCheck,
                 color = Color(0xFF2E7D32)
@@ -192,8 +192,9 @@ fun RelatoriosScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    ExplanationItem("Lucro Líquido", "É o lucro das vendas menos as despesas gerais.")
-                    ExplanationItem("Dinheiro em Caixa", "Refere-se apenas ao que já foi efetivamente pago no período.")
+                    ExplanationItem("Lucro Bruto", "É o total das vendas menos o custo dos produtos vendidos.")
+                    ExplanationItem("Lucro Líquido", "É o lucro bruto menos as despesas gerais.")
+                    ExplanationItem("Recebimentos Realizados", "Refere-se apenas ao que já foi efetivamente pago no período.")
                     ExplanationItem("Inadimplência", "Soma de todas as parcelas que já passaram da data de vencimento.")
                 }
             }

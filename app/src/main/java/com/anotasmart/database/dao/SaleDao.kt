@@ -50,7 +50,7 @@ interface SaleDao {
         INNER JOIN Sale s ON si.saleId = s.id 
         WHERE s.dataVenda BETWEEN :startDate AND :endDate AND s.status != 'CANCELADA'
     """)
-    fun getEstimatedProfit(startDate: Long, endDate: Long): Flow<Double?>
+    fun getGrossProfit(startDate: Long, endDate: Long): Flow<Double?>
 
     @Query("SELECT COUNT(*) FROM Sale WHERE dataVenda BETWEEN :startDate AND :endDate AND status != 'CANCELADA'")
     fun getSalesCount(startDate: Long, endDate: Long): Flow<Int>

@@ -13,11 +13,11 @@ import java.util.*
 
 data class FinancialOverviewState(
     val faturamento: Double = 0.0,
-    val lucroEstimado: Double = 0.0,
+    val lucroBruto: Double = 0.0,
     val despesas: Double = 0.0,
     val totalVendas: Int = 0,
     val lucroLiquido: Double = 0.0,
-    val dinheiroEmCaixa: Double = 0.0,
+    val recebimentosRealizados: Double = 0.0,
     val contasAReceber: Double = 0.0,
     val inadimplencia: Double = 0.0
 )
@@ -40,13 +40,13 @@ class RelatoriosViewModel(
         // Combine orquestrar múltiplas chamadas assíncronas ao db
         val combine = combine(
             saleDao.getTotalRevenue(range.first, range.second),
-            saleDao.getEstimatedProfit(range.first, range.second),
+            saleDao.getGrossProfit(range.first, range.second),
             expenseDao.getTotalExpenses(range.first, range.second),
             saleDao.getSalesCount(range.first, range.second),
             installmentDao.getPaidAmount(range.first, range.second),
             installmentDao.getTotalReceivables(),
             installmentDao.getOverdueAmount(now)
-        ) { values ->
+            ) { values ->
             val rev = values[0] as? Double ?: 0.0
             val profit = values[1] as? Double ?: 0.0
             val exp = values[2] as? Double ?: 0.0
@@ -57,11 +57,11 @@ class RelatoriosViewModel(
 
             FinancialOverviewState(
                 faturamento = rev,
-                lucroEstimado = profit,
+                lucroBruto = profit,
                 despesas = exp,
                 totalVendas = count,
                 lucroLiquido = profit - exp,
-                dinheiroEmCaixa = paid,
+                recebimentosRealizados = paid,
                 contasAReceber = receivables,
                 inadimplencia = overdue
             )
